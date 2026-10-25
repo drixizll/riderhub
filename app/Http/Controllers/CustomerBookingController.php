@@ -1,0 +1,208 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreBookingRequest;
+use App\Models\Booking;
+use App\Services\BookingNotificationService;
+use App\Services\PayMongoCheckoutService;
+use App\Services\PayMongoCheckoutException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
+
+class CustomerBookingController extends Controller
+{
+    public function index(Request $request): View
+    {
+        $validated = $request->validate([
+            'status' => ['nullable', 'in:pending,accepted,picked_up,completed,cancelled'],
+            'type' => ['nullable', 'in:ride,delivery'],
+        ]);
+
+        $bookings = Auth::user()->bookings()
+            ->with(['rider', 'payment'])
+            ->when($validated['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->when($validated['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('customer.bookings.index', compact('bookings'));
+    }
+
+    public function create(): View
+    {
+        $fare = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
+
+        return view('customer.bookings.create', [
+            'fareBase' => $fare['base'],
+            'farePerKm' => $fare['per_km'],
+        ]);
+    }
+
+    public function store(
+        StoreBookingRequest $request,
+        PayMongoCheckoutService $checkoutService,
+        BookingNotificationService $notifications,
+    ): RedirectResponse {
+        $validated = $request->validated();
+
+        $booking = DB::transaction(function () use ($validated): Booking {
+            $booking = Booking::create([
+                'customer_id' => Auth::id(),
+                'rider_id' => null,
+                'type' => $validated['type'],
+                'pickup_address' => $validated['pickup_address'],
+                'pickup_lat' => (float) $validated['pickup_lat'],
+                'pickup_lng' => (float) $validated['pickup_lng'],
+                'dropoff_address' => $validated['dropoff_address'],
+                'dropoff_lat' => (float) $validated['dropoff_lat'],
+                'dropoff_lng' => (float) $validated['dropoff_lng'],
+                'item_description' => $validated['item_description'] ?? null,
+                'fare' => $this->calculateFare(
+                    (float) $validated['pickup_lat'],
+                    (float) $validated['pickup_lng'],
+                    (float) $validated['dropoff_lat'],
+                    (float) $validated['dropoff_lng'],
+                ),
+                'payment_method' => $validated['payment_method'],
+                'status' => 'pending',
+            ]);
+
+            $booking->payment()->create([
+                'amount' => $booking->fare,
+                'method' => $booking->payment_method,
+                'status' => 'pending',
+            ]);
+
+            return $booking;
+        });
+
+        if ($booking->payment_method === 'online') {
+            return $this->startCheckout($booking, $checkoutService);
+        }
+
+        $notifications->notifyAvailableRiders($booking);
+
+        return redirect()->route('customer.bookings.index')->with('success', 'Booking created successfully.');
+    }
+
+    public function checkout(Booking $booking, PayMongoCheckoutService $checkoutService): RedirectResponse
+    {
+        $this->authorize('view', $booking);
+        abort_unless($booking->customer_id === Auth::id(), 403);
+
+        return $this->startCheckout($booking, $checkoutService);
+    }
+
+    public function show(Booking $booking, PayMongoCheckoutService $checkoutService): View|RedirectResponse
+    {
+        $this->authorize('view', $booking);
+        $booking->load(['rider', 'payment', 'rating']);
+
+        if (
+            request()->query('checkout') === 'return'
+            && $booking->customer_id === Auth::id()
+            && $checkoutService->retrieveAndConfirmPaidSession($booking)
+        ) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('success', 'Payment confirmed by PayMongo. Your request is now available to riders.');
+        }
+
+        $booking->load('payment');
+        $riderRatingAverage = $booking->rider?->ratingsReceived()->avg('score');
+        $riderRatingCount = $booking->rider?->ratingsReceived()->count() ?? 0;
+
+        return view('customer.bookings.show', [
+            'booking' => $booking,
+            'riderRatingAverage' => $riderRatingAverage ? number_format($riderRatingAverage, 1) : null,
+            'riderRatingCount' => $riderRatingCount,
+        ]);
+    }
+
+    public function location(Booking $booking): JsonResponse
+    {
+        $this->authorize('viewLocation', $booking);
+
+        $location = $booking->riderLocations()->latest()->first();
+
+        abort_unless($location, 404, 'No rider location is available yet.');
+
+        return response()->json([
+            'lat' => $location->lat,
+            'lng' => $location->lng,
+            'updated_at' => $location->created_at->toIso8601String(),
+        ]);
+    }
+
+    public function cancel(Booking $booking): RedirectResponse
+    {
+        $this->authorize('cancel', $booking);
+        $booking->loadMissing('payment');
+
+        if (
+            $booking->payment?->method === 'online'
+            && $booking->payment->status === 'pending'
+            && $booking->payment->paymongo_reference
+        ) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'This PayMongo checkout is still active. Return to the checkout page to finish payment, or contact support before cancelling.');
+        }
+
+        $booking->update(['status' => 'cancelled']);
+
+        return redirect()->route('customer.bookings.index')->with('success', 'Booking cancelled.');
+    }
+
+    private function startCheckout(Booking $booking, PayMongoCheckoutService $checkoutService): RedirectResponse
+    {
+        $booking->loadMissing('payment');
+
+        if ($booking->payment?->status === 'paid') {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('success', 'This booking has already been paid.');
+        }
+
+        abort_unless(
+            $booking->payment?->method === 'online'
+            && $booking->payment->status === 'pending'
+            && $booking->status === 'pending',
+            422,
+            'Online checkout is only available for pending online bookings.'
+        );
+
+        try {
+            $checkoutUrl = $checkoutService->createOrReuseSession($booking);
+        } catch (PayMongoCheckoutException $exception) {
+            return redirect()->route('customer.bookings.show', $booking)->with('error', $exception->getMessage());
+        }
+
+        return redirect()->away($checkoutUrl);
+    }
+
+    protected function calculateFare(float $pickupLat, float $pickupLng, float $dropoffLat, float $dropoffLng): float
+    {
+        $distance = $this->haversineDistance($pickupLat, $pickupLng, $dropoffLat, $dropoffLng);
+        $config = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
+
+        return round($config['base'] + ($distance * $config['per_km']), 2);
+    }
+
+    protected function haversineDistance(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $earthRadiusKm = 6371;
+        $lat1Rad = deg2rad($lat1);
+        $lat2Rad = deg2rad($lat2);
+        $deltaLat = deg2rad($lat2 - $lat1);
+        $deltaLng = deg2rad($lng2 - $lng1);
+
+        $a = sin($deltaLat / 2) * sin($deltaLat / 2)
+            + cos($lat1Rad) * cos($lat2Rad) * sin($deltaLng / 2) * sin($deltaLng / 2);
+
+        return $earthRadiusKm * 2 * atan2(sqrt($a), sqrt(1 - $a));
+    }
+}

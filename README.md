@@ -1,59 +1,99 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# RiderHub
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+RiderHub is a Laravel 12 ride-booking and package-delivery web application built as a capstone project. It provides separate customer, rider, and administrator workspaces, with a responsive interface powered by Tailwind CSS 3, Alpine.js, Vite, and Leaflet.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Customer registration, login, password reset, profile editing, and account deletion.
+- Customer or rider self-registration with strong-password rules and live strength feedback.
+- Profile photo uploads, a personalized account overview, and in-app booking notifications.
+- Customer ride and delivery requests with pickup/drop-off map selection and fare estimates.
+- Booking history, filters, booking cancellation while a request is pending, and trip details.
+- Rider request queue, protected booking acceptance, trip status transitions, and browser-based live location sharing.
+- Customer live-location polling for an assigned active booking.
+- Customer star ratings and optional feedback for completed trips, with rider average ratings.
+- Installable Progressive Web App shell with a persistent light/dark theme, reduced-motion-aware transitions, and a generic offline page.
+- Administrator operations dashboard, booking search and filters, and a searchable people directory.
+- Role-specific navigation and server-side role checks for protected routes.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Local setup
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Use PHP and Composer versions compatible with Laravel 12, plus Node.js 20 or newer.
 
-## Learning Laravel
+```powershell
+composer install
+npm install
+Copy-Item .env.example .env
+php artisan key:generate
+php artisan migrate --seed
+php artisan storage:link
+npm run dev
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+In a second terminal, start Laravel:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+```powershell
+php artisan serve
+```
 
-## Laravel Sponsors
+Open `http://127.0.0.1:8000`. For a production asset build, run:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```powershell
+npm run build
+```
 
-### Premium Partners
+If your local `.env` uses SQLite, ensure the configured database file exists before running migrations. Keep environment-specific settings in `.env`; do not commit that file.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Local demo accounts
 
-## Contributing
+`php artisan migrate --seed` creates these demo accounts:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+| Role | Email | Password |
+|---|---|---|
+| Admin | `admin@riderhub.test` | `123` |
+| Rider | `rider@riderhub.test` | `123` |
+| Customer | `customer@riderhub.test` | `123` |
 
-## Code of Conduct
+These intentionally weak seeded credentials are for local demonstration only and are separate from the strong-password rules on public registration. Change or remove them before deploying anywhere accessible to others.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Main workflows
 
-## Security Vulnerabilities
+1. A customer registers, signs in, selects ride or delivery, chooses pickup/drop-off points, and submits a booking.
+2. A rider reviews unassigned requests and accepts one active booking at a time.
+3. The rider advances the request from accepted to picked up to completed. With permission and the rider page open, the app shares location about every five seconds; the customer page checks for updates at the same interval while visible.
+4. After a completed trip, the customer can submit one 1–5-star rider review with an optional comment. Rider ratings appear on the rider dashboard.
+5. Customers and riders receive in-app notifications for booking and trip updates. Riders and admins are notified about new booking requests.
+6. An administrator reviews platform totals, searches bookings, and browses the people directory.
+7. Customers can pay online through PayMongo-hosted checkout using enabled GCash, Maya (PayMaya), or Visa/Mastercard card methods. Rider dispatch waits for a signed, amount-verified payment webhook.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## PayMongo sandbox checkout
 
-## License
+RiderHub redirects online customers to PayMongo Hosted Checkout; card numbers and security codes are never collected or stored by RiderHub. The checkout offers GCash (`gcash`), Maya (`paymaya`), and cards (`card`) when those methods are activated for the merchant account. PayMongo supports eligible Philippine and international Visa/Mastercard credit, debit, and prepaid cards; issuer, merchant, and account limits still apply.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+1. Create a PayMongo account, complete the required account verification, and enable the payment methods in the PayMongo dashboard.
+2. Add the test secret key and webhook secret to your local `.env` file (do not commit them). The variable names are in `.env.example`: `PAYMONGO_SECRET_KEY`, `PAYMONGO_WEBHOOK_SECRET`, and `PAYMONGO_LIVEMODE=false`.
+3. In PayMongo **Settings → Webhooks**, register `https://<your-public-https-host>/webhooks/paymongo` and subscribe to `checkout_session.payment.paid`. For local webhook testing, expose your local Laravel server through a trusted HTTPS tunnel and register that temporary URL.
+4. Start the app with `php artisan serve` and `npm run dev` (or use `npm run build` for compiled assets). Submit an online booking and complete checkout with PayMongo's test payment methods.
+5. Keep `PAYMONGO_LIVEMODE=false` while using test credentials. For production, configure the matching live secret and webhook secrets through a deployment secret manager, set `PAYMONGO_LIVEMODE=true`, use HTTPS, and register the production webhook URL.
+
+The customer return page is informational only; the signed PayMongo webhook is the source of truth for payment status. Webhook processing checks the checkout session, booking reference, metadata, amount, PHP currency, and test/live mode before marking payment paid. Unpaid online bookings are not shown to riders. Refunds and chargeback handling are not automated.
+
+## Capstone and deployment notes
+
+The current implementation is a functional academic/demo MVP, not a production payment or dispatch platform:
+
+- PayMongo hosted checkout and signed webhook verification are integrated, but real-money operations still require merchant activation, live credentials, HTTPS deployment, refund/chargeback handling, and operational reconciliation.
+- Location sharing requires the rider's browser to remain open and grant location permission; it is not background tracking.
+- RiderHub can be installed as a PWA on supported browsers. The browser's install control appears when installation is available; on iOS, use Safari's Share menu and choose "Add to Home Screen." Core bookings, maps, and trip tracking still require an internet connection. This does not package a native Android/iOS app or provide app-store distribution.
+- Profile photos are stored on Laravel's public disk. Run `php artisan storage:link` after setup so uploaded images can be displayed.
+- Geocoding uses the public OpenStreetMap Nominatim service. Follow its current usage policy and configure a suitable provider before production traffic.
+- Fare is estimated using straight-line distance, not a routed road distance or traffic-aware quote.
+- Email/push notifications, customer-support tooling, rider identity verification, and automated operational reporting still need implementation before a real launch. Booking and trip notifications currently appear inside RiderHub.
+
+Before a public deployment, configure production mail and database services, secure demo credentials, add payment-provider integration if needed, review privacy/consent and retention for location data, and run the full test suite.
+
+## Tests
+
+```powershell
+php artisan test
+```

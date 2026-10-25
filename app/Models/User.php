@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,6 +23,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'phone',
+        'profile_photo_path',
     ];
 
     /**
@@ -45,5 +49,35 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    public function hasActiveBooking(): bool
+    {
+        return $this->riderBookings()->whereIn('status', ['accepted', 'picked_up'])->exists();
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'customer_id');
+    }
+
+    public function riderBookings(): HasMany
+    {
+        return $this->hasMany(Booking::class, 'rider_id');
+    }
+
+    public function ratingsReceived(): HasMany
+    {
+        return $this->hasMany(BookingRating::class, 'rider_id');
+    }
+
+    public function ratingsGiven(): HasMany
+    {
+        return $this->hasMany(BookingRating::class, 'customer_id');
     }
 }

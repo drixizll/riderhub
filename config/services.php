@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'paymongo' => [
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
+        'livemode' => env('PAYMONGO_LIVEMODE', false),
+        'base_url' => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com'),
+        'payment_method_types' => ['card', 'gcash', 'paymaya'],
+    ],
+
 ];

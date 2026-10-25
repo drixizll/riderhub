@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name') === 'Laravel' ? 'RiderHub' : config('app.name', 'RiderHub') }}</title>
+
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+        <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+        <link rel="icon" type="image/svg+xml" href="{{ asset('icons/riderhub.svg') }}">
+        <meta name="theme-color" content="#4f46e5">
+
+        @include('layouts.theme-init')
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
+        <div class="page-loading fixed inset-x-0 top-0 z-[100] h-1 bg-indigo-100/70" role="status" aria-live="polite" aria-label="Loading page">
+            <span class="page-loading-progress block h-full w-full origin-left bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" aria-hidden="true"></span>
+        </div>
+        <div x-data="{ sidebarOpen: false }" class="min-h-screen">
+            @include('layouts.navigation')
+            @include('layouts.sidebar')
+
+            <div class="min-h-[calc(100vh-4rem)] lg:pl-64">
+                @isset($header)
+                    <header class="border-b border-slate-200 bg-white">
+                        <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endisset
+
+                <main>
+                    {{ $slot }}
+                </main>
+            </div>
+        </div>
+    </body>
+</html>

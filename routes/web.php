@@ -1,7 +1,71 @@
 <?php
 
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\BookingRatingController;
+use App\Http\Controllers\CustomerBookingController;
+use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PayMongoWebhookController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RiderBookingController;
+use App\Http\Controllers\RiderLocationController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
+$dashboardRouteForRole = static fn (?string $role): string => match ($role) {
+    'customer' => 'customer.dashboard',
+    'rider' => 'rider.dashboard',
+    'admin' => 'admin.dashboard',
+    default => abort(403),
+};
+
+Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->name('webhooks.paymongo');
+
+Route::get('/', function () use ($dashboardRouteForRole) {
+    if (auth()->check()) {
+        return redirect()->route($dashboardRouteForRole(auth()->user()->role));
+    }
+
     return view('welcome');
 });
+
+Route::get('/dashboard', function () use ($dashboardRouteForRole) {
+    return redirect()->route($dashboardRouteForRole(auth()->user()->role));
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
+    Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/create', [CustomerBookingController::class, 'create'])->name('bookings.create');
+    Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('bookings.store');
+    Route::post('/bookings/{booking}/checkout', [CustomerBookingController::class, 'checkout'])->name('bookings.checkout');
+    Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('bookings.show');
+    Route::post('/bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('/bookings/{booking}/location', [CustomerBookingController::class, 'location'])->name('bookings.location');
+    Route::post('/bookings/{booking}/rating', [BookingRatingController::class, 'store'])->name('bookings.rating');
+});
+
+Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('rider.')->group(function () {
+    Route::get('/dashboard', [RiderBookingController::class, 'dashboard'])->name('dashboard');
+    Route::get('/bookings', [RiderBookingController::class, 'index'])->name('bookings.index');
+    Route::post('/bookings/{booking}/accept', [RiderBookingController::class, 'accept'])->name('bookings.accept');
+    Route::post('/bookings/{booking}/status', [RiderBookingController::class, 'updateStatus'])->name('bookings.status');
+    Route::post('/locations', [RiderLocationController::class, 'store'])->name('locations.store');
+});
+
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings.index');
+    Route::get('/users', [AdminDashboardController::class, 'users'])->name('users.index');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'updatePhoto'])->name('profile.photo');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+});
+
+require __DIR__.'/auth.php';

@@ -10,6 +10,22 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
     require $maintenance;
 }
 
+// Auto-extract vendor package if missing...
+if (!file_exists(__DIR__.'/../vendor/autoload.php')) {
+    $zipPath = file_exists(__DIR__.'/../vendor.zip') 
+        ? __DIR__.'/../vendor.zip' 
+        : (file_exists(__DIR__.'/vendor.zip') ? __DIR__.'/vendor.zip' : null);
+
+    if ($zipPath && class_exists('ZipArchive')) {
+        $zip = new ZipArchive();
+        if ($zip->open($zipPath) === true) {
+            $zip->extractTo(dirname(__DIR__));
+            $zip->close();
+            @unlink($zipPath);
+        }
+    }
+}
+
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 

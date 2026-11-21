@@ -120,7 +120,7 @@
         </div>
         <div class="card-interactive relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700 p-4 text-white shadow-lg shadow-indigo-900/15">
             <div class="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-white/15 blur-xl" aria-hidden="true"></div>
-            <p class="relative text-sm font-extrabold">Tagoloan Live</p>
+            <p class="relative text-sm font-extrabold">Misamis Oriental Live</p>
             <p class="relative mt-1 text-xs leading-5 text-indigo-100">Fast rides, live GPS tracking, and weather-smart trips in one hub.</p>
             <a href="{{ route($dashboardRoute) }}" class="group relative mt-3 inline-flex items-center gap-1 rounded-lg bg-white/15 px-3 py-1.5 text-xs font-bold text-white backdrop-blur-sm transition hover:bg-white/25">
                 <span>Go to overview</span>

@@ -2,7 +2,7 @@
     'variant' => 'card',
     'lat' => 8.5378,
     'lng' => 124.7536,
-    'title' => 'Tagoloan Live Weather',
+    'title' => 'Misamis Oriental Weather',
 ])
 
 @if ($variant === 'compact')

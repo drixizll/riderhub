@@ -143,11 +143,11 @@ class RiderHubAssistantService
 
         if ($this->matchesAny($text, ['service area', 'barangay', 'satellite', 'map style', 'saan available', 'asa available'])) {
             return [
-                'reply' => 'RiderHub serves Tagoloan, Misamis Oriental — covering Poblacion, Baluarte, Casinglot, Gracia, Mohon, Natumolan, Rosario, Sta. Ana, Sta. Cruz, and Sugbongcogon. On the map, you can switch between Clean Street, Satellite, and Dark Map styles!',
+                'reply' => 'RiderHub serves all of Misamis Oriental — including Tagoloan, Cagayan de Oro, Villanueva, Jasaan, Opol, El Salvador, Claveria, Balingasag, Initao, Laguindingan, and Gingoog! On the map, you can switch between Street Map, Satellite, and OpenStreetMap views.',
                 'actions' => $user?->role === 'customer'
-                    ? [['label' => 'Open Tagoloan Map', 'url' => route('customer.bookings.create')]]
+                    ? [['label' => 'Open Misamis Oriental Map', 'url' => route('customer.bookings.create')]]
                     : $this->primaryActions($user),
-                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather'],
+                'suggestions' => ['Estimate fare for 5 km', 'Check Misamis Oriental weather'],
             ];
         }
 

@@ -38,10 +38,10 @@
                                 <h2 class="font-bold text-slate-950">Choose your route</h2>
                                 <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">
                                     <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-                                    {{ $mapConfig['region_name'] ?? 'Tagoloan, Misamis Oriental' }}
+                                    {{ $mapConfig['region_name'] ?? 'Misamis Oriental' }}
                                 </span>
                             </div>
-                            <p class="mt-1 text-xs text-slate-500">Click the map or tap a barangay below to place the selected pin.</p>
+                            <p class="mt-1 text-xs text-slate-500">Click anywhere in Misamis Oriental or tap a quick location below to place the pin.</p>
                         </div>
                         <div class="flex gap-2">
                             <button type="button" data-select-point="pickup" class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">Set pickup</button>
@@ -50,14 +50,16 @@
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5 border-b border-slate-100 bg-slate-50/70 px-5 py-2.5">
                         <span class="mr-1 text-[11px] font-semibold text-slate-400">Quick pins:</span>
-                        <button type="button" data-quick-pin='{"name":"Poblacion, Tagoloan, Misamis Oriental","lat":8.5378,"lng":124.7536}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Poblacion</button>
-                        <button type="button" data-quick-pin='{"name":"Baluarte, Tagoloan, Misamis Oriental","lat":8.5515,"lng":124.7615}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Baluarte</button>
-                        <button type="button" data-quick-pin='{"name":"Casinglot, Tagoloan, Misamis Oriental","lat":8.5245,"lng":124.7495}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Casinglot</button>
-                        <button type="button" data-quick-pin='{"name":"Sta. Ana, Tagoloan, Misamis Oriental","lat":8.5572,"lng":124.7734}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Sta. Ana</button>
-                        <button type="button" data-quick-pin='{"name":"Natumolan, Tagoloan, Misamis Oriental","lat":8.5458,"lng":124.7648}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Natumolan</button>
-                        <button type="button" data-quick-pin='{"name":"Mohon, Tagoloan, Misamis Oriental","lat":8.5635,"lng":124.7568}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Mohon</button>
+                        <button type="button" data-quick-pin='{"name":"Tagoloan, Misamis Oriental","lat":8.5378,"lng":124.7536}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Tagoloan</button>
+                        <button type="button" data-quick-pin='{"name":"Cagayan de Oro City, Misamis Oriental","lat":8.4810,"lng":124.6498}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Cagayan de Oro</button>
+                        <button type="button" data-quick-pin='{"name":"Villanueva, Misamis Oriental","lat":8.5844,"lng":124.7775}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Villanueva</button>
+                        <button type="button" data-quick-pin='{"name":"Jasaan, Misamis Oriental","lat":8.6544,"lng":124.7535}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Jasaan</button>
+                        <button type="button" data-quick-pin='{"name":"Opol, Misamis Oriental","lat":8.5194,"lng":124.5720}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Opol</button>
+                        <button type="button" data-quick-pin='{"name":"El Salvador City, Misamis Oriental","lat":8.5633,"lng":124.5228}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">El Salvador</button>
+                        <button type="button" data-quick-pin='{"name":"Balingasag, Misamis Oriental","lat":8.7436,"lng":124.7764}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Balingasag</button>
+                        <button type="button" data-quick-pin='{"name":"Gingoog City, Misamis Oriental","lat":8.8211,"lng":125.1003}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Gingoog</button>
                     </div>
-                    <div id="booking-map" class="h-72 w-full bg-slate-100 sm:h-96" aria-label="Interactive pickup and drop-off map for Tagoloan, Misamis Oriental"></div>
+                    <div id="booking-map" class="h-72 w-full bg-slate-100 sm:h-96" aria-label="Interactive pickup and drop-off map for Misamis Oriental"></div>
                     <div class="flex flex-col gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                         <span>Map data &copy; OpenStreetMap contributors</span>
                         <button type="button" id="use-current-location" class="inline-flex items-center gap-1.5 self-start font-bold text-indigo-600 hover:text-indigo-800 sm:self-auto">
@@ -153,17 +155,22 @@
                 <option value="Poblacion, Tagoloan, Misamis Oriental"></option>
                 <option value="Baluarte, Tagoloan, Misamis Oriental"></option>
                 <option value="Casinglot, Tagoloan, Misamis Oriental"></option>
-                <option value="Gracia, Tagoloan, Misamis Oriental"></option>
-                <option value="Mohon, Tagoloan, Misamis Oriental"></option>
-                <option value="Natumolan, Tagoloan, Misamis Oriental"></option>
-                <option value="Rosario, Tagoloan, Misamis Oriental"></option>
                 <option value="Sta. Ana, Tagoloan, Misamis Oriental"></option>
-                <option value="Sta. Cruz, Tagoloan, Misamis Oriental"></option>
-                <option value="Sugbongcogon, Tagoloan, Misamis Oriental"></option>
-                <option value="Tagoloan Municipal Hall, Poblacion, Tagoloan"></option>
-                <option value="Tagoloan Community College, Baluarte, Tagoloan"></option>
-                <option value="Tagoloan Public Market, Poblacion, Tagoloan"></option>
-                <option value="Phividec Industrial Estate, Sta. Cruz, Tagoloan"></option>
+                <option value="Natumolan, Tagoloan, Misamis Oriental"></option>
+                <option value="Phividec Industrial Estate, Tagoloan, Misamis Oriental"></option>
+                <option value="Tagoloan Community College, Tagoloan, Misamis Oriental"></option>
+                <option value="Cagayan de Oro City, Misamis Oriental"></option>
+                <option value="Limketkai Center, Cagayan de Oro, Misamis Oriental"></option>
+                <option value="SM CDO Downtown, Cagayan de Oro, Misamis Oriental"></option>
+                <option value="Villanueva, Misamis Oriental"></option>
+                <option value="Jasaan, Misamis Oriental"></option>
+                <option value="Opol, Misamis Oriental"></option>
+                <option value="El Salvador City, Misamis Oriental"></option>
+                <option value="Claveria, Misamis Oriental"></option>
+                <option value="Balingasag, Misamis Oriental"></option>
+                <option value="Initao, Misamis Oriental"></option>
+                <option value="Laguindingan Airport, Misamis Oriental"></option>
+                <option value="Gingoog City, Misamis Oriental"></option>
             </datalist>
         </form>
     </div>
@@ -294,7 +301,7 @@
                 button.disabled = true;
                 button.textContent = 'Searching…';
                 try {
-                    const query = /tagoloan/i.test(address) ? address : `${address}, ${mapCfg.region_name}`;
+                    const query = /misamis oriental|cagayan de oro/i.test(address) ? address : `${address}, ${mapCfg.region_name}`;
                     const url = new URL('https://nominatim.openstreetmap.org/search');
                     url.search = new URLSearchParams({
                         format: 'jsonv2',

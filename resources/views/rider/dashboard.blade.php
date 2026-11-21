@@ -114,9 +114,50 @@
 
             <div class="space-y-4">
                 <x-weather-widget title="Tagoloan Road Weather" :lat="$activeBooking?->pickup_lat ?? 8.5378" :lng="$activeBooking?->pickup_lng ?? 124.7536" />
+
+                <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-slate-950">7-Day Completed Earnings</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">Your daily completed fare totals (₱).</p>
+                    <div class="relative mt-4 h-48">
+                        <canvas id="rider-earnings-chart"></canvas>
+                    </div>
+                </section>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Chart) return;
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            const tickColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(51,65,85,0.45)' : 'rgba(226,232,240,0.8)';
+            const data = @json($earningsChart);
+            const canvas = document.getElementById('rider-earnings-chart');
+            if (!canvas) return;
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'Earnings (₱)',
+                        data: data.earnings,
+                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                        borderRadius: 8,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: tickColor }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { color: tickColor, callback: (v) => `₱${v}` }, grid: { color: gridColor } },
+                    },
+                },
+            });
+        });
+    </script>
 
     @if ($activeBooking)
         <script>

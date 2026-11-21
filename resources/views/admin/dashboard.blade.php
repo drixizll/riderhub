@@ -11,11 +11,50 @@
     </x-slot>
 
     <div class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform metrics">
-            <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p class="text-sm font-medium text-slate-500">Total bookings</p><p class="mt-2 text-3xl font-extrabold text-slate-950">{{ number_format($totalBookings) }}</p><p class="mt-1 text-xs text-slate-500">All ride and delivery requests</p></article>
-            <article class="card-interactive rounded-2xl border border-amber-100 bg-amber-50/70 p-5 shadow-sm"><p class="text-sm font-medium text-amber-700">Awaiting a rider</p><p class="mt-2 text-3xl font-extrabold text-amber-950">{{ number_format($pendingBookings) }}</p><p class="mt-1 text-xs text-amber-700/80">Pending assignments</p></article>
-            <article class="card-interactive rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm"><p class="text-sm font-medium text-indigo-700">Active trips</p><p class="mt-2 text-3xl font-extrabold text-indigo-950">{{ number_format($activeBookings) }}</p><p class="mt-1 text-xs text-indigo-700/80">Accepted or picked up</p></article>
-            <article class="card-interactive rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm"><p class="text-sm font-medium text-emerald-700">Completed fare volume</p><p class="mt-2 text-3xl font-extrabold text-emerald-950">₱{{ number_format($completedRevenue, 2) }}</p><p class="mt-1 text-xs text-emerald-700/80">{{ number_format($completedBookings) }} completed bookings</p></article>
+        <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform metrics">
+            <a href="{{ route('admin.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-slate-500">Total bookings</p><span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span></div>
+                <p class="mt-2 text-3xl font-extrabold text-slate-950">{{ number_format($totalBookings) }}</p>
+                <p class="mt-1 text-xs text-slate-500">All ride and delivery requests</p>
+            </a>
+            <a href="{{ route('admin.bookings.index', ['status' => 'pending']) }}" class="card-interactive group block rounded-2xl border border-amber-100 bg-amber-50/70 p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-amber-700">Awaiting a rider</p><span class="text-xs font-bold text-amber-700 transition group-hover:translate-x-0.5">→</span></div>
+                <p class="mt-2 text-3xl font-extrabold text-amber-950">{{ number_format($pendingBookings) }}</p>
+                <p class="mt-1 text-xs text-amber-700/80">Pending assignments</p>
+            </a>
+            <a href="{{ route('admin.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-indigo-700">Active trips</p><span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span></div>
+                <p class="mt-2 text-3xl font-extrabold text-indigo-950">{{ number_format($activeBookings) }}</p>
+                <p class="mt-1 text-xs text-indigo-700/80">Accepted or picked up</p>
+            </a>
+            <a href="{{ route('admin.bookings.index', ['status' => 'completed']) }}" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-emerald-700">Completed fare volume</p><span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span></div>
+                <p class="mt-2 text-3xl font-extrabold text-emerald-950">₱{{ number_format($completedRevenue, 2) }}</p>
+                <p class="mt-1 text-xs text-emerald-700/80">{{ number_format($completedBookings) }} completed bookings</p>
+            </a>
+        </section>
+
+        <section class="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]" aria-label="Platform analytics">
+            <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-950">7-Day Bookings &amp; Fare Volume</h2>
+                        <p class="mt-0.5 text-xs text-slate-500">Daily trip requests and completed fare totals across Tagoloan.</p>
+                    </div>
+                    <a href="{{ route('admin.bookings.index') }}" class="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100">View report →</a>
+                </div>
+                <div class="relative mt-5 h-64">
+                    <canvas id="admin-daily-chart"></canvas>
+                </div>
+            </article>
+
+            <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-950">Booking Status Breakdown</h2>
+                <p class="mt-0.5 text-xs text-slate-500">Click any slice to filter bookings by status.</p>
+                <div class="relative mt-5 h-64">
+                    <canvas id="admin-status-chart"></canvas>
+                </div>
+            </article>
         </section>
 
         <section class="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -23,14 +62,14 @@
                 <h2 class="text-lg font-bold text-slate-950">Platform users</h2>
                 <p class="mt-1 text-sm text-slate-500">Registered accounts by service role.</p>
                 <div class="mt-6 space-y-5">
-                    <div>
-                        <div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">Customers</span><span class="font-bold text-slate-950">{{ number_format($totalCustomers) }}</span></div>
+                    <a href="{{ route('admin.users.index', ['role' => 'customer']) }}" class="block rounded-xl p-2 -mx-2 transition hover:bg-slate-50">
+                        <div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">Customers →</span><span class="font-bold text-slate-950">{{ number_format($totalCustomers) }}</span></div>
                         <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-indigo-600" style="width: {{ ($totalCustomers + $totalRiders) > 0 ? max(6, round($totalCustomers / ($totalCustomers + $totalRiders) * 100)) : 0 }}%"></div></div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">Riders</span><span class="font-bold text-slate-950">{{ number_format($totalRiders) }}</span></div>
+                    </a>
+                    <a href="{{ route('admin.users.index', ['role' => 'rider']) }}" class="block rounded-xl p-2 -mx-2 transition hover:bg-slate-50">
+                        <div class="flex justify-between text-sm"><span class="font-semibold text-slate-700">Riders →</span><span class="font-bold text-slate-950">{{ number_format($totalRiders) }}</span></div>
                         <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-amber-400" style="width: {{ ($totalCustomers + $totalRiders) > 0 ? max(6, round($totalRiders / ($totalCustomers + $totalRiders) * 100)) : 0 }}%"></div></div>
-                    </div>
+                    </a>
                 </div>
                 <div class="mt-6 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
                     Completed fare volume is calculated from completed bookings; it is not a payout or payment-provider reconciliation.
@@ -71,4 +110,82 @@
             <a href="{{ route('admin.users.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Browse people</a>
         </section>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Chart) return;
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            const tickColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(51,65,85,0.45)' : 'rgba(226,232,240,0.8)';
+            const dailyData = @json($dailyChart);
+            const statusData = @json($statusChart);
+            const bookingsBaseUrl = @json(route('admin.bookings.index'));
+
+            const dailyCanvas = document.getElementById('admin-daily-chart');
+            if (dailyCanvas) {
+                new Chart(dailyCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: dailyData.labels,
+                        datasets: [
+                            {
+                                label: 'Bookings',
+                                data: dailyData.bookings,
+                                backgroundColor: 'rgba(79, 70, 229, 0.85)',
+                                borderRadius: 8,
+                                yAxisID: 'y',
+                            },
+                            {
+                                type: 'line',
+                                label: 'Completed Fare (₱)',
+                                data: dailyData.revenue,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.15)',
+                                tension: 0.35,
+                                fill: true,
+                                yAxisID: 'y1',
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { labels: { color: tickColor, usePointStyle: true } } },
+                        scales: {
+                            x: { ticks: { color: tickColor }, grid: { display: false } },
+                            y: { beginAtZero: true, ticks: { precision: 0, color: tickColor }, grid: { color: gridColor } },
+                            y1: { position: 'right', beginAtZero: true, ticks: { color: '#10b981', callback: (v) => `₱${v}` }, grid: { display: false } },
+                        },
+                    },
+                });
+            }
+
+            const statusCanvas = document.getElementById('admin-status-chart');
+            if (statusCanvas) {
+                new Chart(statusCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusData.labels,
+                        datasets: [{
+                            data: statusData.counts,
+                            backgroundColor: ['#f59e0b', '#6366f1', '#0ea5e9', '#10b981', '#f43f5e'],
+                            borderWidth: 0,
+                            hoverOffset: 8,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '64%',
+                        plugins: { legend: { position: 'bottom', labels: { color: tickColor, usePointStyle: true, padding: 14 } } },
+                        onClick: (_, elements) => {
+                            if (!elements.length) return;
+                            const key = statusData.keys[elements[0].index];
+                            if (key) window.location.href = `${bookingsBaseUrl}?status=${encodeURIComponent(key)}`;
+                        },
+                    },
+                });
+            }
+        });
+    </script>
 </x-app-layout>

@@ -11,6 +11,38 @@ class AdminDashboardController extends Controller
 {
     public function index(): View
     {
+        $days = collect(range(6, 0))->map(fn (int $offset) => now()->subDays($offset)->startOfDay());
+        $recentWeekBookings = Booking::query()
+            ->where('created_at', '>=', now()->subDays(6)->startOfDay())
+            ->get(['created_at', 'status', 'fare', 'type']);
+
+        $dailyChart = [
+            'labels' => $days->map(fn ($day) => $day->format('M j'))->values()->all(),
+            'bookings' => $days->map(fn ($day) => $recentWeekBookings->filter(
+                fn ($b) => $b->created_at->isSameDay($day)
+            )->count())->values()->all(),
+            'revenue' => $days->map(fn ($day) => round((float) $recentWeekBookings->filter(
+                fn ($b) => $b->created_at->isSameDay($day) && $b->status === 'completed'
+            )->sum('fare'), 2))->values()->all(),
+        ];
+
+        $statusCounts = Booking::query()
+            ->selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $statusChart = [
+            'labels' => ['Pending', 'Accepted', 'Picked up', 'Completed', 'Cancelled'],
+            'keys' => ['pending', 'accepted', 'picked_up', 'completed', 'cancelled'],
+            'counts' => [
+                (int) ($statusCounts['pending'] ?? 0),
+                (int) ($statusCounts['accepted'] ?? 0),
+                (int) ($statusCounts['picked_up'] ?? 0),
+                (int) ($statusCounts['completed'] ?? 0),
+                (int) ($statusCounts['cancelled'] ?? 0),
+            ],
+        ];
+
         return view('admin.dashboard', [
             'totalBookings' => Booking::count(),
             'activeBookings' => Booking::whereIn('status', ['accepted', 'picked_up'])->count(),
@@ -25,6 +57,8 @@ class AdminDashboardController extends Controller
             'totalRiders' => User::where('role', 'rider')->count(),
             'completedRevenue' => Booking::where('status', 'completed')->sum('fare'),
             'recentBookings' => Booking::with(['customer', 'rider', 'payment'])->latest()->limit(8)->get(),
+            'dailyChart' => $dailyChart,
+            'statusChart' => $statusChart,
         ]);
     }
 

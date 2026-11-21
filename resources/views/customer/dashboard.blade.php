@@ -18,22 +18,22 @@
             <div role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('success') }}</div>
         @endif
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Booking summary">
-            <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">All bookings</p>
+        <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Booking summary">
+            <a href="{{ route('customer.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-slate-500">All bookings</p><span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span></div>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">{{ $totalBookings }}</p>
                 <p class="mt-1 text-xs text-slate-500">Your RiderHub activity</p>
-            </article>
-            <article class="card-interactive rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
-                <p class="text-sm font-medium text-indigo-700">In progress</p>
+            </a>
+            <a href="{{ route('customer.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-indigo-700">In progress</p><span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span></div>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-indigo-950">{{ $activeBookings }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">Accepted or on the way</p>
-            </article>
-            <article class="card-interactive rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
-                <p class="text-sm font-medium text-emerald-700">Completed</p>
+            </a>
+            <a href="{{ route('customer.bookings.index', ['status' => 'completed']) }}" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+                <div class="flex items-center justify-between"><p class="text-sm font-medium text-emerald-700">Completed</p><span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span></div>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-emerald-950">{{ $completedBookings }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">Trips and deliveries completed</p>
-            </article>
+            </a>
             <a href="{{ route('customer.bookings.create') }}" class="card-interactive group flex min-h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-700 to-violet-700 p-5 text-white shadow-sm">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
@@ -114,5 +114,49 @@
                 </div>
             @endif
         </section>
+
+        <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-950">Your 7-Day Trip Activity</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">Rides vs. package deliveries you booked over the last 7 days.</p>
+                </div>
+                <a href="{{ route('customer.bookings.index') }}" class="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100">Full history →</a>
+            </div>
+            <div class="relative mt-5 h-56">
+                <canvas id="customer-activity-chart"></canvas>
+            </div>
+        </section>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.Chart) return;
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            const tickColor = isDark ? '#94a3b8' : '#64748b';
+            const gridColor = isDark ? 'rgba(51,65,85,0.45)' : 'rgba(226,232,240,0.8)';
+            const data = @json($activityChart);
+            const canvas = document.getElementById('customer-activity-chart');
+            if (!canvas) return;
+            new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: data.labels,
+                    datasets: [
+                        { label: 'Rides', data: data.rides, backgroundColor: 'rgba(79, 70, 229, 0.85)', borderRadius: 8 },
+                        { label: 'Deliveries', data: data.deliveries, backgroundColor: 'rgba(245, 158, 11, 0.85)', borderRadius: 8 },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: tickColor, usePointStyle: true } } },
+                    scales: {
+                        x: { ticks: { color: tickColor }, grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0, color: tickColor }, grid: { color: gridColor } },
+                    },
+                },
+            });
+        });
+    </script>
 </x-app-layout>

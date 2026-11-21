@@ -3,9 +3,11 @@ import 'leaflet/dist/leaflet.css';
 
 import L from 'leaflet';
 import Alpine from 'alpinejs';
+import Chart from 'chart.js/auto';
 
 window.Alpine = Alpine;
 window.L = L;
+window.Chart = Chart;
 
 Alpine.start();
 

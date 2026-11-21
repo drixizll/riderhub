@@ -37,6 +37,17 @@ class RiderBookingController extends Controller
             ->latest();
 
         $ratingAverage = $rider->ratingsReceived()->avg('score');
+        $days = collect(range(6, 0))->map(fn (int $offset) => now()->subDays($offset)->startOfDay());
+        $weekCompleted = $rider->riderBookings()
+            ->where('status', 'completed')
+            ->where('updated_at', '>=', now()->subDays(6)->startOfDay())
+            ->get(['updated_at', 'fare']);
+
+        $earningsChart = [
+            'labels' => $days->map(fn ($day) => $day->format('M j'))->values()->all(),
+            'trips' => $days->map(fn ($day) => $weekCompleted->filter(fn ($b) => $b->updated_at->isSameDay($day))->count())->values()->all(),
+            'earnings' => $days->map(fn ($day) => round((float) $weekCompleted->filter(fn ($b) => $b->updated_at->isSameDay($day))->sum('fare'), 2))->values()->all(),
+        ];
 
         return [
             'activeBooking' => $rider->riderBookings()
@@ -52,6 +63,7 @@ class RiderBookingController extends Controller
             'bookings' => $paginate
                 ? $availableBookings->paginate(10)
                 : $availableBookings->limit(5)->get(),
+            'earningsChart' => $earningsChart,
         ];
     }
 

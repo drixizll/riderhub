@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>RiderHub — Decoupled Frontend Client</title>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            font-family: 'Figtree', system-ui, -apple-system, sans-serif;
+            color: #f8fafc;
+            background:
+                radial-gradient(circle at 15% 15%, rgba(139, 92, 246, 0.28), transparent 45%),
+                radial-gradient(circle at 85% 80%, rgba(192, 132, 252, 0.22), transparent 45%),
+                linear-gradient(145deg, #0b1120 0%, #1a0f3c 50%, #0f172a 100%);
+            padding: 24px 16px 56px;
+        }
+        .wrap { max-width: 980px; margin: 0 auto; }
+        .top {
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px;
+            padding: 18px 22px; border-radius: 20px;
+            background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(167, 139, 250, 0.25);
+            backdrop-filter: blur(16px);
+        }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 800; }
+        .brand span { color: #c4b5fd; }
+        .pill {
+            display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px;
+            font-size: 12px; font-weight: 700; background: rgba(16, 185, 129, 0.14);
+            border: 1px solid rgba(52, 211, 153, 0.35); color: #6ee7b7;
+        }
+        .dot { width: 8px; height: 8px; border-radius: 999px; background: #34d399; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-top: 22px; }
+        .card {
+            background: rgba(17, 24, 39, 0.84); border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 22px; padding: 22px; backdrop-filter: blur(14px);
+            transition: transform 220ms ease, border-color 220ms ease;
+        }
+        .card:hover { transform: translateY(-3px); border-color: rgba(167, 139, 250, 0.45); }
+        h2 { margin: 0 0 6px; font-size: 16px; font-weight: 800; color: #f8fafc; }
+        .muted { font-size: 13px; color: #94a3b8; margin: 0 0 14px; }
+        input, button {
+            font-family: inherit; font-size: 14px; border-radius: 12px;
+        }
+        input {
+            width: 100%; padding: 11px 14px; background: #0f172a; color: #f8fafc;
+            border: 1px solid #334155; outline: none;
+        }
+        input:focus { border-color: #8b5cf6; }
+        .btn {
+            margin-top: 10px; width: 100%; padding: 11px 16px; border: none; cursor: pointer;
+            font-weight: 700; color: #fff;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.35);
+        }
+        .out {
+            margin-top: 14px; padding: 12px 14px; border-radius: 14px;
+            background: rgba(30, 27, 75, 0.65); border: 1px solid rgba(139, 92, 246, 0.25);
+            font-size: 13.5px; line-height: 1.5; color: #e2e8f0;
+        }
+        .big { font-size: 26px; font-weight: 800; color: #c4b5fd; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <header class="top">
+            <div class="brand">Rider<span>Hub</span> <small style="font-size:12px;color:#94a3b8;font-weight:600;">Decoupled Frontend (API v1)</small></div>
+            <div id="api-status" class="pill"><span class="dot"></span>Connecting to Backend API…</div>
+        </header>
+
+        <section class="grid">
+            <article class="card">
+                <h2>Live Misamis Oriental Weather</h2>
+                <p class="muted">Fetched live from <code>GET /api/v1/weather</code></p>
+                <div id="weather-out" class="out">Loading live weather…</div>
+            </article>
+
+            <article class="card">
+                <h2>Instant Fare Estimator</h2>
+                <p class="muted">Powered by <code>POST /api/v1/fare-estimate</code></p>
+                <input id="km-input" type="number" min="0.5" max="200" step="0.5" value="5" placeholder="Distance in km">
+                <button id="fare-btn" class="btn" type="button">Calculate Fare</button>
+                <div id="fare-out" class="out">Enter distance and click Calculate Fare.</div>
+            </article>
+
+            <article class="card">
+                <h2>RiderHub AI Assistant</h2>
+                <p class="muted">Powered by <code>POST /api/v1/assistant/chat</code></p>
+                <input id="ai-input" type="text" placeholder="Ask RiderHub AI anything…">
+                <button id="ai-btn" class="btn" type="button">Send to AI</button>
+                <div id="ai-out" class="out">Say hi or ask about fares, weather, or RiderHub!</div>
+            </article>
+        </section>
+    </div>
+
+    <script type="module">
+        import { RiderHubApi } from './js/api.js';
+
+        const defaultBase = window.location.origin.startsWith('http')
+            ? `${window.location.origin}/api/v1`
+            : 'http://127.0.0.1:8000/api/v1';
+        const api = new RiderHubApi(defaultBase);
+
+        const statusEl = document.getElementById('api-status');
+        const weatherEl = document.getElementById('weather-out');
+        const fareEl = document.getElementById('fare-out');
+        const aiEl = document.getElementById('ai-out');
+
+        api.health()
+            .then((data) => {
+                statusEl.innerHTML = `<span class="dot"></span>Backend ${data.version} · ${data.database} (${data.region})`;
+            })
+            .catch(() => {
+                statusEl.textContent = 'Start Laravel backend (php artisan serve) to connect';
+            });
+
+        api.weather()
+            .then((w) => {
+                weatherEl.innerHTML = w.available
+                    ? `<div class="big">${w.temperature}°C</div><div>${w.label} · Rain ${w.rain_chance}% · Wind ${w.wind_kmh} km/h</div><div style="margin-top:6px;color:#c4b5fd;">${w.advisory}</div>`
+                    : 'Weather data temporarily unavailable.';
+            })
+            .catch(() => { weatherEl.textContent = 'Could not reach /api/v1/weather.'; });
+
+        const runFare = async () => {
+            const km = document.getElementById('km-input').value || 5;
+            try {
+                const res = await api.estimateFare(km);
+                fareEl.innerHTML = `<div class="big">${res.formatted_fare}</div><div>${res.distance_km} km · ₱${res.base_fare} base + ₱${res.per_km_rate}/km</div>`;
+            } catch {
+                fareEl.textContent = 'Could not calculate fare right now.';
+            }
+        };
+        document.getElementById('fare-btn').addEventListener('click', runFare);
+        runFare();
+
+        document.getElementById('ai-btn').addEventListener('click', async () => {
+            const input = document.getElementById('ai-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            aiEl.textContent = 'Thinking…';
+            try {
+                const res = await api.chat(msg);
+                aiEl.textContent = res.reply;
+                input.value = '';
+            } catch {
+                aiEl.textContent = 'Could not reach RiderHub AI right now.';
+            }
+        });
+    </script>
+</body>
+</html>

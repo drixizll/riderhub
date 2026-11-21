@@ -112,6 +112,11 @@ class AdminDashboardController extends Controller
 
     public function updateUser(Request $request, User $user): \Illuminate\Http\RedirectResponse
     {
+        if ($user->id === $request->user()->id) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'You cannot edit your own administrator account from the directory.');
+        }
+
         if ($request->filled('email')) {
             $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
         }
@@ -122,11 +127,6 @@ class AdminDashboardController extends Controller
             'phone' => ['nullable', 'string', 'max:25'],
             'role' => ['required', 'in:customer,rider,admin'],
         ]);
-
-        if ($user->id === $request->user()->id && $validated['role'] !== 'admin') {
-            return redirect()->route('admin.users.index')
-                ->with('error', 'You cannot remove your own administrator role.');
-        }
 
         $user->update($validated);
 

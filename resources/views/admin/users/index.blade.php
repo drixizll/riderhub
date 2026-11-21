@@ -104,15 +104,17 @@
                                     <td class="px-5 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-bold capitalize {{ $user->role === 'admin' ? 'bg-violet-50 text-violet-700' : ($user->role === 'rider' ? 'bg-amber-50 text-amber-700' : 'bg-indigo-50 text-indigo-700') }}">{{ $user->role }}</span></td>
                                     <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{{ $user->created_at->format('M j, Y') }}</td>
                                     <td class="whitespace-nowrap px-5 py-4 text-right sm:px-6">
-                                        <div class="inline-flex items-center justify-end gap-2">
-                                            <button
-                                                type="button"
-                                                @click="openEdit(@js($userData))"
-                                                class="rounded-lg border border-indigo-200 bg-indigo-50/70 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
-                                            >
-                                                Edit
-                                            </button>
-                                            @if ($user->id !== Auth::id())
+                                        @if ($user->id === Auth::id())
+                                            <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-400">Protected</span>
+                                        @else
+                                            <div class="inline-flex items-center justify-end gap-2">
+                                                <button
+                                                    type="button"
+                                                    @click="openEdit(@js($userData))"
+                                                    class="rounded-lg border border-indigo-200 bg-indigo-50/70 px-3 py-1.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
+                                                >
+                                                    Edit
+                                                </button>
                                                 <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete {{ addslashes($user->name) }}\'s account permanently?');">
                                                     @csrf
                                                     @method('DELETE')
@@ -120,8 +122,8 @@
                                                         Delete
                                                     </button>
                                                 </form>
-                                            @endif
-                                        </div>
+                                            </div>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach

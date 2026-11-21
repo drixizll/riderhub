@@ -287,7 +287,16 @@ class BookingFlowTest extends TestCase
 
         $this->assertNull($target->fresh());
 
-        // Admin cannot delete themselves
+        // Admin cannot edit or delete themselves from the directory
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $admin), [
+                'name' => 'Self Edit',
+                'email' => $admin->email,
+                'role' => 'admin',
+            ])
+            ->assertRedirect(route('admin.users.index'))
+            ->assertSessionHas('error');
+
         $this->actingAs($admin)
             ->delete(route('admin.users.destroy', $admin))
             ->assertRedirect(route('admin.users.index'))

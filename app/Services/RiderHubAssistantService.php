@@ -465,13 +465,47 @@ class RiderHubAssistantService
     }
 
     /**
-     * Calls Gemini, Groq, or OpenAI if an API key is configured in .env.
+     * Calls Repohive Cloud AI Gateway, Gemini, Groq, or OpenAI if configured.
      *
      * @param  list<array{role: string, text: string}>  $history
      */
     private function askConfiguredLlm(string $message, ?User $user, array $history): ?string
     {
         $systemPrompt = $this->buildSystemPrompt($user);
+
+        // 0. Repohive Cloud AI Gateway (Sir Kent's Cloud AI — GPT-4o Mini / GPT-4o)
+        $repohiveKey = config('services.repohive.ai_key');
+        $repohiveUrl = (string) config('services.repohive.ai_url', 'https://apicloud.repohive.com/api/ai/chat');
+        if (is_string($repohiveKey) && trim($repohiveKey) !== '' && ! app()->runningUnitTests()) {
+            try {
+                $messages = [];
+                foreach (array_slice($history, -8) as $turn) {
+                    $messages[] = ['role' => $turn['role'], 'content' => $turn['text']];
+                }
+                $messages[] = ['role' => 'user', 'content' => $message];
+
+                $response = Http::withToken(trim($repohiveKey))
+                    ->acceptJson()
+                    ->timeout(15)
+                    ->post($repohiveUrl, [
+                        'system_prompt' => $systemPrompt,
+                        'message' => $message,
+                        'messages' => $messages,
+                        'model' => (string) config('services.repohive.ai_model', 'gpt-4o-mini'),
+                        'temperature' => 0.7,
+                        'max_tokens' => 450,
+                    ]);
+
+                $reply = data_get($response->json(), 'message')
+                    ?? data_get($response->json(), 'data.message')
+                    ?? data_get($response->json(), 'choices.0.message.content');
+                if ($response->successful() && is_string($reply) && trim($reply) !== '') {
+                    return trim($reply);
+                }
+            } catch (\Throwable) {
+                // Fall through cleanly to next configured provider.
+            }
+        }
 
         // 1. Google Gemini API (supports both AI Studio "AIza..." keys and Vertex AI Express "AQ...." keys)
         $geminiKey = config('services.gemini.api_key');

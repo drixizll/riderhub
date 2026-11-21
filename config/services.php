@@ -43,6 +43,14 @@ return [
         'payment_method_types' => ['card', 'gcash', 'paymaya'],
     ],
 
+    'repohive' => [
+        'ai_key' => env('REPOHIVE_AI_KEY', 'hbc_ai_e6b17f6a201164aa22706f6517d574c1d0b5a4d786a5d42c'),
+        'ai_url' => env('REPOHIVE_AI_URL', 'https://apicloud.repohive.com/api/ai/chat'),
+        'ai_model' => env('REPOHIVE_AI_MODEL', 'gpt-4o-mini'),
+        'otp_key' => env('REPOHIVE_OTP_KEY'),
+        'otp_url' => env('REPOHIVE_OTP_URL', 'https://cloud.repohive.com/api/v1/otp'),
+    ],
+
     'gemini' => [
         'api_key' => env('GEMINI_API_KEY'),
         'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),

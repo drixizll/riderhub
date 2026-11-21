@@ -15,31 +15,43 @@
             <div role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('success') }}</div>
         @endif
 
-        <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Rider summary">
-            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p class="text-sm font-medium text-slate-500">Available requests</p>
+        <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Rider summary">
+            <a href="{{ route('rider.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm active:scale-[0.98]">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-slate-500">Available requests</p>
+                    <span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                </div>
                 <p class="mt-2 text-3xl font-extrabold text-slate-950">{{ $availableCount }}</p>
                 <p class="mt-1 text-xs text-slate-500">Waiting for a rider</p>
-            </article>
-            <article class="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
-                <p class="text-sm font-medium text-indigo-700">Assigned to you</p>
+            </a>
+            <a href="{{ $activeBooking ? '#active-booking' : route('rider.bookings.index') }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm active:scale-[0.98]">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-indigo-700">Assigned to you</p>
+                    <span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                </div>
                 <p class="mt-2 text-3xl font-extrabold text-indigo-950">{{ $assignedCount }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">All-time bookings</p>
-            </article>
-            <article class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
-                <p class="text-sm font-medium text-emerald-700">Completed</p>
+            </a>
+            <a href="#rider-earnings" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm active:scale-[0.98]">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-emerald-700">Completed</p>
+                    <span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                </div>
                 <p class="mt-2 text-3xl font-extrabold text-emerald-950">{{ $completedCount }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">Successfully delivered</p>
-            </article>
-            <article class="rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm">
-                <p class="text-sm font-medium text-amber-800">Rider rating</p>
+            </a>
+            <a href="{{ route('profile.edit') }}" class="card-interactive group block rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm active:scale-[0.98]">
+                <div class="flex items-center justify-between">
+                    <p class="text-sm font-medium text-amber-800">Rider rating</p>
+                    <span class="text-xs font-bold text-amber-800 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
+                </div>
                 <p class="mt-2 text-3xl font-extrabold text-amber-950">{{ $ratingAverage ?? 'New' }}@if ($ratingAverage)<span class="text-lg">/5</span>@endif</p>
                 <p class="mt-1 text-xs text-amber-800/80">{{ $ratingCount }} {{ \Illuminate\Support\Str::plural('review', $ratingCount) }} from customers</p>
-            </article>
+            </a>
         </section>
 
         @if ($activeBooking)
-            <section class="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
+            <section id="active-booking" class="scroll-mt-24 overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
                 <div class="flex flex-col gap-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -158,7 +170,7 @@
             <div class="space-y-4">
                 <x-weather-widget title="Tagoloan Road Weather" :lat="$activeBooking?->pickup_lat ?? 8.5378" :lng="$activeBooking?->pickup_lng ?? 124.7536" />
 
-                <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <section id="rider-earnings" class="scroll-mt-24 card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div class="flex items-center justify-between gap-2">
                         <div>
                             <h2 class="text-sm font-bold text-slate-950">7-Day Completed Earnings</h2>

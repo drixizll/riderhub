@@ -1,5 +1,6 @@
 <div
     x-data="riderhubAssistant()"
+    @riderhub-open-ai.window="open = true; $nextTick(() => scrollToBottom())"
     class="fixed bottom-5 right-5 z-50 flex flex-col items-end"
     aria-live="polite"
 >
@@ -30,16 +31,27 @@
                     <p class="text-[11px] text-indigo-100">Smart ride, weather &amp; fare assistant</p>
                 </div>
             </div>
-            <button
-                type="button"
-                @click="open = false"
-                class="rounded-xl p-1.5 text-indigo-100 transition hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
-                aria-label="Close AI Assistant"
-            >
-                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                </svg>
-            </button>
+            <div class="flex items-center gap-1">
+                <button
+                    type="button"
+                    @click="resetChat()"
+                    title="Clear conversation"
+                    class="rounded-xl p-1.5 text-indigo-100 transition hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
+                    aria-label="Reset conversation"
+                >
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.64 18.36A9 9 0 0 0 20 12M18.36 5.64A9 9 0 0 0 4 12" /></svg>
+                </button>
+                <button
+                    type="button"
+                    @click="open = false"
+                    class="rounded-xl p-1.5 text-indigo-100 transition hover:bg-white/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-white/60"
+                    aria-label="Close AI Assistant"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                    </svg>
+                </button>
+            </div>
         </div>
 
         <div x-ref="messages" class="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4">
@@ -153,6 +165,10 @@
                 scrollToBottom() {
                     const el = this.$refs.messages;
                     if (el) el.scrollTop = el.scrollHeight;
+                },
+                resetChat() {
+                    this.messages = [this.messages[0]];
+                    this.input = '';
                 },
                 async send(text) {
                     const clean = (text || '').trim();

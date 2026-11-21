@@ -85,7 +85,56 @@
             @endforeach
         </nav>
 
-        <div class="mt-8 border-t border-slate-100 pt-6">
+        <div class="mt-6 border-t border-slate-100 pt-5">
+            <p class="whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-all duration-200"
+               :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2'">
+                Tools &amp; Reports
+            </p>
+            <div class="mt-3 space-y-1.5">
+                @if ($role === 'admin')
+                    <a href="{{ route('admin.bookings.export.pdf') }}" target="_blank" title="Export PDF Report"
+                       class="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-indigo-50/70 hover:text-indigo-700 active:scale-[0.98]">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition group-hover:scale-105 group-hover:bg-indigo-600 group-hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
+                        </span>
+                        <span class="whitespace-nowrap transition-all duration-200" :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">Export PDF Report</span>
+                    </a>
+                    <a href="{{ route('admin.bookings.export.csv') }}" data-no-loading="true" title="Export CSV (Excel)"
+                       class="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-emerald-50/70 hover:text-emerald-700 active:scale-[0.98]">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:scale-105 group-hover:bg-emerald-600 group-hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0-4-4m4 4 4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" /></svg>
+                        </span>
+                        <span class="whitespace-nowrap transition-all duration-200" :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">Export CSV (Excel)</span>
+                    </a>
+                @elseif ($role === 'customer')
+                    <a href="{{ route('customer.bookings.export.pdf') }}" target="_blank" title="Export PDF History"
+                       class="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-indigo-50/70 hover:text-indigo-700 active:scale-[0.98]">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition group-hover:scale-105 group-hover:bg-indigo-600 group-hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
+                        </span>
+                        <span class="whitespace-nowrap transition-all duration-200" :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">Export PDF History</span>
+                    </a>
+                @elseif ($role === 'rider')
+                    <a href="{{ route('rider.earnings.export.pdf') }}" target="_blank" title="Earnings PDF Report"
+                       class="group flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-emerald-50/70 hover:text-emerald-700 active:scale-[0.98]">
+                        <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition group-hover:scale-105 group-hover:bg-emerald-600 group-hover:text-white">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
+                        </span>
+                        <span class="whitespace-nowrap transition-all duration-200" :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">Earnings PDF Report</span>
+                    </a>
+                @endif
+
+                <button type="button" @click="sidebarOpen = false; $dispatch('riderhub-open-ai')" title="Ask RiderHub AI"
+                        class="group flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left text-sm font-semibold text-slate-600 transition-all duration-200 hover:bg-violet-50/80 hover:text-violet-700 active:scale-[0.98]">
+                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-sm shadow-violet-600/30 transition group-hover:scale-105">
+                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z" /></svg>
+                    </span>
+                    <span class="whitespace-nowrap transition-all duration-200" :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">Ask RiderHub AI</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="mt-6 border-t border-slate-100 pt-5">
             <p class="whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-all duration-200"
                :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2'">
                 Account

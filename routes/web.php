@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PayMongoWebhookController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RiderBookingController;
 use App\Http\Controllers\RiderLocationController;
 use App\Http\Controllers\RouteController;
@@ -41,10 +42,12 @@ Route::get('/dashboard', function () use ($dashboardRouteForRole) {
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/export/pdf', [ReportController::class, 'customerPdf'])->name('bookings.export.pdf');
     Route::get('/bookings/create', [CustomerBookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/checkout', [CustomerBookingController::class, 'checkout'])->name('bookings.checkout');
     Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/receipt', [ReportController::class, 'customerReceipt'])->name('bookings.receipt');
     Route::post('/bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('bookings.cancel');
     Route::get('/bookings/{booking}/location', [CustomerBookingController::class, 'location'])->name('bookings.location');
     Route::post('/bookings/{booking}/rating', [BookingRatingController::class, 'store'])->name('bookings.rating');
@@ -52,6 +55,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
 
 Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('rider.')->group(function () {
     Route::get('/dashboard', [RiderBookingController::class, 'dashboard'])->name('dashboard');
+    Route::get('/earnings/export/pdf', [ReportController::class, 'riderPdf'])->name('earnings.export.pdf');
     Route::get('/bookings', [RiderBookingController::class, 'index'])->name('bookings.index');
     Route::post('/bookings/{booking}/accept', [RiderBookingController::class, 'accept'])->name('bookings.accept');
     Route::post('/bookings/{booking}/status', [RiderBookingController::class, 'updateStatus'])->name('bookings.status');
@@ -61,6 +65,8 @@ Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('ri
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings.index');
+    Route::get('/bookings/export/pdf', [ReportController::class, 'adminPdf'])->name('bookings.export.pdf');
+    Route::get('/bookings/export/csv', [ReportController::class, 'adminCsv'])->name('bookings.export.csv');
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users.index');
 });
 

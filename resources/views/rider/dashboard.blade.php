@@ -159,8 +159,13 @@
                 <x-weather-widget title="Tagoloan Road Weather" :lat="$activeBooking?->pickup_lat ?? 8.5378" :lng="$activeBooking?->pickup_lng ?? 124.7536" />
 
                 <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <h2 class="text-sm font-bold text-slate-950">7-Day Completed Earnings</h2>
-                    <p class="mt-0.5 text-xs text-slate-500">Your daily completed fare totals (₱).</p>
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <h2 class="text-sm font-bold text-slate-950">7-Day Completed Earnings</h2>
+                            <p class="mt-0.5 text-xs text-slate-500">Your daily completed fare totals (₱).</p>
+                        </div>
+                        <a href="{{ route('rider.earnings.export.pdf') }}" target="_blank" class="rounded-lg bg-indigo-50 px-2.5 py-1.5 text-[11px] font-bold text-indigo-700 transition hover:bg-indigo-100">PDF Report</a>
+                    </div>
                     <div class="relative mt-4 h-48">
                         <canvas id="rider-earnings-chart"></canvas>
                     </div>

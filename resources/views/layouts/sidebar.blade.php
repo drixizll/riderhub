@@ -28,10 +28,20 @@
 
 <div x-show="sidebarOpen" x-transition.opacity.duration.250ms class="fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-xs lg:hidden" @click="sidebarOpen = false" aria-hidden="true"></div>
 
-<aside class="fixed bottom-0 left-0 top-16 z-50 flex w-64 -translate-x-full flex-col border-r border-slate-200/80 bg-white/95 backdrop-blur-md transition-transform duration-300 ease-out lg:translate-x-0"
-       :class="sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'">
-    <div class="flex-1 overflow-y-auto px-4 py-6">
-        <p class="px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">Workspace</p>
+<aside
+    @mouseenter="sidebarHover = true"
+    @mouseleave="sidebarHover = false"
+    class="fixed bottom-0 left-0 top-16 z-50 flex w-64 -translate-x-full flex-col overflow-hidden border-r border-slate-200/80 bg-white/95 backdrop-blur-md transition-all duration-300 ease-out lg:translate-x-0"
+    :class="[
+        sidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full',
+        sidebarHover ? 'lg:w-64 lg:shadow-2xl lg:shadow-indigo-950/15' : 'lg:w-20 lg:shadow-none'
+    ]"
+>
+    <div class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
+        <p class="whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-all duration-200"
+           :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2'">
+            Workspace
+        </p>
         <nav class="mt-3 space-y-1.5" aria-label="Main sidebar">
             @foreach ($navigation as $item)
                 @php
@@ -39,13 +49,14 @@
                 @endphp
                 <a href="{{ route($item['route']) }}"
                    @click="sidebarOpen = false"
+                   title="{{ $item['label'] }}"
                    class="{{ $active
                        ? 'bg-gradient-to-r from-indigo-50 via-indigo-50/80 to-violet-50/60 text-indigo-700 shadow-xs ring-1 ring-inset ring-indigo-200/80'
-                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }} group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 hover:translate-x-0.5 active:scale-[0.98]">
+                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }} group relative flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98]">
                     @if ($active)
                         <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-indigo-500 to-violet-600" aria-hidden="true"></span>
                     @endif
-                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {{ $active ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'bg-slate-100 text-slate-500 group-hover:scale-105 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
+                    <span class="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200 {{ $active ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'bg-slate-100 text-slate-500 group-hover:scale-105 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                         @if ($item['icon'] === 'home')
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V10Z" /></svg>
                         @elseif ($item['icon'] === 'plus')
@@ -55,37 +66,55 @@
                         @else
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
                         @endif
+                        @if (($item['badge'] ?? 0) > 0)
+                            <span class="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full bg-amber-500 ring-2 ring-white transition-opacity duration-200"
+                                  :class="sidebarHover || sidebarOpen ? 'opacity-0' : 'opacity-100'" aria-hidden="true"></span>
+                        @endif
                     </span>
-                    <span class="truncate">{{ $item['label'] }}</span>
+                    <span class="whitespace-nowrap transition-all duration-200"
+                          :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">
+                        {{ $item['label'] }}
+                    </span>
                     @if (($item['badge'] ?? 0) > 0)
-                        <span class="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-extrabold text-amber-800 shadow-xs">{{ $item['badge'] > 99 ? '99+' : $item['badge'] }}</span>
+                        <span class="ml-auto inline-flex min-w-6 items-center justify-center rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-extrabold text-amber-800 shadow-xs transition-all duration-200"
+                              :class="sidebarHover || sidebarOpen ? 'opacity-100 scale-100' : 'lg:opacity-0 lg:scale-75 lg:pointer-events-none'">
+                            {{ $item['badge'] > 99 ? '99+' : $item['badge'] }}
+                        </span>
                     @endif
                 </a>
             @endforeach
         </nav>
 
         <div class="mt-8 border-t border-slate-100 pt-6">
-            <p class="px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400">Account</p>
+            <p class="whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-all duration-200"
+               :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2'">
+                Account
+            </p>
             @php
                 $profileActive = request()->routeIs('profile.*');
             @endphp
             <a href="{{ route('profile.edit') }}"
                @click="sidebarOpen = false"
+               title="Account settings"
                class="{{ $profileActive
                    ? 'bg-gradient-to-r from-indigo-50 via-indigo-50/80 to-violet-50/60 text-indigo-700 shadow-xs ring-1 ring-inset ring-indigo-200/80'
-                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }} group relative mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 hover:translate-x-0.5 active:scale-[0.98]">
+                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950' }} group relative mt-3 flex items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm font-semibold transition-all duration-200 active:scale-[0.98]">
                 @if ($profileActive)
                     <span class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-gradient-to-b from-indigo-500 to-violet-600" aria-hidden="true"></span>
                 @endif
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 {{ $profileActive ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'bg-slate-100 text-slate-500 group-hover:scale-105 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
+                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-200 {{ $profileActive ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/30' : 'bg-slate-100 text-slate-500 group-hover:scale-105 group-hover:bg-indigo-50 group-hover:text-indigo-600' }}">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke-width="1.9" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.9" d="M4 21a8 8 0 0 1 16 0" /></svg>
                 </span>
-                <span>Account settings</span>
+                <span class="whitespace-nowrap transition-all duration-200"
+                      :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2 lg:pointer-events-none'">
+                    Account settings
+                </span>
             </a>
         </div>
     </div>
 
-    <div class="border-t border-slate-100 p-4">
+    <div class="border-t border-slate-100 p-3 transition-all duration-300"
+         :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-y-0' : 'lg:opacity-0 lg:translate-y-2 lg:pointer-events-none'">
         <div class="mb-3">
             <x-install-app-button />
         </div>

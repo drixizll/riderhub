@@ -31,11 +31,11 @@
                 <span>Loading RiderHub…</span>
             </div>
         </div>
-        <div x-data="{ sidebarOpen: false }" class="relative z-10 min-h-screen">
+        <div x-data="{ sidebarOpen: false, sidebarHover: false }" class="relative z-10 min-h-screen">
             @include('layouts.navigation')
             @include('layouts.sidebar')
 
-            <div class="min-h-[calc(100vh-4rem)] lg:pl-64">
+            <div class="min-h-[calc(100vh-4rem)] transition-[padding] duration-300 ease-out lg:pl-20">
                 @isset($header)
                     <header class="border-b border-slate-200 bg-white">
                         <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">

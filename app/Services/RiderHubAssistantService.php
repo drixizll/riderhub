@@ -520,30 +520,34 @@ class RiderHubAssistantService
         // 2. Groq API (Ultra-fast & free tier available via console.groq.com)
         $groqKey = config('services.groq.api_key');
         if (is_string($groqKey) && trim($groqKey) !== '') {
-            try {
-                $model = (string) config('services.groq.model', 'llama-3.3-70b-versatile');
-                $messages = [['role' => 'system', 'content' => $systemPrompt]];
-                foreach (array_slice($history, -8) as $turn) {
-                    $messages[] = ['role' => $turn['role'], 'content' => $turn['text']];
-                }
-                $messages[] = ['role' => 'user', 'content' => $message];
+            $configuredModel = (string) config('services.groq.model', 'openai/gpt-oss-120b');
+            $candidateModels = array_values(array_unique([$configuredModel, 'openai/gpt-oss-120b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile']));
 
-                $response = Http::withToken(trim($groqKey))
-                    ->acceptJson()
-                    ->timeout(15)
-                    ->post('https://api.groq.com/openai/v1/chat/completions', [
-                        'model' => $model,
-                        'messages' => $messages,
-                        'temperature' => 0.7,
-                        'max_tokens' => 400,
-                    ]);
+            $messages = [['role' => 'system', 'content' => $systemPrompt]];
+            foreach (array_slice($history, -8) as $turn) {
+                $messages[] = ['role' => $turn['role'], 'content' => $turn['text']];
+            }
+            $messages[] = ['role' => 'user', 'content' => $message];
 
-                $reply = data_get($response->json(), 'choices.0.message.content');
-                if ($response->successful() && is_string($reply) && trim($reply) !== '') {
-                    return trim($reply);
+            foreach ($candidateModels as $model) {
+                try {
+                    $response = Http::withToken(trim($groqKey))
+                        ->acceptJson()
+                        ->timeout(15)
+                        ->post('https://api.groq.com/openai/v1/chat/completions', [
+                            'model' => $model,
+                            'messages' => $messages,
+                            'temperature' => 0.7,
+                            'max_tokens' => 450,
+                        ]);
+
+                    $reply = data_get($response->json(), 'choices.0.message.content');
+                    if ($response->successful() && is_string($reply) && trim($reply) !== '') {
+                        return trim($reply);
+                    }
+                } catch (\Throwable) {
+                    // Try next model or fall through cleanly.
                 }
-            } catch (\Throwable) {
-                // Fall through cleanly.
             }
         }
 

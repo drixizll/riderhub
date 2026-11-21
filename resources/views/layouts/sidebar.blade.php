@@ -1,6 +1,5 @@
 @php
     $role = Auth::user()->role;
-    $unreadNotificationCount = Auth::user()->unreadNotifications()->count();
     $dashboardRoute = match ($role) {
         'customer' => 'customer.dashboard',
         'rider' => 'rider.dashboard',
@@ -57,17 +56,7 @@
         </nav>
 
         <div class="mt-8 border-t border-slate-100 pt-6">
-            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Workspace</p>
-            <a href="{{ route('notifications.index') }}"
-               @click="sidebarOpen = false"
-               class="{{ request()->routeIs('notifications.*') ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition">
-                <svg class="h-5 w-5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 12h4" /></svg>
-                Notifications
-                @if ($unreadNotificationCount > 0)
-                    <span class="ml-auto rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-extrabold text-rose-700">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
-                @endif
-            </a>
-            <p class="mt-6 px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Account</p>
+            <p class="px-3 text-xs font-bold uppercase tracking-widest text-slate-400">Account</p>
             <a href="{{ route('profile.edit') }}"
                @click="sidebarOpen = false"
                class="{{ request()->routeIs('profile.*') ? 'bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-100' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900' }} mt-3 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition">

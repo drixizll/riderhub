@@ -19,13 +19,8 @@
                 </svg>
             </button>
 
-            <a href="{{ route($dashboardRoute) }}" class="inline-flex items-center gap-3" aria-label="RiderHub dashboard">
-                <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3M5 17a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                </span>
-                <span class="text-lg font-extrabold tracking-tight text-slate-900">Rider<span class="text-indigo-600">Hub</span></span>
+            <a href="{{ route($dashboardRoute) }}" class="transition hover:opacity-90" aria-label="RiderHub dashboard">
+                <x-brand-logo size="md" />
             </a>
         </div>
 

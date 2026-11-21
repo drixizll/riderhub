@@ -12,7 +12,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('icons/riderhub.svg') }}">
-        <meta name="theme-color" content="#4f46e5">
+        <meta name="theme-color" content="#7c3aed">
 
         @include('layouts.theme-init')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -34,13 +34,8 @@
         </div>
         <header class="sticky top-0 z-30 border-b border-slate-100/80 bg-white/90 backdrop-blur-md">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-                <a href="{{ url('/') }}" class="inline-flex items-center gap-3" aria-label="RiderHub home">
-                    <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
-                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                            <path d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3M5 17a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                    </span>
-                    <span class="text-xl font-extrabold tracking-tight text-slate-900">Rider<span class="text-indigo-600">Hub</span></span>
+                <a href="{{ url('/') }}" class="transition hover:opacity-90" aria-label="RiderHub home">
+                    <x-brand-logo size="md" />
                 </a>
 
                 <div class="flex items-center gap-2 sm:gap-4">
@@ -366,11 +361,8 @@
 
         <footer class="border-t border-slate-200 bg-white">
             <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <a href="{{ url('/') }}" class="inline-flex items-center gap-2 font-extrabold text-slate-900">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3M5 17a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                    </span>
-                    <span>Rider<span class="text-indigo-600">Hub</span></span>
+                <a href="{{ url('/') }}" class="transition hover:opacity-90">
+                    <x-brand-logo size="sm" />
                 </a>
                 <p>&copy; {{ date('Y') }} RiderHub. All rights reserved.</p>
                 <a href="{{ route('login') }}" class="font-semibold text-slate-600 transition hover:text-indigo-600">Already have an account? Log in</a>

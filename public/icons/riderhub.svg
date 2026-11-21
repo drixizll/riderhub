@@ -1,4 +1,20 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-    <rect width="512" height="512" rx="112" fill="#4f46e5"/>
-    <path d="M112 332h36m216 0h36m-252 0 36-112h144l36 112m-180-112 18-54h108l18 54m-216 112a36 36 0 1 0 72 0m108 0a36 36 0 1 0 72 0" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="25"/>
+    <defs>
+        <linearGradient id="rh-bg" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6"/>
+            <stop offset="55%" stop-color="#7c3aed"/>
+            <stop offset="100%" stop-color="#5b21b6"/>
+        </linearGradient>
+        <linearGradient id="rh-accent" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="100%" stop-color="#ede9fe"/>
+        </linearGradient>
+    </defs>
+    <rect width="512" height="512" rx="124" fill="url(#rh-bg)"/>
+    <circle cx="384" cy="124" r="96" fill="#c4b5fd" opacity="0.16"/>
+    <!-- Stylized GPS Pin + Motion Speed Lines -->
+    <path d="M116 218h64M96 268h58M124 318h46" stroke="#ddd6fe" stroke-width="20" stroke-linecap="round" opacity="0.85"/>
+    <path d="M286 118c-60 0-108 48-108 108 0 74 88 158 102 171a9 9 0 0 0 12 0c14-13 102-97 102-171 0-60-48-108-108-108Z" fill="url(#rh-accent)"/>
+    <!-- Stylized R / Rider Hub emblem inside pin -->
+    <path d="M254 268v-84h36c20 0 34 11 34 28 0 13-8 23-21 26l25 30h-26l-21-27h-7v27h-20Zm20-45h14c9 0 15-4 15-11s-6-11-15-11h-14v22Z" fill="#6d28d9"/>
 </svg>

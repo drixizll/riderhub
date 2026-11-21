@@ -11,7 +11,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('icons/riderhub.svg') }}">
-        <meta name="theme-color" content="#4f46e5">
+        <meta name="theme-color" content="#7c3aed">
 
         @include('layouts.theme-init')
         @vite(['resources/css/app.css', 'resources/js/app.js'])

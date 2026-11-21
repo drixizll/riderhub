@@ -144,6 +144,59 @@ html[data-theme="dark"] .text-gradient-brand {
     color: transparent;
 }
 
+/* Landing Hero Animated Royal Violet Mobility Background */
+.hero-mesh-bg {
+    background:
+        radial-gradient(circle at 14% 22%, rgba(139, 92, 246, 0.22) 0%, transparent 46%),
+        radial-gradient(circle at 86% 18%, rgba(168, 85, 247, 0.24) 0%, transparent 48%),
+        radial-gradient(circle at 65% 88%, rgba(124, 58, 237, 0.16) 0%, transparent 50%),
+        linear-gradient(135deg, #f5f3ff 0%, #ede9fe 38%, #faf5ff 70%, #eef2ff 100%);
+    background-size: 160% 160%;
+    animation: riderhub-mesh-shift 16s ease-in-out infinite alternate;
+}
+
+html[data-theme="dark"] .hero-mesh-bg {
+    background:
+        radial-gradient(circle at 14% 22%, rgba(139, 92, 246, 0.28) 0%, transparent 48%),
+        radial-gradient(circle at 86% 18%, rgba(168, 85, 247, 0.24) 0%, transparent 50%),
+        radial-gradient(circle at 65% 88%, rgba(109, 40, 217, 0.26) 0%, transparent 52%),
+        linear-gradient(135deg, #0b1120 0%, #170e33 45%, #111827 100%);
+    background-size: 160% 160%;
+    animation: riderhub-mesh-shift 16s ease-in-out infinite alternate;
+}
+
+.hero-map-grid {
+    background-image:
+        linear-gradient(to right, rgba(124, 58, 237, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(124, 58, 237, 0.08) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 45%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 85% 75% at 50% 45%, #000 45%, transparent 100%);
+    animation: riderhub-grid-pan 28s linear infinite;
+}
+
+html[data-theme="dark"] .hero-map-grid {
+    background-image:
+        linear-gradient(to right, rgba(167, 139, 250, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(167, 139, 250, 0.12) 1px, transparent 1px);
+}
+
+.hero-route-sweep {
+    stroke-dasharray: 14 14;
+    animation: riderhub-route-flow 3.2s linear infinite;
+}
+
+@keyframes riderhub-mesh-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 35%; }
+    100% { background-position: 25% 100%; }
+}
+
+@keyframes riderhub-grid-pan {
+    from { background-position: 0 0; }
+    to { background-position: 88px 88px; }
+}
+
 @keyframes riderhub-aurora-1 {
     0% { transform: translate3d(0, 0, 0) scale(1); }
     50% { transform: translate3d(6%, 5%, 0) scale(1.08); }

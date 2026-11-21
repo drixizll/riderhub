@@ -51,9 +51,27 @@
             </nav>
         </header>
 
-        <main>
-            <section class="relative overflow-hidden bg-slate-50">
-                <div class="absolute inset-y-0 right-0 hidden w-1/2 bg-gradient-to-br from-indigo-50 via-slate-50 to-amber-50 lg:block" aria-hidden="true"></div>
+        <main class="relative z-10">
+            <section class="hero-mesh-bg relative overflow-hidden border-b border-indigo-100/80">
+                <div class="hero-map-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
+                <div class="aurora-blob aurora-blob-1 pointer-events-none !absolute !opacity-35" aria-hidden="true"></div>
+                <div class="aurora-blob aurora-blob-2 pointer-events-none !absolute !opacity-30" aria-hidden="true"></div>
+                <svg class="pointer-events-none absolute inset-0 h-full w-full opacity-40" viewBox="0 0 1440 720" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <path d="M-80 540 C 260 440, 420 220, 760 280 C 1060 330, 1180 140, 1520 90" stroke="url(#hero-line-1)" stroke-width="2.5" class="hero-route-sweep" />
+                    <path d="M-60 660 C 310 610, 520 430, 880 460 C 1180 485, 1280 340, 1540 270" stroke="url(#hero-line-2)" stroke-width="2" class="hero-route-sweep" style="animation-duration: 4.5s; animation-direction: reverse;" />
+                    <defs>
+                        <linearGradient id="hero-line-1" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0"/>
+                            <stop offset="50%" stop-color="#7c3aed" stop-opacity="0.7"/>
+                            <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
+                        </linearGradient>
+                        <linearGradient id="hero-line-2" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0"/>
+                            <stop offset="50%" stop-color="#6d28d9" stop-opacity="0.5"/>
+                            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
                 <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
                     <div class="home-hero-copy max-w-2xl reveal-on-scroll" data-revealed="true">
                         <span class="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm">
@@ -86,7 +104,7 @@
                     <div class="home-hero-visual relative mx-auto w-full max-w-lg reveal-on-scroll" data-revealed="true">
                         <div class="hero-orb absolute -left-5 -top-5 h-24 w-24 rounded-full bg-amber-200/70 blur-2xl" aria-hidden="true"></div>
                         <div class="hero-orb-delayed absolute -bottom-6 -right-5 h-32 w-32 rounded-full bg-indigo-200/80 blur-2xl" aria-hidden="true"></div>
-                        <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:p-7">
+                        <div class="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-5 shadow-2xl shadow-indigo-950/15 backdrop-blur-md sm:p-7">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <p class="text-sm font-semibold text-slate-500">Your next trip</p>

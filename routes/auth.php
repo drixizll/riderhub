@@ -32,6 +32,10 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:10,1')
         ->name('account.recover');
 
+    Route::post('reset-password/code', [PasswordResetLinkController::class, 'resetWithCode'])
+        ->middleware('throttle:10,1')
+        ->name('password.reset.code');
+
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 

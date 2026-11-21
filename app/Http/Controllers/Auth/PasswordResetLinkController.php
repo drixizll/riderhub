@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Notifications\RiderHubNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
@@ -56,7 +58,9 @@ class PasswordResetLinkController extends Controller
                 ->withErrors(['email' => $result['message']]);
         }
 
-        $response = back()->with('status', $result['message']);
+        $response = back()
+            ->with('status', $result['message'])
+            ->with('otp_email', $user->email);
 
         if ($result['reset_url']) {
             $response->with('local_reset_url', $result['reset_url']);
@@ -95,6 +99,7 @@ class PasswordResetLinkController extends Controller
         $maskedEmail = $this->maskEmail($user->email);
         $response = back()
             ->with('recovery_tab', 'phone')
+            ->with('otp_email', $user->email)
             ->with('status', "Account found ({$maskedEmail})! We sent a password reset link to your email.");
 
         if ($result['reset_url']) {
@@ -105,9 +110,62 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Generates a single valid password reset token, sends the email notification
-     * (when SMTP is configured), records an in-app security notification, and exposes
-     * the same one-time reset URL directly whenever no live SMTP mailer is active.
+     * Verify a 6-digit OTP code sent via email/phone recovery and reset the user's password.
+     */
+    public function resetWithCode(Request $request): RedirectResponse
+    {
+        $request->merge([
+            'otp_email' => Str::lower(trim((string) $request->input('otp_email', ''))),
+            'code' => preg_replace('/\D+/', '', (string) $request->input('code', '')) ?? '',
+        ]);
+
+        $validated = $request->validate([
+            'otp_email' => ['required', 'email'],
+            'code' => ['required', 'digits:6'],
+            'password' => ['required', 'string', 'min:4', 'confirmed'],
+        ]);
+
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$validated['otp_email']])
+            ->first();
+
+        $cacheKey = 'password_reset_otp:'.sha1($validated['otp_email']);
+        $hashedOtp = Cache::get($cacheKey);
+
+        if (! $user || ! is_string($hashedOtp) || ! Hash::check($validated['code'], $hashedOtp)) {
+            return back()
+                ->with('otp_email', $validated['otp_email'])
+                ->withInput($request->only('otp_email', 'code'))
+                ->withErrors(['code' => 'Invalid or expired 6-digit verification code. Please request a new code.']);
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($validated['password']),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        Cache::forget($cacheKey);
+        Password::broker()->deleteToken($user);
+
+        try {
+            $user->notify(new RiderHubNotification(
+                title: 'Password updated successfully',
+                message: 'Your RiderHub password was changed using a 6-digit verification code.',
+                url: route('profile.edit'),
+                category: 'security',
+            ));
+        } catch (\Throwable) {
+            // Non-blocking
+        }
+
+        return redirect()->route('login')
+            ->with('status', 'Your password has been reset successfully! You can now log in with your new password.');
+    }
+
+    /**
+     * Generates a single valid password reset token and 6-digit OTP code, sends the
+     * email notification (when SMTP is configured), records an in-app security
+     * notification, and exposes the reset URL directly when no live SMTP mailer is active.
      *
      * @return array{ok: bool, emailed: bool, message: string, reset_url: ?string}
      */
@@ -117,6 +175,12 @@ class PasswordResetLinkController extends Controller
         $hasLiveMailer = ! in_array($mailer, ['log', 'array'], true);
         $broker = Password::broker();
         $token = $broker->createToken($user);
+        $otp = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $emailKey = sha1(Str::lower($user->email));
+
+        Cache::put("password_reset_otp:{$emailKey}", Hash::make($otp), now()->addMinutes(15));
+        Cache::put("password_reset_otp_plain:{$emailKey}", $otp, now()->addSeconds(30));
+
         $emailed = false;
 
         try {
@@ -128,6 +192,8 @@ class PasswordResetLinkController extends Controller
                 'error' => $exception->getMessage(),
             ]);
             $emailed = false;
+        } finally {
+            Cache::forget("password_reset_otp_plain:{$emailKey}");
         }
 
         // Record an in-app security notification for the user account.

@@ -128,7 +128,83 @@ class CustomerBookingController extends Controller
             'booking' => $booking,
             'riderRatingAverage' => $riderRatingAverage ? number_format($riderRatingAverage, 1) : null,
             'riderRatingCount' => $riderRatingCount,
+            'mapConfig' => config('riderhub.map'),
         ]);
+    }
+
+    public function update(Request $request, Booking $booking): RedirectResponse
+    {
+        $this->authorize('view', $booking);
+        abort_unless($booking->customer_id === Auth::id(), 403);
+
+        $validated = $request->validate([
+            'pickup_address' => ['required', 'string', 'max:255'],
+            'pickup_lat' => ['required', 'numeric', 'between:-90,90'],
+            'pickup_lng' => ['required', 'numeric', 'between:-180,180'],
+            'dropoff_address' => ['required', 'string', 'max:255'],
+            'dropoff_lat' => ['required', 'numeric', 'between:-90,90'],
+            'dropoff_lng' => ['required', 'numeric', 'between:-180,180'],
+            'item_description' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $distanceKm = $this->haversineDistance(
+            (float) $validated['pickup_lat'],
+            (float) $validated['pickup_lng'],
+            (float) $validated['dropoff_lat'],
+            (float) $validated['dropoff_lng'],
+        );
+
+        if ($distanceKm < 0.05) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'Pickup and drop-off must be at least 50 meters apart.');
+        }
+
+        $newFare = $this->calculateFare(
+            (float) $validated['pickup_lat'],
+            (float) $validated['pickup_lng'],
+            (float) $validated['dropoff_lat'],
+            (float) $validated['dropoff_lng'],
+        );
+
+        $updated = DB::transaction(function () use ($booking, $validated, $newFare): bool {
+            $locked = Booking::query()->lockForUpdate()->with('payment')->findOrFail($booking->id);
+
+            if (
+                $locked->status !== 'pending'
+                || $locked->rider_id !== null
+                || $locked->payment?->status === 'paid'
+                || ($locked->payment_method === 'online' && $locked->payment?->paymongo_reference)
+            ) {
+                return false;
+            }
+
+            $locked->update([
+                'pickup_address' => $validated['pickup_address'],
+                'pickup_lat' => (float) $validated['pickup_lat'],
+                'pickup_lng' => (float) $validated['pickup_lng'],
+                'dropoff_address' => $validated['dropoff_address'],
+                'dropoff_lat' => (float) $validated['dropoff_lat'],
+                'dropoff_lng' => (float) $validated['dropoff_lng'],
+                'item_description' => $locked->type === 'delivery'
+                    ? ($validated['item_description'] ?: $locked->item_description)
+                    : null,
+                'fare' => $newFare,
+            ]);
+
+            if ($locked->payment) {
+                $locked->payment->update(['amount' => $newFare]);
+            }
+
+            return true;
+        });
+
+        if (! $updated) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'This booking can no longer be edited because a rider has accepted it or payment has started.');
+        }
+
+        return redirect()->route('customer.bookings.show', $booking)
+            ->with('success', 'Pickup & drop-off updated and fare recalculated.');
     }
 
     public function location(Booking $booking): JsonResponse

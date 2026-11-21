@@ -47,6 +47,7 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('bookings.store');
     Route::post('/bookings/{booking}/checkout', [CustomerBookingController::class, 'checkout'])->name('bookings.checkout');
     Route::get('/bookings/{booking}', [CustomerBookingController::class, 'show'])->name('bookings.show');
+    Route::patch('/bookings/{booking}', [CustomerBookingController::class, 'update'])->name('bookings.update');
     Route::get('/bookings/{booking}/receipt', [ReportController::class, 'customerReceipt'])->name('bookings.receipt');
     Route::post('/bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('bookings.cancel');
     Route::get('/bookings/{booking}/location', [CustomerBookingController::class, 'location'])->name('bookings.location');

@@ -294,4 +294,39 @@ class BookingFlowTest extends TestCase
             ->assertSessionHas('error');
         $this->assertNotNull($admin->fresh());
     }
+
+    public function test_customer_can_edit_pending_unpaid_booking_locations_and_fare_recalculates(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $booking = Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'payment_method' => 'cash',
+            'status' => 'pending',
+            'fare' => 80.00,
+        ]);
+        $payment = Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'method' => 'cash',
+            'status' => 'pending',
+            'amount' => 80.00,
+        ]);
+
+        $this->actingAs($customer)
+            ->patch(route('customer.bookings.update', $booking), [
+                'pickup_address' => 'Tagoloan, Misamis Oriental',
+                'pickup_lat' => 8.5378,
+                'pickup_lng' => 124.7536,
+                'dropoff_address' => 'Cagayan de Oro City',
+                'dropoff_lat' => 8.4810,
+                'dropoff_lng' => 124.6498,
+            ])
+            ->assertRedirect(route('customer.bookings.show', $booking))
+            ->assertSessionHas('success');
+
+        $booking->refresh();
+        $payment->refresh();
+        $this->assertSame('Tagoloan, Misamis Oriental', $booking->pickup_address);
+        $this->assertGreaterThan(80.00, $booking->fare);
+        $this->assertSame($booking->fare, $payment->amount);
+    }
 }

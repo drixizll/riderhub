@@ -346,12 +346,128 @@
                 </script>
             @endif
 
+            @php
+                $canEditLocation = $booking->status === 'pending'
+                    && $booking->rider_id === null
+                    && $booking->payment?->status !== 'paid'
+                    && ! ($booking->payment_method === 'online' && $booking->payment?->paymongo_reference);
+            @endphp
+
             @if ($booking->status === 'pending' && ! ($booking->payment_method === 'online' && $booking->payment?->status === 'paid'))
-                <div class="border-t border-slate-100 px-5 py-4 sm:px-7">
-                    <form action="{{ route('customer.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Cancel this booking?');">
-                        @csrf
-                        <button type="submit" class="rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">Cancel booking</button>
-                    </form>
+                <div x-data="{ editOpen: false }" class="border-t border-slate-100 px-5 py-4 sm:px-7">
+                    <div class="flex flex-wrap items-center gap-3">
+                        @if ($canEditLocation)
+                            <button
+                                type="button"
+                                @click="editOpen = !editOpen; if (editOpen) $nextTick(() => window.dispatchEvent(new CustomEvent('riderhub-init-edit-map')))"
+                                class="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50/80 px-4 py-2.5 text-sm font-bold text-indigo-700 transition hover:-translate-y-0.5 hover:bg-indigo-100"
+                            >
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" /></svg>
+                                <span x-text="editOpen ? 'Close editor' : 'Edit Pickup / Drop-off'"></span>
+                            </button>
+                        @endif
+                        <form action="{{ route('customer.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Cancel this booking?');">
+                            @csrf
+                            <button type="submit" class="rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">Cancel booking</button>
+                        </form>
+                    </div>
+
+                    @if ($canEditLocation)
+                        <form
+                            x-show="editOpen"
+                            x-cloak
+                            x-transition:enter="transition ease-out duration-250"
+                            x-transition:enter-start="opacity-0 -translate-y-2"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            method="POST"
+                            action="{{ route('customer.bookings.update', $booking) }}"
+                            class="mt-5 space-y-4 rounded-2xl border border-indigo-100 bg-indigo-50/40 p-5"
+                        >
+                            @csrf
+                            @method('PATCH')
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-950">Update Pickup &amp; Drop-off</h3>
+                                    <p class="text-xs text-slate-500">Drag pins or click the map to adjust. Fare updates automatically.</p>
+                                </div>
+                                <div class="flex gap-1.5">
+                                    <button type="button" data-edit-select="pickup" class="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white">Pin Pickup</button>
+                                    <button type="button" data-edit-select="dropoff" class="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600">Pin Drop-off</button>
+                                </div>
+                            </div>
+
+                            <div id="edit-booking-map" class="h-60 w-full overflow-hidden rounded-xl border border-slate-200 bg-slate-100"></div>
+
+                            <div class="grid gap-4 sm:grid-cols-2">
+                                <div>
+                                    <label for="edit_pickup_address" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Pickup address</label>
+                                    <input id="edit_pickup_address" name="pickup_address" type="text" required value="{{ old('pickup_address', $booking->pickup_address) }}" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900">
+                                    <input type="hidden" id="edit_pickup_lat" name="pickup_lat" value="{{ old('pickup_lat', $booking->pickup_lat) }}">
+                                    <input type="hidden" id="edit_pickup_lng" name="pickup_lng" value="{{ old('pickup_lng', $booking->pickup_lng) }}">
+                                </div>
+                                <div>
+                                    <label for="edit_dropoff_address" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Drop-off address</label>
+                                    <input id="edit_dropoff_address" name="dropoff_address" type="text" required value="{{ old('dropoff_address', $booking->dropoff_address) }}" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900">
+                                    <input type="hidden" id="edit_dropoff_lat" name="dropoff_lat" value="{{ old('dropoff_lat', $booking->dropoff_lat) }}">
+                                    <input type="hidden" id="edit_dropoff_lng" name="dropoff_lng" value="{{ old('dropoff_lng', $booking->dropoff_lng) }}">
+                                </div>
+                            </div>
+
+                            @if ($booking->type === 'delivery')
+                                <div>
+                                    <label for="edit_item_description" class="block text-xs font-bold uppercase tracking-wider text-slate-500">Package description</label>
+                                    <input id="edit_item_description" name="item_description" type="text" value="{{ old('item_description', $booking->item_description) }}" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900">
+                                </div>
+                            @endif
+
+                            <div class="flex justify-end gap-2">
+                                <x-secondary-button type="button" @click="editOpen = false">Cancel</x-secondary-button>
+                                <x-primary-button>Save updated location</x-primary-button>
+                            </div>
+                        </form>
+
+                        <script>
+                            window.addEventListener('riderhub-init-edit-map', () => {
+                                const el = document.getElementById('edit-booking-map');
+                                if (!el || el.dataset.initialized === 'true' || !window.L) return;
+                                el.dataset.initialized = 'true';
+                                const pLat = document.getElementById('edit_pickup_lat');
+                                const pLng = document.getElementById('edit_pickup_lng');
+                                const dLat = document.getElementById('edit_dropoff_lat');
+                                const dLng = document.getElementById('edit_dropoff_lng');
+
+                                const editMap = L.map('edit-booking-map').setView([Number(pLat.value), Number(pLng.value)], 13);
+                                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                                    attribution: 'Tiles &copy; Esri',
+                                    maxZoom: 19,
+                                }).addTo(editMap);
+
+                                const pMarker = L.marker([Number(pLat.value), Number(pLng.value)], { draggable: true }).addTo(editMap).bindPopup('Pickup');
+                                const dMarker = L.marker([Number(dLat.value), Number(dLng.value)], { draggable: true }).addTo(editMap).bindPopup('Drop-off');
+                                editMap.fitBounds([[Number(pLat.value), Number(pLng.value)], [Number(dLat.value), Number(dLng.value)]], { padding: [30, 30] });
+
+                                let mode = 'pickup';
+                                const sync = (which, lat, lng) => {
+                                    if (which === 'pickup') { pLat.value = lat.toFixed(7); pLng.value = lng.toFixed(7); pMarker.setLatLng([lat, lng]); }
+                                    else { dLat.value = lat.toFixed(7); dLng.value = lng.toFixed(7); dMarker.setLatLng([lat, lng]); }
+                                };
+                                pMarker.on('dragend', (e) => { const pt = e.target.getLatLng(); sync('pickup', pt.lat, pt.lng); });
+                                dMarker.on('dragend', (e) => { const pt = e.target.getLatLng(); sync('dropoff', pt.lat, pt.lng); });
+                                editMap.on('click', (e) => sync(mode, e.latlng.lat, e.latlng.lng));
+
+                                document.querySelectorAll('[data-edit-select]').forEach((btn) => {
+                                    btn.addEventListener('click', () => {
+                                        mode = btn.dataset.editSelect;
+                                        document.querySelectorAll('[data-edit-select]').forEach((b) => {
+                                            b.className = b.dataset.editSelect === mode
+                                                ? 'rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-bold text-white'
+                                                : 'rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600';
+                                        });
+                                    });
+                                });
+                            });
+                        </script>
+                    @endif
                 </div>
             @endif
         </section>

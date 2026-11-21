@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name') === 'Laravel' ? 'RiderHub' : config('app.name', 'RiderHub') }} — Every trip, made easier</title>
+        <title>{{ in_array(config('app.name'), ['Laravel', 'RideHub', ''], true) ? 'RiderHub' : config('app.name', 'RiderHub') }} — Every trip, made easier</title>
         <meta name="description" content="Book a ride or send a package with RiderHub. Convenient rides, reliable delivery, and live rider tracking in one place.">
 
         <link rel="preconnect" href="https://fonts.bunny.net">

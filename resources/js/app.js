@@ -233,12 +233,30 @@ if (techCanvas instanceof HTMLCanvasElement && !window.matchMedia('(prefers-redu
     let nodes = [];
     let pointer = { x: -999, y: -999 };
 
-    const initNodes = () => {
+    const initNodes = (force = false) => {
         const host = techCanvas.parentElement || document.body;
         const rect = host.getBoundingClientRect();
-        width = techCanvas.width = Math.max(window.innerWidth, rect.width || window.innerWidth);
-        height = techCanvas.height = Math.max(window.innerHeight, rect.height || window.innerHeight);
-        const count = Math.min(54, Math.max(24, Math.floor((width * height) / 24000)));
+        const nextWidth = Math.max(window.innerWidth, rect.width || window.innerWidth);
+        const nextHeight = Math.max(window.innerHeight, rect.height || window.innerHeight);
+
+        // Ignore tiny iOS Safari URL-bar show/hide height jitters during vertical scroll
+        if (!force && width > 0 && Math.abs(nextWidth - width) < 20 && Math.abs(nextHeight - height) < 120) {
+            return;
+        }
+
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        width = nextWidth;
+        height = nextHeight;
+        techCanvas.width = Math.floor(width * dpr);
+        techCanvas.height = Math.floor(height * dpr);
+        if (ctx) {
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        const isMobile = width < 640;
+        const count = isMobile
+            ? Math.min(26, Math.max(16, Math.floor((width * height) / 26000)))
+            : Math.min(54, Math.max(24, Math.floor((width * height) / 24000)));
         nodes = Array.from({ length: count }, () => ({
             x: Math.random() * width,
             y: Math.random() * height,
@@ -256,8 +274,8 @@ if (techCanvas instanceof HTMLCanvasElement && !window.matchMedia('(prefers-redu
     window.addEventListener('mouseleave', () => {
         pointer = { x: -999, y: -999 };
     });
-    window.addEventListener('resize', initNodes);
-    initNodes();
+    window.addEventListener('resize', () => initNodes(false), { passive: true });
+    initNodes(true);
 
     const render = () => {
         if (!document.hidden && ctx) {

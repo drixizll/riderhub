@@ -8,8 +8,8 @@
 @endphp
 
 <header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-    <div class="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center gap-3">
+    <div class="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-2 px-3 sm:px-6 lg:px-8">
+        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             <button @click="sidebarOpen = !sidebarOpen"
                     class="inline-flex items-center justify-center rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 lg:hidden"
                     aria-label="Toggle sidebar"
@@ -19,12 +19,12 @@
                 </svg>
             </button>
 
-            <a href="{{ route($dashboardRoute) }}" class="transition hover:opacity-90" aria-label="RiderHub dashboard">
+            <a href="{{ route($dashboardRoute) }}" class="shrink-0 transition hover:opacity-90" aria-label="RiderHub dashboard">
                 <x-brand-logo size="md" />
             </a>
         </div>
 
-        <div class="flex items-center gap-3">
+        <div class="flex shrink-0 items-center gap-2 sm:gap-3">
             <x-weather-widget variant="compact" />
             <x-theme-toggle />
             <x-notification-menu />

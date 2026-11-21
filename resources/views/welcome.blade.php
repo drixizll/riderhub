@@ -2,7 +2,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ in_array(config('app.name'), ['Laravel', 'RideHub', ''], true) ? 'RiderHub' : config('app.name', 'RiderHub') }} — Every trip, made easier</title>
@@ -12,6 +14,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet" />
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('icons/riderhub.svg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('icons/riderhub.svg') }}">
         <meta name="theme-color" content="#7c3aed">
 
         @include('layouts.theme-init')
@@ -33,20 +36,20 @@
             </div>
         </div>
         <header class="sticky top-0 z-30 border-b border-slate-100/80 bg-white/90 backdrop-blur-md">
-            <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
-                <a href="{{ url('/') }}" class="transition hover:opacity-90" aria-label="RiderHub home">
+            <nav class="mx-auto flex max-w-7xl items-center justify-between gap-2 px-3 py-3.5 sm:px-6 sm:py-4 lg:px-8" aria-label="Main navigation">
+                <a href="{{ url('/') }}" class="shrink-0 transition hover:opacity-90" aria-label="RiderHub home">
                     <x-brand-logo size="md" />
                 </a>
 
-                <div class="flex items-center gap-2 sm:gap-4">
+                <div class="flex shrink-0 items-center gap-1.5 sm:gap-3.5">
                     <a href="#services" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">Services</a>
                     <a href="#about-us" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">About us</a>
                     <a href="#how-it-works" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">How it works</a>
                     <x-weather-widget variant="compact" />
                     <x-theme-toggle />
                     <x-install-app-button />
-                    <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:text-indigo-600">Log in</a>
-                    <a href="{{ route('register') }}" class="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Sign up</a>
+                    <a href="{{ route('login') }}" class="whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:text-indigo-600 sm:px-3 sm:text-sm">Log in</a>
+                    <a href="{{ route('register') }}" class="whitespace-nowrap rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-4 sm:py-2.5 sm:text-sm">Sign up</a>
                 </div>
             </nav>
         </header>
@@ -90,17 +93,17 @@
 
                         <!-- Futuristic Live App Preview Card -->
                         <div class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-5 shadow-2xl shadow-indigo-950/20 backdrop-blur-xl sm:p-6">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2.5">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-700 text-white shadow-md shadow-indigo-600/30">
+                            <div class="flex items-center justify-between gap-2">
+                                <div class="flex min-w-0 items-center gap-2.5">
+                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-700 text-white shadow-md shadow-indigo-600/30">
                                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" stroke-width="2" /></svg>
                                     </span>
-                                    <div>
-                                        <p class="text-xs font-extrabold uppercase tracking-wider text-indigo-600">RiderHub App · Live</p>
-                                        <p class="text-sm font-bold text-slate-900">Tagoloan → Cagayan de Oro</p>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-xs font-extrabold uppercase tracking-wider text-indigo-600">RiderHub App · Live</p>
+                                        <p class="truncate text-xs font-bold text-slate-900 sm:text-sm">Tagoloan → Cagayan de Oro</p>
                                     </div>
                                 </div>
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200/70">
+                                <span class="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-extrabold text-emerald-700 ring-1 ring-emerald-200/70 sm:px-3 sm:text-[11px]">
                                     <span class="h-2 w-2 animate-ping rounded-full bg-emerald-500"></span>
                                     LIVE GPS
                                 </span>
@@ -149,18 +152,18 @@
                             </div>
 
                             <!-- Bottom Action Bar -->
-                            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
-                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Tracking</p>
-                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">Satellite + GPS</p>
+                            <div class="mt-4 grid grid-cols-3 gap-1.5 text-center sm:gap-2">
+                                <div class="rounded-xl border border-indigo-100/80 bg-indigo-50/80 px-1.5 py-2 sm:px-2.5 sm:py-2.5">
+                                    <p class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 sm:text-[10px]">Tracking</p>
+                                    <p class="mt-0.5 text-[11px] font-extrabold text-slate-900 sm:text-xs">Satellite + GPS</p>
                                 </div>
-                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Payments</p>
-                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">GCash · Maya</p>
+                                <div class="rounded-xl border border-indigo-100/80 bg-indigo-50/80 px-1.5 py-2 sm:px-2.5 sm:py-2.5">
+                                    <p class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 sm:text-[10px]">Payments</p>
+                                    <p class="mt-0.5 text-[11px] font-extrabold text-slate-900 sm:text-xs">GCash · Maya</p>
                                 </div>
-                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
-                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Smart AI</p>
-                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">24/7 Assistant</p>
+                                <div class="rounded-xl border border-indigo-100/80 bg-indigo-50/80 px-1.5 py-2 sm:px-2.5 sm:py-2.5">
+                                    <p class="text-[9px] font-bold uppercase tracking-wider text-indigo-600 sm:text-[10px]">Smart AI</p>
+                                    <p class="mt-0.5 text-[11px] font-extrabold text-slate-900 sm:text-xs">24/7 Assistant</p>
                                 </div>
                             </div>
                         </div>

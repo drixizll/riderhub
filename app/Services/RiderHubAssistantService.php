@@ -241,9 +241,8 @@ class RiderHubAssistantService
             ];
         }
 
-        // 9. General knowledge lookup (Wikipedia REST & Search API — only for explicit questions or multi-word topics)
-        $isKnowledgeQuery = preg_match('/^(what|who|where|when|why|how|tell me|explain|define|ano|sino|saan|unsa|kinsa|asa)\b/i', trim($message))
-            || str_word_count(trim($message)) >= 2;
+        // 9. Explicit general knowledge lookup (Wikipedia REST & Search API — only for real factual questions, never random chat)
+        $isKnowledgeQuery = (bool) preg_match('/^(what\s+is|what\s+are|who\s+is|who\s+was|where\s+is|tell\s+me\s+about|explain|define|ano\s+ang|sino\s+si|saan\s+ang|unsa\s+ang|kinsa\s+si|asa\s+ang)\s+.+/i', trim($message));
         if ($isKnowledgeQuery && ($wikiReply = $this->lookupWikipedia($message))) {
             return [
                 'reply' => $wikiReply,
@@ -253,11 +252,57 @@ class RiderHubAssistantService
             ];
         }
 
-        // 10. Graceful fallback
+        // 10. Natural conversational replies for casual/random messages (when no external LLM key is configured)
+        $hour = (int) now()->timezone('Asia/Manila')->format('G');
+        $period = $hour >= 18 || $hour < 5 ? 'tonight' : 'today';
+        $firstName = $user ? Str::before($user->name, ' ') : null;
+        $nameSuffix = $firstName ? ", {$firstName}" : '';
+
+        if ($this->matchesAny($text, ['haha', 'hehe', 'lol', 'lmao', 'hihi', 'wkwk'])) {
+            return [
+                'reply' => "Haha love the energy{$nameSuffix}! 😄 Anything I can help you with {$period} — maybe a ride, fare estimate, or live weather check?",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['bored', 'boring', 'walang magawa', 'laay'])) {
+            return [
+                'reply' => "Feeling bored{$nameSuffix}? Maybe it's time for a quick trip or food run around Misamis Oriental! Want me to check the weather or estimate a fare for you?",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['gutom', 'hungry', 'kain', 'food', 'eat', 'kaon'])) {
+            return [
+                'reply' => "Sounds like it's time to eat{$nameSuffix}! 🍜 You can book a quick RiderHub ride to your favorite spot or use Send a Package for a fast delivery.",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['How to book a ride?', 'Estimate fare for 3 km', 'Check Misamis Oriental weather'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['pagod', 'tired', 'antok', 'sleepy', 'kapoy'])) {
+            return [
+                'reply' => "Take it easy and get some rest{$nameSuffix}! If you need a safe, hassle-free ride home {$period}, RiderHub riders are ready whenever you are.",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['How to book a ride?', 'Check Misamis Oriental weather'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['help', 'tulong', 'tabang', 'assist', 'ano kaya mo', 'what can you do'])) {
+            return [
+                'reply' => "I've got you{$nameSuffix}! I can check live Misamis Oriental weather, estimate ride/delivery fares, check your booking status, guide you through booking or PayMongo payments, solve math, and answer general questions. Just ask me anything!",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'How to book a ride?'],
+            ];
+        }
+
+        // 11. Warm, natural fallback (never dumps random Wikipedia articles or errors)
         return [
-            'reply' => "I couldn't find an exact match for \"{$message}\" right now. Try rephrasing with a specific topic (for example: \"Who is Jose Rizal?\", \"What is Tagoloan, Misamis Oriental?\", \"250 * 4\"), or ask me about RiderHub fares, weather, and bookings!",
+            'reply' => "Gotcha{$nameSuffix}! I'm here to help {$period} — if you're looking for something specific, try asking me about Misamis Oriental weather, trip fares (like \"Estimate fare for 5 km\"), your booking status, or ask a question like \"Tell me about Tagoloan\". What would you like to do?",
             'actions' => $this->primaryActions($user),
-            'suggestions' => ['Tell me about Tagoloan, Misamis Oriental', 'Check Tagoloan weather', 'Estimate fare for 5 km'],
+            'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'How to book a ride?'],
         ];
     }
 
@@ -420,7 +465,7 @@ class RiderHubAssistantService
     }
 
     /**
-     * Calls Gemini or OpenAI if an API key is configured in .env.
+     * Calls Gemini, Groq, or OpenAI if an API key is configured in .env.
      *
      * @param  list<array{role: string, text: string}>  $history
      */
@@ -428,59 +473,100 @@ class RiderHubAssistantService
     {
         $systemPrompt = $this->buildSystemPrompt($user);
 
+        // 1. Google Gemini API (Free tier available via aistudio.google.com)
         $geminiKey = config('services.gemini.api_key');
-        if (is_string($geminiKey) && $geminiKey !== '') {
-            try {
-                $model = (string) config('services.gemini.model', 'gemini-2.0-flash');
-                $contents = [];
-                foreach (array_slice($history, -6) as $turn) {
-                    $contents[] = [
-                        'role' => $turn['role'] === 'assistant' ? 'model' : 'user',
-                        'parts' => [['text' => $turn['text']]],
-                    ];
-                }
-                $contents[] = ['role' => 'user', 'parts' => [['text' => $message]]];
+        if (is_string($geminiKey) && trim($geminiKey) !== '') {
+            $configuredModel = (string) config('services.gemini.model', 'gemini-2.5-flash');
+            $candidateModels = array_values(array_unique([$configuredModel, 'gemini-2.0-flash', 'gemini-1.5-flash']));
 
-                $response = Http::acceptJson()
-                    ->timeout(15)
-                    ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".urlencode($geminiKey), [
-                        'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
-                        'contents' => $contents,
-                    ]);
+            $contents = [];
+            foreach (array_slice($history, -8) as $turn) {
+                $contents[] = [
+                    'role' => $turn['role'] === 'assistant' ? 'model' : 'user',
+                    'parts' => [['text' => $turn['text']]],
+                ];
+            }
+            $contents[] = ['role' => 'user', 'parts' => [['text' => $message]]];
 
-                $reply = data_get($response->json(), 'candidates.0.content.parts.0.text');
-                if ($response->successful() && is_string($reply) && trim($reply) !== '') {
-                    return trim($reply);
+            foreach ($candidateModels as $model) {
+                try {
+                    $response = Http::acceptJson()
+                        ->timeout(15)
+                        ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".urlencode(trim($geminiKey)), [
+                            'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
+                            'contents' => $contents,
+                            'generationConfig' => [
+                                'temperature' => 0.7,
+                                'maxOutputTokens' => 400,
+                            ],
+                        ]);
+
+                    $reply = data_get($response->json(), 'candidates.0.content.parts.0.text');
+                    if ($response->successful() && is_string($reply) && trim($reply) !== '') {
+                        return trim($reply);
+                    }
+                } catch (\Throwable) {
+                    // Try next model or fall through cleanly without throwing errors.
                 }
-            } catch (ConnectionException) {
-                // Fall through cleanly.
             }
         }
 
-        $openaiKey = config('services.openai.api_key');
-        if (is_string($openaiKey) && $openaiKey !== '') {
+        // 2. Groq API (Ultra-fast & free tier available via console.groq.com)
+        $groqKey = config('services.groq.api_key');
+        if (is_string($groqKey) && trim($groqKey) !== '') {
             try {
-                $model = (string) config('services.openai.model', 'gpt-4o-mini');
+                $model = (string) config('services.groq.model', 'llama-3.3-70b-versatile');
                 $messages = [['role' => 'system', 'content' => $systemPrompt]];
-                foreach (array_slice($history, -6) as $turn) {
+                foreach (array_slice($history, -8) as $turn) {
                     $messages[] = ['role' => $turn['role'], 'content' => $turn['text']];
                 }
                 $messages[] = ['role' => 'user', 'content' => $message];
 
-                $response = Http::withToken($openaiKey)
+                $response = Http::withToken(trim($groqKey))
                     ->acceptJson()
                     ->timeout(15)
-                    ->post('https://api.openai.com/v1/chat/completions', [
+                    ->post('https://api.groq.com/openai/v1/chat/completions', [
                         'model' => $model,
                         'messages' => $messages,
-                        'max_tokens' => 350,
+                        'temperature' => 0.7,
+                        'max_tokens' => 400,
                     ]);
 
                 $reply = data_get($response->json(), 'choices.0.message.content');
                 if ($response->successful() && is_string($reply) && trim($reply) !== '') {
                     return trim($reply);
                 }
-            } catch (ConnectionException) {
+            } catch (\Throwable) {
+                // Fall through cleanly.
+            }
+        }
+
+        // 3. OpenAI API
+        $openaiKey = config('services.openai.api_key');
+        if (is_string($openaiKey) && trim($openaiKey) !== '') {
+            try {
+                $model = (string) config('services.openai.model', 'gpt-4o-mini');
+                $messages = [['role' => 'system', 'content' => $systemPrompt]];
+                foreach (array_slice($history, -8) as $turn) {
+                    $messages[] = ['role' => $turn['role'], 'content' => $turn['text']];
+                }
+                $messages[] = ['role' => 'user', 'content' => $message];
+
+                $response = Http::withToken(trim($openaiKey))
+                    ->acceptJson()
+                    ->timeout(15)
+                    ->post('https://api.openai.com/v1/chat/completions', [
+                        'model' => $model,
+                        'messages' => $messages,
+                        'temperature' => 0.7,
+                        'max_tokens' => 400,
+                    ]);
+
+                $reply = data_get($response->json(), 'choices.0.message.content');
+                if ($response->successful() && is_string($reply) && trim($reply) !== '') {
+                    return trim($reply);
+                }
+            } catch (\Throwable) {
                 // Fall through cleanly.
             }
         }
@@ -491,11 +577,13 @@ class RiderHubAssistantService
     private function buildSystemPrompt(?User $user): string
     {
         $fare = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
+        $now = now()->timezone('Asia/Manila')->format('l, F j, Y g:i A');
         $userContext = $user ? "Signed-in user: {$user->name} (role: {$user->role})." : 'User is a guest visitor.';
 
-        return "You are RiderHub AI, a friendly, accurate, concise assistant built into RiderHub — a ride-booking and express delivery platform in Tagoloan, Misamis Oriental, Philippines. "
+        return "You are RiderHub AI, a warm, natural, intelligent assistant built into RiderHub — a ride-booking and express delivery platform in Misamis Oriental (including Tagoloan, Cagayan de Oro, Villanueva, Jasaan, Opol, El Salvador, and nearby towns), Philippines. "
+            ."Current Philippine time: {$now}. "
             ."Fare formula: ₱{$fare['base']} base + ₱{$fare['per_km']}/km. Supports Cash and PayMongo (GCash, Maya, Card). {$userContext} "
-            ."Reply clearly in the same language the user uses (English, Tagalog, Taglish, or Bisaya/Cebuano). Answer any general question accurately and concisely (2-5 sentences).";
+            ."Respond naturally like a real helpful human assistant in whatever language the user uses (English, Tagalog, Taglish, or Bisaya/Cebuano), even for casual or random messages. Keep replies clear, accurate, friendly, and concise (1-4 sentences).";
     }
 
     private function tryMath(string $message): ?string

@@ -2,7 +2,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ in_array(config('app.name'), ['Laravel', 'RideHub', ''], true) ? 'RiderHub' : config('app.name', 'RiderHub') }}</title>
@@ -11,6 +13,7 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
         <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
         <link rel="icon" type="image/svg+xml" href="{{ asset('icons/riderhub.svg') }}">
+        <link rel="apple-touch-icon" href="{{ asset('icons/riderhub.svg') }}">
         <meta name="theme-color" content="#7c3aed">
 
         @include('layouts.theme-init')
@@ -37,7 +40,7 @@
             @include('layouts.navigation')
             @include('layouts.sidebar')
 
-            <div class="min-h-[calc(100vh-4rem)] transition-[padding] duration-300 ease-out lg:pl-20">
+            <div class="min-h-[calc(100dvh-4rem)] transition-[padding] duration-300 ease-out lg:pl-20">
                 @isset($header)
                     <header class="border-b border-slate-200 bg-white">
                         <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
@@ -64,7 +67,7 @@
                 x-transition:leave-start="opacity-100 translate-y-0 scale-100"
                 x-transition:leave-end="opacity-0 translate-y-4 scale-95"
                 role="status"
-                class="fixed bottom-5 left-5 z-50 flex max-w-sm items-center gap-3 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3.5 shadow-2xl shadow-emerald-950/15 backdrop-blur-md"
+                class="fixed bottom-20 left-4 right-4 z-50 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3.5 shadow-2xl shadow-emerald-950/15 backdrop-blur-md sm:bottom-5 sm:left-5 sm:right-auto sm:max-w-sm"
             >
                 <span class="success-check-circle flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-md shadow-emerald-500/30">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

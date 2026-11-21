@@ -1,7 +1,8 @@
 <div
     x-data="riderhubAssistant()"
     @riderhub-open-ai.window="open = true; $nextTick(() => scrollToBottom())"
-    class="fixed bottom-5 right-5 z-50 flex flex-col items-end"
+    class="fixed z-50 flex flex-col items-end"
+    style="bottom: max(1rem, env(safe-area-inset-bottom)); right: max(1rem, env(safe-area-inset-right));"
     aria-live="polite"
 >
     <div
@@ -13,7 +14,7 @@
         x-transition:leave="transition ease-in duration-180"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 scale-95"
-        class="mb-3 flex h-[32rem] max-h-[78vh] w-[calc(100vw-2.5rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-indigo-950/20"
+        class="mb-3 flex h-[32rem] max-h-[75dvh] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-indigo-950/20"
         role="dialog"
         aria-label="RiderHub AI Assistant"
     >

@@ -7,6 +7,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -93,6 +94,31 @@ class AppServiceProvider extends ServiceProvider
                     }
 
                     Cache::put('riderhub_local_accounts_synced_v1', true, now()->addDays(7));
+                }
+
+                // Publish decoupled frontend to /app (app.riderhub.online) and API gateway to /api (api.riderhub.online)
+                if (! Cache::get('riderhub_subdomains_published_v2')) {
+                    $frontendDir = base_path('frontend');
+                    $appDir = base_path('app');
+                    $apiDir = base_path('api');
+
+                    if (File::isDirectory($frontendDir) && File::isDirectory($appDir)) {
+                        if (File::exists($appDir.'/index.php')) {
+                            File::delete($appDir.'/index.php');
+                        }
+                        File::copy($frontendDir.'/index.html', $appDir.'/index.html');
+                        File::ensureDirectoryExists($appDir.'/js');
+                        File::copy($frontendDir.'/js/api.js', $appDir.'/js/api.js');
+                    }
+
+                    File::ensureDirectoryExists($apiDir);
+                    if (File::exists($apiDir.'/index.html')) {
+                        File::delete($apiDir.'/index.html');
+                    }
+                    File::put($apiDir.'/.htaccess', "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteCond %{HTTP:Authorization} .\n    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]\n    RewriteCond %{REQUEST_FILENAME} !-d\n    RewriteCond %{REQUEST_FILENAME} !-f\n    RewriteRule ^ index.php [L]\n</IfModule>\n");
+                    File::put($apiDir.'/index.php', "<?php\n\$uri = \$_SERVER['REQUEST_URI'] ?? '/';\n\$path = parse_url(\$uri, PHP_URL_PATH) ?: '/';\nif (\$path === '/' || \$path === '/index.php') {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/health';\n} elseif (! str_starts_with(\$path, '/api/')) {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/'.ltrim(\$uri, '/');\n}\n\$_SERVER['SCRIPT_NAME'] = '/index.php';\n\$_SERVER['SCRIPT_FILENAME'] = dirname(__DIR__).'/public/index.php';\nrequire dirname(__DIR__).'/public/index.php';\n");
+
+                    Cache::put('riderhub_subdomains_published_v2', true, now()->addHours(12));
                 }
             } catch (\Throwable) {
                 // Non-blocking safeguard

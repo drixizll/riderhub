@@ -111,4 +111,30 @@ class AssistantAndWeatherTest extends TestCase
             ->assertOk();
         $this->assertStringContainsString('Login page', $loginHelp->json('reply'));
     }
+
+    public function test_route_endpoint_returns_real_road_steps_and_eta(): void
+    {
+        Cache::flush();
+        Http::fake([
+            'https://router.project-osrm.org/route/v1/driving/*' => Http::response([
+                'routes' => [[
+                    'distance' => 5400,
+                    'duration' => 720,
+                    'geometry' => ['coordinates' => [[124.7536, 8.5378], [124.6498, 8.4810]]],
+                    'legs' => [[
+                        'steps' => [
+                            ['distance' => 300, 'duration' => 45, 'name' => 'National Highway', 'maneuver' => ['type' => 'depart']],
+                            ['distance' => 0, 'duration' => 0, 'name' => '', 'maneuver' => ['type' => 'arrive']],
+                        ],
+                    ]],
+                ]],
+            ]),
+        ]);
+
+        $this->getJson('/api/route?from_lat=8.5378&from_lng=124.7536&to_lat=8.4810&to_lng=124.6498')
+            ->assertOk()
+            ->assertJsonPath('source', 'osrm')
+            ->assertJsonPath('routes.0.distance_km', 5.4)
+            ->assertJsonPath('routes.0.duration_min', 12);
+    }
 }

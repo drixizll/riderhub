@@ -233,11 +233,37 @@
                         map.fitBounds([pickupPoint, dropoffPoint], { padding: [36, 36] });
 
                         let routeLine = L.polyline([pickupPoint, dropoffPoint], {
-                            color: '#4f46e5',
-                            weight: 4,
-                            opacity: 0.75,
-                            dashArray: '8 8',
+                            color: '#7c3aed',
+                            weight: 5,
+                            opacity: 0.85,
                         }).addTo(map);
+                        const routeEndpoint = @json(route('route.directions'));
+                        let lastRoadFetchAt = 0;
+
+                        const updateRoadLine = async (fromPt, toPt) => {
+                            const now = Date.now();
+                            if (now - lastRoadFetchAt < 12000) return;
+                            lastRoadFetchAt = now;
+                            try {
+                                const url = new URL(routeEndpoint, window.location.origin);
+                                url.searchParams.set('from_lat', fromPt[0]);
+                                url.searchParams.set('from_lng', fromPt[1]);
+                                url.searchParams.set('to_lat', toPt[0]);
+                                url.searchParams.set('to_lng', toPt[1]);
+                                const res = await fetch(url, { headers: { Accept: 'application/json' } });
+                                if (!res.ok) return;
+                                const data = await res.json();
+                                const primary = data.routes?.[0];
+                                if (primary?.coordinates?.length) {
+                                    routeLine.setLatLngs(primary.coordinates);
+                                    etaDistance.textContent = `${primary.distance_km} km road`;
+                                    etaMinutes.textContent = `~${primary.duration_min} min ETA`;
+                                    etaBox.classList.remove('hidden');
+                                    etaBox.classList.add('inline-flex');
+                                }
+                            } catch {}
+                        };
+                        updateRoadLine(pickupPoint, dropoffPoint);
 
                         const riderIcon = L.divIcon({
                             className: '',
@@ -290,13 +316,15 @@
                                     riderMarker.setLatLng(point);
                                 }
                                 const target = initialStatus === 'picked_up' ? dropoffPoint : pickupPoint;
-                                routeLine.setLatLngs([point, target]);
+                                updateRoadLine(point, target);
                                 const km = distanceKm(point, target);
                                 const mins = Math.max(1, Math.round((km / 22) * 60));
-                                etaDistance.textContent = `${km.toFixed(1)} km away`;
-                                etaMinutes.textContent = `~${mins} min ETA`;
-                                etaBox.classList.remove('hidden');
-                                etaBox.classList.add('inline-flex');
+                                if (etaBox.classList.contains('hidden')) {
+                                    etaDistance.textContent = `${km.toFixed(1)} km away`;
+                                    etaMinutes.textContent = `~${mins} min ETA`;
+                                    etaBox.classList.remove('hidden');
+                                    etaBox.classList.add('inline-flex');
+                                }
                                 status.textContent = `Rider location updated ${new Date(data.updated_at).toLocaleTimeString()}`;
                             } catch (error) {
                                 status.textContent = 'Could not refresh rider location. Check your connection.';

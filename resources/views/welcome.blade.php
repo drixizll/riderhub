@@ -101,45 +101,73 @@
                         </div>
                     </div>
 
-                    <div class="home-hero-visual relative mx-auto w-full max-w-lg reveal-on-scroll" data-revealed="true">
-                        <div class="hero-orb absolute -left-5 -top-5 h-24 w-24 rounded-full bg-amber-200/70 blur-2xl" aria-hidden="true"></div>
-                        <div class="hero-orb-delayed absolute -bottom-6 -right-5 h-32 w-32 rounded-full bg-indigo-200/80 blur-2xl" aria-hidden="true"></div>
-                        <div class="relative overflow-hidden rounded-3xl border border-white/70 bg-white/90 p-5 shadow-2xl shadow-indigo-950/15 backdrop-blur-md sm:p-7">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm font-semibold text-slate-500">Your next trip</p>
-                                    <p class="mt-1 text-lg font-bold text-slate-900">A smoother way to go</p>
-                                </div>
-                                <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">READY WHEN YOU ARE</span>
+                    <div class="home-hero-visual relative mx-auto w-full max-w-xl reveal-on-scroll" data-revealed="true">
+                        <div class="hero-orb absolute -left-6 -top-6 h-28 w-28 rounded-full bg-violet-300/60 blur-2xl" aria-hidden="true"></div>
+                        <div class="hero-orb-delayed absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-indigo-300/70 blur-2xl" aria-hidden="true"></div>
+
+                        <div class="relative overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-3.5 shadow-2xl shadow-indigo-950/15 backdrop-blur-md sm:p-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <figure class="group relative col-span-2 h-52 overflow-hidden rounded-2xl bg-slate-900 sm:h-60">
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg"
+                                        alt="Tagoloan River and Bridge, Misamis Oriental"
+                                        referrerpolicy="no-referrer"
+                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    >
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/15 to-transparent"></div>
+                                    <div class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-extrabold text-indigo-700 shadow-md backdrop-blur-md">
+                                        <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
+                                        <span>MISAMIS ORIENTAL LIVE</span>
+                                    </div>
+                                    <figcaption class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 text-white">
+                                        <div>
+                                            <p class="text-sm font-extrabold">Across Tagoloan &amp; Misamis Oriental</p>
+                                            <p class="text-[11px] text-slate-200">Fast rides &amp; express deliveries every day</p>
+                                        </div>
+                                        <span class="shrink-0 rounded-xl bg-white/20 px-2.5 py-1 text-[11px] font-bold backdrop-blur-md">Live GPS</span>
+                                    </figcaption>
+                                </figure>
+
+                                <figure class="group relative h-36 overflow-hidden rounded-2xl bg-slate-900 sm:h-40">
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg"
+                                        alt="Tagoloan Municipal Hall, Misamis Oriental"
+                                        referrerpolicy="no-referrer"
+                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    >
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent"></div>
+                                    <figcaption class="absolute inset-x-0 bottom-0 p-3 text-white">
+                                        <p class="text-xs font-extrabold">Locals &amp; Students</p>
+                                        <p class="text-[10px] text-slate-200">Upfront fares</p>
+                                    </figcaption>
+                                </figure>
+
+                                <figure class="group relative h-36 overflow-hidden rounded-2xl bg-slate-900 sm:h-40">
+                                    <img
+                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Angkas_riders_in_the_Philippines_03.jpg/1280px-Angkas_riders_in_the_Philippines_03.jpg"
+                                        alt="Philippine motorcycle riders"
+                                        referrerpolicy="no-referrer"
+                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    >
+                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent"></div>
+                                    <figcaption class="absolute inset-x-0 bottom-0 p-3 text-white">
+                                        <p class="text-xs font-extrabold">Trusted Riders</p>
+                                        <p class="text-[10px] text-slate-200">Verified &amp; rated</p>
+                                    </figcaption>
+                                </figure>
                             </div>
-                            <div class="relative mt-6 h-64 overflow-hidden rounded-2xl bg-indigo-50">
-                                <svg class="absolute inset-0 h-full w-full" viewBox="0 0 420 260" fill="none" preserveAspectRatio="none" aria-hidden="true">
-                                    <path d="M38 220C100 210 94 140 158 146C220 152 217 62 280 82C334 99 333 42 389 34" stroke="#C7D2FE" stroke-width="24" stroke-linecap="round" />
-                                    <path d="M38 220C100 210 94 140 158 146C220 152 217 62 280 82C334 99 333 42 389 34" stroke="#4F46E5" stroke-width="4" stroke-dasharray="7 9" stroke-linecap="round" class="route-dash-animated" />
-                                </svg>
-                                <div class="absolute left-[7%] top-[72%] flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-indigo-600 text-white shadow-lg">
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a5.5 5.5 0 0 0-5.5 5.5c0 4.1 5.5 11.5 5.5 11.5S15.5 11.1 15.5 7A5.5 5.5 0 0 0 10 1.5Zm0 7.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" /></svg>
-                                </div>
-                                <div class="absolute right-[5%] top-[7%] flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-amber-400 text-slate-900 shadow-lg">
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a5.5 5.5 0 0 0-5.5 5.5c0 4.1 5.5 11.5 5.5 11.5S15.5 11.1 15.5 7A5.5 5.5 0 0 0 10 1.5Zm0 7.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" /></svg>
-                                </div>
-                                <div class="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3 rounded-xl bg-white px-4 py-3 shadow-lg">
-                                    <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
-                                        <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 16h2m10 0h2M7 16l2-6h6l2 6m-8-6 1-3h4l1 3M5 16a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+
+                            <div class="mt-3 flex items-center justify-between rounded-2xl bg-indigo-50/80 px-4 py-3">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                                        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" stroke-width="2" /></svg>
                                     </span>
-                                    <span>
-                                        <span class="block text-sm font-bold text-slate-900">Your rider</span>
-                                        <span class="block text-xs text-slate-500">On the way</span>
-                                    </span>
-                                    <span class="ml-2 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-100"></span>
+                                    <div>
+                                        <p class="text-xs font-bold text-slate-900">Your rider is ready nearby</p>
+                                        <p class="text-[11px] text-slate-500">Street &amp; Satellite tracking · GCash, Maya &amp; Cash</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="mt-5 flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                                <div>
-                                    <p class="text-xs font-medium text-slate-500">From pickup to drop-off</p>
-                                    <p class="mt-1 text-sm font-bold text-slate-900">A clear ride, every time</p>
-                                </div>
-                                <span class="rounded-lg bg-white px-3 py-2 text-sm font-bold text-indigo-700 shadow-sm">Let’s go</span>
+                                <a href="{{ route('register') }}" class="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700">Let’s go</a>
                             </div>
                         </div>
                     </div>
@@ -185,7 +213,7 @@
                 </div>
             </section>
 
-            <section id="about-us" class="reveal-on-scroll relative overflow-hidden bg-white py-16 sm:py-24">
+            <section id="about-us" class="reveal-on-scroll relative overflow-hidden bg-white/70 py-16 backdrop-blur-[2px] sm:py-24">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div
                         x-data="{
@@ -340,7 +368,7 @@
                 </div>
             </section>
 
-            <section id="how-it-works" class="reveal-on-scroll bg-slate-50 py-16 sm:py-20">
+            <section id="how-it-works" class="reveal-on-scroll bg-indigo-50/40 py-16 backdrop-blur-[2px] sm:py-20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
                         <p class="text-sm font-bold uppercase tracking-widest text-indigo-600">Simple from the start</p>

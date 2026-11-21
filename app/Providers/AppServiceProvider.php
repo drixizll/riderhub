@@ -50,21 +50,16 @@ class AppServiceProvider extends ServiceProvider
                 'token' => $token,
                 'email' => $notifiable->getEmailForPasswordReset(),
             ], false));
+            $firstName = Str::before((string) ($notifiable->name ?? 'RiderHub User'), ' ');
 
-            $mail = (new MailMessage)
-                ->subject('RiderHub Password Reset Verification Code')
-                ->greeting('Hello '.Str::before((string) ($notifiable->name ?? 'RiderHub User'), ' ').'!')
-                ->line('We received a request to reset your RiderHub account password.');
-
-            if (is_string($otp) && $otp !== '') {
-                $mail->line('Your 6-digit verification code is:')
-                    ->line("**{$otp}**")
-                    ->line('Enter this 6-digit code on the RiderHub recovery page to set your new password. This code expires in 15 minutes.');
-            }
-
-            return $mail
-                ->action('Reset Password Directly', $resetUrl)
-                ->line('If you did not request a password reset, you can safely ignore this email.');
+            return (new MailMessage)
+                ->from((string) config('mail.from.address', 'noreply@riderhub.online'), 'RiderHub Security')
+                ->subject('RiderHub — Your 6-Digit Password Reset Code')
+                ->view('emails.password-reset-otp', [
+                    'firstName' => $firstName,
+                    'otp' => is_string($otp) ? $otp : null,
+                    'resetUrl' => $resetUrl,
+                ]);
         });
     }
 }

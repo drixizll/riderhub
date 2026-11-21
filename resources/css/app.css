@@ -338,11 +338,15 @@ html[data-theme="dark"] body {
     color: #e2e8f0;
 }
 
-html[data-theme="dark"] .bg-white {
-    background-color: #111827 !important;
+html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] [class~="bg-white/90"],
+html[data-theme="dark"] [class~="bg-white/80"] {
+    background-color: rgb(17 24 39 / 0.92) !important;
 }
 
-html[data-theme="dark"] .bg-slate-50 {
+html[data-theme="dark"] .bg-slate-50,
+html[data-theme="dark"] [class~="bg-slate-50/70"],
+html[data-theme="dark"] [class~="bg-slate-50/90"] {
     background-color: #0b1120 !important;
 }
 
@@ -475,6 +479,14 @@ html[data-theme="dark"] select {
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
     color: #94a3b8 !important;
+}
+
+html[data-theme="dark"] input:-webkit-autofill,
+html[data-theme="dark"] input:-webkit-autofill:hover,
+html[data-theme="dark"] input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #f8fafc !important;
+    -webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+    transition: background-color 5000s ease-in-out 0s;
 }
 
 html[data-theme="dark"] .leaflet-container {

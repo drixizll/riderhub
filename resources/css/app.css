@@ -356,6 +356,35 @@ html[data-theme="dark"] .text-gradient-brand {
     100% { transform: scale(1.9); opacity: 0; }
 }
 
+/* Success checkmark & banner animations */
+.success-banner-enter {
+    animation: riderhub-success-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.success-check-circle {
+    animation: riderhub-check-pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.success-check-path {
+    stroke-dasharray: 28;
+    stroke-dashoffset: 28;
+    animation: riderhub-check-draw 420ms ease-out 180ms forwards;
+}
+
+@keyframes riderhub-success-enter {
+    from { opacity: 0; transform: translate3d(0, -10px, 0) scale(0.97); }
+    to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+
+@keyframes riderhub-check-pop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes riderhub-check-draw {
+    to { stroke-dashoffset: 0; }
+}
+
 @keyframes riderhub-spin {
     to { transform: rotate(360deg); }
 }
@@ -439,9 +468,10 @@ html[data-theme="dark"] body {
 }
 
 html[data-theme="dark"] .bg-white,
+html[data-theme="dark"] [class~="bg-white/95"],
 html[data-theme="dark"] [class~="bg-white/90"],
 html[data-theme="dark"] [class~="bg-white/80"] {
-    background-color: rgb(17 24 39 / 0.92) !important;
+    background-color: rgb(17 24 39 / 0.94) !important;
 }
 
 html[data-theme="dark"] .bg-slate-50,

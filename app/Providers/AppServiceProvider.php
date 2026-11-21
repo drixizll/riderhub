@@ -53,9 +53,10 @@ class AppServiceProvider extends ServiceProvider
             $firstName = Str::before((string) ($notifiable->name ?? 'RiderHub User'), ' ');
 
             return (new MailMessage)
-                ->from((string) config('mail.from.address', 'noreply@riderhub.online'), 'RiderHub Security')
+                ->from((string) config('mail.from.address', 'riderhub.misor@gmail.com'), 'RiderHub Security')
+                ->replyTo((string) config('mail.from.address', 'riderhub.misor@gmail.com'), 'RiderHub Security')
                 ->subject('RiderHub — Your 6-Digit Password Reset Code')
-                ->view('emails.password-reset-otp', [
+                ->view(['html' => 'emails.password-reset-otp', 'text' => 'emails.password-reset-otp-text'], [
                     'firstName' => $firstName,
                     'otp' => is_string($otp) ? $otp : null,
                     'resetUrl' => $resetUrl,

@@ -473,9 +473,11 @@ class RiderHubAssistantService
     {
         $systemPrompt = $this->buildSystemPrompt($user);
 
-        // 1. Google Gemini API (Free tier available via aistudio.google.com)
+        // 1. Google Gemini API (supports both AI Studio "AIza..." keys and Vertex AI Express "AQ...." keys)
         $geminiKey = config('services.gemini.api_key');
         if (is_string($geminiKey) && trim($geminiKey) !== '') {
+            $cleanKey = trim($geminiKey);
+            $isVertexExpressKey = str_starts_with($cleanKey, 'AQ.');
             $configuredModel = (string) config('services.gemini.model', 'gemini-2.5-flash');
             $candidateModels = array_values(array_unique([$configuredModel, 'gemini-2.0-flash', 'gemini-1.5-flash']));
 
@@ -490,14 +492,18 @@ class RiderHubAssistantService
 
             foreach ($candidateModels as $model) {
                 try {
+                    $endpoint = $isVertexExpressKey
+                        ? "https://aiplatform.googleapis.com/v1/publishers/google/models/{$model}:generateContent?key=".urlencode($cleanKey)
+                        : "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".urlencode($cleanKey);
+
                     $response = Http::acceptJson()
                         ->timeout(15)
-                        ->post("https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=".urlencode(trim($geminiKey)), [
+                        ->post($endpoint, [
                             'system_instruction' => ['parts' => [['text' => $systemPrompt]]],
                             'contents' => $contents,
                             'generationConfig' => [
                                 'temperature' => 0.7,
-                                'maxOutputTokens' => 400,
+                                'maxOutputTokens' => 450,
                             ],
                         ]);
 

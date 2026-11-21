@@ -105,5 +105,10 @@ class AssistantAndWeatherTest extends TestCase
             ->assertOk();
 
         $this->assertStringContainsString('Misamis Oriental', $response->json('reply'));
+
+        // Taglish navigation query should give RiderHub login guidance, never a random Wikipedia article
+        $loginHelp = $this->postJson('/api/assistant/chat', ['message' => 'san mag log in?'])
+            ->assertOk();
+        $this->assertStringContainsString('Login page', $loginHelp->json('reply'));
     }
 }

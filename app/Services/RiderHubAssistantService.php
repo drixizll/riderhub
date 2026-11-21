@@ -74,6 +74,83 @@ class RiderHubAssistantService
             ];
         }
 
+        // 4b. Login / Register / Forgot Password / Profile / How to book / Tagoloan map (English, Tagalog & Bisaya)
+        if ($this->matchesAny($text, ['log in', 'login', 'sign in', 'mag log', 'log out', 'logout', 'switch account'])) {
+            if ($user) {
+                return [
+                    'reply' => "You're already logged in as {$user->name} ({$user->role} account)! To log out or switch accounts, tap your profile avatar at the top-right corner and click Log out.",
+                    'actions' => [
+                        ['label' => 'Account settings', 'url' => route('profile.edit')],
+                        ...$this->primaryActions($user),
+                    ],
+                    'suggestions' => ['Check my booking status', 'Estimate fare for 5 km', 'Check Tagoloan weather'],
+                ];
+            }
+
+            return [
+                'reply' => 'You can log in on the RiderHub Login page using your registered email and password. Check "Remember me" to save your email for quick sign-in next time!',
+                'actions' => [
+                    ['label' => 'Go to Log in', 'url' => route('login')],
+                    ['label' => 'Create an account', 'url' => route('register')],
+                ],
+                'suggestions' => ['Forgot password?', 'How to book a ride?', 'About RiderHub'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['register', 'sign up', 'signup', 'create account', 'gagawa ng account', 'himo account', 'become a rider', 'mag rider'])) {
+            return [
+                'reply' => $user
+                    ? "You already have an active {$user->role} account ({$user->email}). To register another account (like a Rider or Customer account), log out first from the top-right profile menu, then open Sign up."
+                    : 'Creating a RiderHub account is free! Choose Customer (to book rides & deliveries) or Rider (to accept trips in Tagoloan), enter your name, email, optional phone number, and any password (at least 4 characters).',
+                'actions' => $user
+                    ? [['label' => 'Account settings', 'url' => route('profile.edit')]]
+                    : [['label' => 'Create account', 'url' => route('register')]],
+                'suggestions' => ['How to book a ride?', 'Payment options'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['forgot', 'nakalimutan', 'kalimot', 'reset password', 'recover account', 'retrieve'])) {
+            return [
+                'reply' => 'Forgot your password or email? Open the Account & Password Recovery page! You can reset using your email OR use the "Find Account by Phone" tab with your registered phone number to get a masked email hint and reset link.',
+                'actions' => $user
+                    ? [['label' => 'Change password in settings', 'url' => route('profile.edit')]]
+                    : [['label' => 'Open Account Recovery', 'url' => route('password.request')]],
+                'suggestions' => ['Where to log in?', 'About RiderHub'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['how to book', 'paano mag book', 'unsaon pag book', 'book a ride', 'mag book', 'send a package', 'padala', 'paano magpadala'])) {
+            return [
+                'reply' => 'Booking in Tagoloan is easy: 1) Open "Book a ride", 2) Choose Ride or Send a package, 3) Pin your Pickup and Drop-off on the Tagoloan map (or tap a quick barangay pin like Poblacion, Baluarte, Casinglot, Sta. Ana), 4) Choose Cash or PayMongo (GCash/Maya/Card) and confirm!',
+                'actions' => $user?->role === 'customer'
+                    ? [['label' => 'Book a ride now', 'url' => route('customer.bookings.create')]]
+                    : $this->primaryActions($user),
+                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather', 'Payment options'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['profile', 'settings', 'change photo', 'palit picture', 'change password', 'palit password', 'edit account', 'delete account'])) {
+            return [
+                'reply' => $user
+                    ? 'You can update your profile photo, name, email, phone number, or password anytime in Account Settings (also accessible by tapping your avatar at the top-right).'
+                    : 'Log in first, then tap your profile avatar at the top-right to open Account Settings.',
+                'actions' => $user
+                    ? [['label' => 'Open Account Settings', 'url' => route('profile.edit')]]
+                    : [['label' => 'Log in', 'url' => route('login')]],
+                'suggestions' => ['Check my booking status', 'Check Tagoloan weather'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['service area', 'barangay', 'satellite', 'map style', 'saan available', 'asa available'])) {
+            return [
+                'reply' => 'RiderHub serves Tagoloan, Misamis Oriental — covering Poblacion, Baluarte, Casinglot, Gracia, Mohon, Natumolan, Rosario, Sta. Ana, Sta. Cruz, and Sugbongcogon. On the map, you can switch between Clean Street, Satellite, and Dark Map styles!',
+                'actions' => $user?->role === 'customer'
+                    ? [['label' => 'Open Tagoloan Map', 'url' => route('customer.bookings.create')]]
+                    : $this->primaryActions($user),
+                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather'],
+            ];
+        }
+
         // 5. Try real LLM (Gemini or OpenAI) if an API key is configured in .env
         if ($llmReply = $this->askConfiguredLlm($message, $user, $history)) {
             return [
@@ -508,6 +585,24 @@ class RiderHubAssistantService
 
             $title = data_get($search->json(), 'query.search.0.title');
             if (! $search->successful() || ! is_string($title) || $title === '') {
+                return null;
+            }
+
+            // Ensure the Wikipedia title actually matches at least one meaningful word from the query.
+            $stopWords = ['the', 'and', 'for', 'with', 'from', 'that', 'this', 'san', 'saan', 'mag', 'ang', 'mga', 'how', 'what', 'who', 'where', 'when', 'why', 'can', 'you', 'ako', 'naman', 'lang', 'ba'];
+            $queryWords = array_values(array_filter(
+                preg_split('/[^a-z0-9]+/i', Str::lower($query)) ?: [],
+                fn (string $w): bool => strlen($w) >= 3 && ! in_array($w, $stopWords, true),
+            ));
+            $lowerTitle = Str::lower($title);
+            $hasMatch = false;
+            foreach ($queryWords as $word) {
+                if (Str::contains($lowerTitle, $word)) {
+                    $hasMatch = true;
+                    break;
+                }
+            }
+            if (! $hasMatch) {
                 return null;
             }
 

@@ -50,24 +50,35 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', ['email' => 'rider@example.com', 'role' => 'rider']);
     }
 
-    public function test_registration_rejects_admin_roles_and_weak_passwords(): void
+    public function test_registration_allows_simple_custom_passwords_and_rejects_admin_role(): void
     {
         $this->from('/register')->post('/register', [
             'name' => 'Invalid Role',
             'email' => 'admin-signup@example.com',
             'role' => 'admin',
-            'password' => 'StrongPass1!',
-            'password_confirmation' => 'StrongPass1!',
+            'password' => 'myownpass',
+            'password_confirmation' => 'myownpass',
         ])->assertSessionHasErrors('role');
 
         $this->from('/register')->post('/register', [
-            'name' => 'Weak Password',
-            'email' => 'weak-password@example.com',
+            'name' => 'Too Short',
+            'email' => 'short-password@example.com',
             'role' => 'customer',
-            'password' => 'lowercase',
-            'password_confirmation' => 'lowercase',
+            'password' => '123',
+            'password_confirmation' => '123',
         ])->assertSessionHasErrors('password');
 
         $this->assertDatabaseCount('users', 0);
+
+        // Any custom password >= 4 chars (no uppercase, number, or symbol needed) works
+        $this->post('/register', [
+            'name' => 'Simple Password User',
+            'email' => 'simple@example.com',
+            'role' => 'customer',
+            'password' => 'myownpass',
+            'password_confirmation' => 'myownpass',
+        ])->assertRedirect(route('customer.dashboard', absolute: false));
+
+        $this->assertDatabaseHas('users', ['email' => 'simple@example.com']);
     }
 }

@@ -7,7 +7,7 @@
     };
 @endphp
 
-<header class="sticky top-0 z-30 border-b border-slate-200 bg-white">
+<header class="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
     <div class="mx-auto flex h-16 max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8">
         <div class="flex items-center gap-3">
             <button @click="sidebarOpen = !sidebarOpen"
@@ -30,6 +30,7 @@
         </div>
 
         <div class="flex items-center gap-3">
+            <x-weather-widget variant="compact" />
             <x-theme-toggle />
             <x-notification-menu />
             <span class="hidden text-right sm:block">

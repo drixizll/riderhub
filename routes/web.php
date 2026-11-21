@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\BookingRatingController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerDashboardController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\PayMongoWebhookController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RiderBookingController;
 use App\Http\Controllers\RiderLocationController;
+use App\Http\Controllers\WeatherController;
 use Illuminate\Support\Facades\Route;
 
 $dashboardRouteForRole = static fn (?string $role): string => match ($role) {
@@ -19,6 +21,8 @@ $dashboardRouteForRole = static fn (?string $role): string => match ($role) {
 };
 
 Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->name('webhooks.paymongo');
+Route::get('/api/weather', WeatherController::class)->middleware('throttle:60,1')->name('weather.current');
+Route::post('/api/assistant/chat', [AssistantController::class, 'chat'])->middleware('throttle:30,1')->name('assistant.chat');
 
 Route::get('/', function () use ($dashboardRouteForRole) {
     if (auth()->check()) {

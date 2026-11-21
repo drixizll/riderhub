@@ -141,4 +141,23 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+
+    public function test_user_cannot_delete_account_while_a_booking_is_active(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $rider = User::factory()->create(['role' => 'rider']);
+        \App\Models\Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'rider_id' => $rider->id,
+            'status' => 'accepted',
+        ]);
+
+        $this->actingAs($customer)
+            ->from('/profile')
+            ->delete('/profile', ['password' => 'password'])
+            ->assertSessionHasErrorsIn('userDeletion', 'password')
+            ->assertRedirect('/profile');
+
+        $this->assertNotNull($customer->fresh());
+    }
 }

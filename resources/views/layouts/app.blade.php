@@ -38,5 +38,6 @@
                 </main>
             </div>
         </div>
+        <x-ai-assistant />
     </body>
 </html>

@@ -104,13 +104,18 @@ class CustomerBookingController extends Controller
         $this->authorize('view', $booking);
         $booking->load(['rider', 'payment', 'rating']);
 
-        if (
-            request()->query('checkout') === 'return'
-            && $booking->customer_id === Auth::id()
-            && $checkoutService->retrieveAndConfirmPaidSession($booking)
-        ) {
-            return redirect()->route('customer.bookings.show', $booking)
-                ->with('success', 'Payment confirmed by PayMongo. Your request is now available to riders.');
+        if (request()->query('checkout') === 'return' && $booking->customer_id === Auth::id()) {
+            if ($checkoutService->retrieveAndConfirmPaidSession($booking)) {
+                return redirect()->route('customer.bookings.show', $booking)
+                    ->with('success', 'Payment confirmed by PayMongo. Your request is now available to riders.');
+            }
+
+            if ($booking->payment?->status !== 'paid') {
+                return redirect()->route('customer.bookings.show', $booking)
+                    ->with('info', 'Payment has not been completed yet. You can continue to checkout whenever you are ready.');
+            }
+
+            return redirect()->route('customer.bookings.show', $booking);
         }
 
         $booking->load('payment');
@@ -130,16 +135,22 @@ class CustomerBookingController extends Controller
 
         $location = $booking->riderLocations()->latest()->first();
 
-        abort_unless($location, 404, 'No rider location is available yet.');
+        if (! $location) {
+            return response()->json([
+                'message' => 'No rider location is available yet.',
+                'status' => $booking->status,
+            ], 404);
+        }
 
         return response()->json([
             'lat' => $location->lat,
             'lng' => $location->lng,
             'updated_at' => $location->created_at->toIso8601String(),
+            'status' => $booking->status,
         ]);
     }
 
-    public function cancel(Booking $booking): RedirectResponse
+    public function cancel(Booking $booking, PayMongoCheckoutService $checkoutService): RedirectResponse
     {
         $this->authorize('cancel', $booking);
         $booking->loadMissing('payment');
@@ -149,11 +160,43 @@ class CustomerBookingController extends Controller
             && $booking->payment->status === 'pending'
             && $booking->payment->paymongo_reference
         ) {
-            return redirect()->route('customer.bookings.show', $booking)
-                ->with('error', 'This PayMongo checkout is still active. Return to the checkout page to finish payment, or contact support before cancelling.');
+            // The customer may have paid moments ago: never cancel a paid booking.
+            if ($checkoutService->retrieveAndConfirmPaidSession($booking)) {
+                return redirect()->route('customer.bookings.show', $booking)
+                    ->with('success', 'PayMongo already received your payment, so this booking was not cancelled. It is now available to riders.');
+            }
+
+            if (! $checkoutService->expireUnpaidSession($booking->payment)) {
+                return redirect()->route('customer.bookings.show', $booking)
+                    ->with('error', 'We could not confirm the payment status with PayMongo. Please try cancelling again in a moment.');
+            }
         }
 
-        $booking->update(['status' => 'cancelled']);
+        // Lock the row so a rider accepting at the same moment cannot end up with a cancelled trip.
+        $cancelled = DB::transaction(function () use ($booking): bool {
+            $locked = Booking::query()->lockForUpdate()->with('payment')->findOrFail($booking->id);
+
+            if (
+                $locked->status !== 'pending'
+                || $locked->rider_id !== null
+                || ($locked->payment_method === 'online' && $locked->payment?->status === 'paid')
+            ) {
+                return false;
+            }
+
+            $locked->update(['status' => 'cancelled']);
+
+            if ($locked->payment?->status === 'pending') {
+                $locked->payment->update(['status' => 'cancelled']);
+            }
+
+            return true;
+        });
+
+        if (! $cancelled) {
+            return redirect()->route('customer.bookings.show', $booking)
+                ->with('error', 'This booking can no longer be cancelled because a rider has already accepted it or it has been paid.');
+        }
 
         return redirect()->route('customer.bookings.index')->with('success', 'Booking cancelled.');
     }

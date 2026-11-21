@@ -35,7 +35,7 @@ class RegisteredUserController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['nullable', 'string', 'max:20'],
             'role' => ['required', Rule::in(['customer', 'rider'])],
-            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
+            'password' => ['required', 'string', 'min:4', 'confirmed'],
         ]);
 
         $user = User::create([

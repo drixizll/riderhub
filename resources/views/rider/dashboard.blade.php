@@ -99,17 +99,23 @@
             </section>
         @endif
 
-        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-950">Open booking requests</h2>
-                    <p class="mt-1 text-sm text-slate-500">Review the route and fare before accepting.</p>
+        <div class="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-950">Open booking requests</h2>
+                        <p class="mt-1 text-sm text-slate-500">Review the route and fare before accepting.</p>
+                    </div>
+                    <a href="{{ route('rider.bookings.index') }}" class="text-sm font-bold text-indigo-600 hover:text-indigo-800">View all <span aria-hidden="true">→</span></a>
                 </div>
-                <a href="{{ route('rider.bookings.index') }}" class="text-sm font-bold text-indigo-600 hover:text-indigo-800">View all <span aria-hidden="true">→</span></a>
-            </div>
 
-            @include('rider.bookings.partials.list', ['bookings' => $bookings, 'activeBooking' => $activeBooking])
-        </section>
+                @include('rider.bookings.partials.list', ['bookings' => $bookings, 'activeBooking' => $activeBooking])
+            </section>
+
+            <div class="space-y-4">
+                <x-weather-widget title="Road & Riding Weather" :lat="$activeBooking?->pickup_lat ?? 14.5995" :lng="$activeBooking?->pickup_lng ?? 120.9842" />
+            </div>
+        </div>
     </div>
 
     @if ($activeBooking)

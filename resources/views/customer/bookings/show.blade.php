@@ -17,6 +17,9 @@
         @endif
         @if (session('error'))
             <div role="alert" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-800">{{ session('error') }}</div>
+@endif
+@if (session('info'))
+<div role="status" class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800">{{ session('info') }}</div>
         @endif
         <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div class="flex flex-col gap-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50/70 to-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
@@ -111,7 +114,9 @@
                                 <fieldset>
                                     <legend class="text-sm font-semibold text-slate-700">Your rating</legend>
                                     <div data-rating-choices class="mt-2 flex items-center gap-1" role="radiogroup" aria-label="Rate your rider from 1 to 5 stars">
-                                        @php($selectedScore = (int) old('score', 5))
+                                        @php
+                                            $selectedScore = (int) old('score', 5);
+                                        @endphp
                                         @for ($score = 1; $score <= 5; $score++)
                                             <label class="rating-choice cursor-pointer rounded-lg p-1.5 text-3xl leading-none transition hover:scale-110 {{ $score <= $selectedScore ? 'is-selected' : '' }}">
                                                 <input class="sr-only" type="radio" name="score" value="{{ $score }}" @checked($selectedScore === $score) required>
@@ -139,23 +144,102 @@
 
             @if (in_array($booking->status, ['accepted', 'picked_up'], true) && $booking->rider)
                 <div class="border-t border-slate-100 p-5 sm:p-7">
-                    <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                        <div><h2 class="font-bold text-slate-950">Live rider tracking</h2><p data-tracking-status role="status" aria-live="polite" class="mt-1 text-sm text-slate-500">Waiting for the rider to share their location…</p></div>
-                        <span class="text-xs text-slate-400">Updates automatically while this page is open</span>
+                    @php
+                        $steps = [
+                            ['key' => 'pending', 'label' => 'Booked'],
+                            ['key' => 'accepted', 'label' => 'Rider matched'],
+                            ['key' => 'picked_up', 'label' => 'On the way'],
+                            ['key' => 'completed', 'label' => 'Completed'],
+                        ];
+                        $currentIndex = match ($booking->status) {
+                            'accepted' => 1,
+                            'picked_up' => 2,
+                            'completed' => 3,
+                            default => 0,
+                        };
+                    @endphp
+                    <ol class="mb-6 grid grid-cols-4 gap-2" aria-label="Trip progress">
+                        @foreach ($steps as $index => $step)
+                            <li class="flex flex-col gap-1.5">
+                                <div class="h-1.5 rounded-full transition-all duration-500 {{ $index <= $currentIndex ? 'bg-indigo-600' : 'bg-slate-200' }}"></div>
+                                <span class="text-[11px] font-bold {{ $index <= $currentIndex ? 'text-indigo-700' : 'text-slate-400' }}">{{ $step['label'] }}</span>
+                            </li>
+                        @endforeach
+                    </ol>
+
+                    <div class="grid gap-5 lg:grid-cols-[1.45fr_0.55fr]">
+                        <div>
+                            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="relative flex h-2.5 w-2.5">
+                                            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                                        </span>
+                                        <h2 class="font-bold text-slate-950">Live rider tracking</h2>
+                                    </div>
+                                    <p data-tracking-status role="status" aria-live="polite" class="mt-1 text-sm text-slate-500">Waiting for the rider to share their location…</p>
+                                </div>
+                                <div data-tracking-eta class="hidden items-center gap-2 rounded-xl bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">
+                                    <span data-eta-distance>—</span>
+                                    <span class="text-indigo-300">·</span>
+                                    <span data-eta-minutes>—</span>
+                                </div>
+                            </div>
+                            <div id="tracking-map" class="mt-4 h-80 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner" aria-label="Map showing rider location"></div>
+                        </div>
+
+                        <div class="flex flex-col justify-between gap-4">
+                            <x-weather-widget title="Route Weather" :lat="$booking->pickup_lat" :lng="$booking->pickup_lng" />
+                            <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
+                                <p class="font-bold text-slate-900">Real-time updates</p>
+                                <p class="mt-1">Map coordinates, distance, ETA, and trip status refresh automatically every 5 seconds while this page stays open.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div id="tracking-map" class="mt-4 h-72 overflow-hidden rounded-xl border border-slate-200 bg-slate-100" aria-label="Map showing rider location"></div>
                 </div>
                 <script>
                     document.addEventListener('DOMContentLoaded', () => {
-                        const map = L.map('tracking-map').setView([{{ $booking->pickup_lat }}, {{ $booking->pickup_lng }}], 13);
+                        const pickupPoint = [{{ $booking->pickup_lat }}, {{ $booking->pickup_lng }}];
+                        const dropoffPoint = [{{ $booking->dropoff_lat }}, {{ $booking->dropoff_lng }}];
+                        const map = L.map('tracking-map').setView(pickupPoint, 13);
                         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                             attribution: '&copy; OpenStreetMap contributors',
                         }).addTo(map);
-                        L.marker([{{ $booking->pickup_lat }}, {{ $booking->pickup_lng }}]).addTo(map).bindPopup('Pickup');
-                        L.marker([{{ $booking->dropoff_lat }}, {{ $booking->dropoff_lng }}]).addTo(map).bindPopup('Drop-off');
+
+                        L.marker(pickupPoint).addTo(map).bindPopup('Pickup');
+                        L.marker(dropoffPoint).addTo(map).bindPopup('Drop-off');
+                        map.fitBounds([pickupPoint, dropoffPoint], { padding: [36, 36] });
+
+                        let routeLine = L.polyline([pickupPoint, dropoffPoint], {
+                            color: '#4f46e5',
+                            weight: 4,
+                            opacity: 0.75,
+                            dashArray: '8 8',
+                        }).addTo(map);
+
+                        const riderIcon = L.divIcon({
+                            className: '',
+                            iconSize: [34, 34],
+                            iconAnchor: [17, 17],
+                            html: '<div class="rider-pulse-pin"><div class="rider-pulse-pin-core"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3"/></svg></div></div>',
+                        });
+
                         let riderMarker = null;
                         let refreshInFlight = false;
+                        const initialStatus = @json($booking->status);
                         const status = document.querySelector('[data-tracking-status]');
+                        const etaBox = document.querySelector('[data-tracking-eta]');
+                        const etaDistance = document.querySelector('[data-eta-distance]');
+                        const etaMinutes = document.querySelector('[data-eta-minutes]');
+
+                        const distanceKm = (a, b) => {
+                            const toRad = (deg) => deg * Math.PI / 180;
+                            const dLat = toRad(b[0] - a[0]);
+                            const dLng = toRad(b[1] - a[1]);
+                            const x = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLng / 2) ** 2;
+                            return 6371 * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+                        };
 
                         const refreshLocation = async () => {
                             if (refreshInFlight || document.hidden) return;
@@ -166,16 +250,33 @@
                                     headers: { 'Accept': 'application/json' },
                                     cache: 'no-store',
                                 });
+                                const data = await response.json().catch(() => ({}));
+                                // Reload when the rider picks up or completes the trip so the page reflects it.
+                                if (data.status && data.status !== initialStatus) {
+                                    window.location.reload();
+                                    return;
+                                }
                                 if (response.status === 404) {
                                     status.textContent = 'Your rider has not shared a location yet. We’ll keep checking.';
                                     return;
                                 }
                                 if (!response.ok) throw new Error('Location could not be loaded.');
-                                const location = await response.json();
-                                const point = [location.lat, location.lng];
-                                if (!riderMarker) riderMarker = L.marker(point).addTo(map).bindPopup('Your rider');
-                                else riderMarker.setLatLng(point);
-                                status.textContent = `Rider location updated ${new Date(location.updated_at).toLocaleTimeString()}`;
+                                const point = [data.lat, data.lng];
+                                if (!riderMarker) {
+                                    riderMarker = L.marker(point, { icon: riderIcon }).addTo(map).bindPopup('Your rider');
+                                    map.fitBounds([pickupPoint, dropoffPoint, point], { padding: [36, 36] });
+                                } else {
+                                    riderMarker.setLatLng(point);
+                                }
+                                const target = initialStatus === 'picked_up' ? dropoffPoint : pickupPoint;
+                                routeLine.setLatLngs([point, target]);
+                                const km = distanceKm(point, target);
+                                const mins = Math.max(1, Math.round((km / 22) * 60));
+                                etaDistance.textContent = `${km.toFixed(1)} km away`;
+                                etaMinutes.textContent = `~${mins} min ETA`;
+                                etaBox.classList.remove('hidden');
+                                etaBox.classList.add('inline-flex');
+                                status.textContent = `Rider location updated ${new Date(data.updated_at).toLocaleTimeString()}`;
                             } catch (error) {
                                 status.textContent = 'Could not refresh rider location. Check your connection.';
                             } finally {
@@ -190,7 +291,7 @@
                 </script>
             @endif
 
-            @if ($booking->status === 'pending' && ! ($booking->payment_method === 'online' && ($booking->payment?->paymongo_reference || $booking->payment?->status === 'paid')))
+            @if ($booking->status === 'pending' && ! ($booking->payment_method === 'online' && $booking->payment?->status === 'paid'))
                 <div class="border-t border-slate-100 px-5 py-4 sm:px-7">
                     <form action="{{ route('customer.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Cancel this booking?');">
                         @csrf

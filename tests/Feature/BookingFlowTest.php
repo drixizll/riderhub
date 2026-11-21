@@ -219,4 +219,44 @@ class BookingFlowTest extends TestCase
             ->get('/admin/users')
             ->assertForbidden();
     }
+
+    public function test_booking_rejects_identical_pickup_and_dropoff_coordinates(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+
+        $this->actingAs($customer)->from('/customer/bookings/create')->post('/customer/bookings', [
+            'type' => 'ride',
+            'pickup_address' => 'Makati City',
+            'pickup_lat' => 14.5547,
+            'pickup_lng' => 121.0244,
+            'dropoff_address' => 'Same Spot',
+            'dropoff_lat' => 14.5547,
+            'dropoff_lng' => 121.0244,
+            'payment_method' => 'cash',
+        ])->assertSessionHasErrors('dropoff_address');
+
+        $this->assertDatabaseCount('bookings', 0);
+    }
+
+    public function test_cancelling_a_pending_cash_booking_also_cancels_its_payment(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+        $booking = Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'payment_method' => 'cash',
+            'status' => 'pending',
+        ]);
+        $payment = Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'method' => 'cash',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.cancel', $booking))
+            ->assertRedirect(route('customer.bookings.index'));
+
+        $this->assertSame('cancelled', $booking->fresh()->status);
+        $this->assertSame('cancelled', $payment->fresh()->status);
+    }
 }

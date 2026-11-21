@@ -3,6 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name') === 'Laravel' ? 'RiderHub' : config('app.name', 'RiderHub') }} — Every trip, made easier</title>
         <meta name="description" content="Book a ride or send a package with RiderHub. Convenient rides, reliable delivery, and live rider tracking in one place.">
@@ -20,7 +21,7 @@
         <div class="page-loading fixed inset-x-0 top-0 z-[100] h-1 bg-indigo-100/70" role="status" aria-live="polite" aria-label="Loading page">
             <span class="page-loading-progress block h-full w-full origin-left bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" aria-hidden="true"></span>
         </div>
-        <header class="border-b border-slate-100 bg-white">
+        <header class="sticky top-0 z-30 border-b border-slate-100/80 bg-white/90 backdrop-blur-md">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-3" aria-label="RiderHub home">
                     <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
@@ -33,7 +34,9 @@
 
                 <div class="flex items-center gap-2 sm:gap-4">
                     <a href="#services" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">Services</a>
-                    <a href="#how-it-works" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">How it works</a>
+                    <a href="#about-us" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">About us</a>
+                    <a href="#how-it-works" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">How it works</a>
+                    <x-weather-widget variant="compact" />
                     <x-theme-toggle />
                     <x-install-app-button />
                     <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition hover:text-indigo-600">Log in</a>
@@ -88,7 +91,7 @@
                             <div class="relative mt-6 h-64 overflow-hidden rounded-2xl bg-indigo-50">
                                 <svg class="absolute inset-0 h-full w-full" viewBox="0 0 420 260" fill="none" preserveAspectRatio="none" aria-hidden="true">
                                     <path d="M38 220C100 210 94 140 158 146C220 152 217 62 280 82C334 99 333 42 389 34" stroke="#C7D2FE" stroke-width="24" stroke-linecap="round" />
-                                    <path d="M38 220C100 210 94 140 158 146C220 152 217 62 280 82C334 99 333 42 389 34" stroke="#4F46E5" stroke-width="4" stroke-dasharray="7 9" stroke-linecap="round" />
+                                    <path d="M38 220C100 210 94 140 158 146C220 152 217 62 280 82C334 99 333 42 389 34" stroke="#4F46E5" stroke-width="4" stroke-dasharray="7 9" stroke-linecap="round" class="route-dash-animated" />
                                 </svg>
                                 <div class="absolute left-[7%] top-[72%] flex h-10 w-10 items-center justify-center rounded-full border-4 border-white bg-indigo-600 text-white shadow-lg">
                                     <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5a5.5 5.5 0 0 0-5.5 5.5c0 4.1 5.5 11.5 5.5 11.5S15.5 11.1 15.5 7A5.5 5.5 0 0 0 10 1.5Zm0 7.5a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z" /></svg>
@@ -158,6 +161,156 @@
                 </div>
             </section>
 
+            <section id="about-us" class="reveal-on-scroll relative overflow-hidden bg-white py-16 sm:py-24">
+                <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div
+                        x-data="{
+                            active: 0,
+                            paused: false,
+                            timer: null,
+                            slides: [
+                                {
+                                    image: @js(asset('images/rider-city-ride.jpg')),
+                                    badge: 'Everyday Commute',
+                                    title: 'Trained riders ready across your city',
+                                    caption: 'Verified riders, smooth navigation, and transparent upfront fares from pickup to drop-off.',
+                                    stat: 'Fast pickup',
+                                    statSub: 'Smart matching'
+                                },
+                                {
+                                    image: @js(asset('images/rider-express-delivery.jpg')),
+                                    badge: 'Express Delivery',
+                                    title: 'Door-to-door parcel care you can trust',
+                                    caption: 'Send documents, food, or gifts across town with live status milestones and instant notifications.',
+                                    stat: '100% Tracked',
+                                    statSub: 'Door-to-door'
+                                },
+                                {
+                                    image: @js(asset('images/rider-live-tracking.jpg')),
+                                    badge: 'Smart Mobility Tech',
+                                    title: 'Real-time GPS & weather-aware routing',
+                                    caption: 'Follow your rider live on the map with real-time ETA, weather advisories, and secure PayMongo checkout.',
+                                    stat: 'Live GPS + AI',
+                                    statSub: 'Weather-aware'
+                                }
+                            ],
+                            start() {
+                                this.stop();
+                                this.timer = window.setInterval(() => {
+                                    if (!this.paused) this.next();
+                                }, 5500);
+                            },
+                            stop() {
+                                if (this.timer) {
+                                    window.clearInterval(this.timer);
+                                    this.timer = null;
+                                }
+                            },
+                            next() {
+                                this.active = (this.active + 1) % this.slides.length;
+                            },
+                            prev() {
+                                this.active = (this.active - 1 + this.slides.length) % this.slides.length;
+                            },
+                            goTo(index) {
+                                this.active = index;
+                                this.start();
+                            }
+                        }"
+                        x-init="start()"
+                        @mouseenter="paused = true"
+                        @mouseleave="paused = false"
+                        class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14"
+                    >
+                        <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-2xl shadow-indigo-950/15">
+                            <div class="relative aspect-[16/10] w-full overflow-hidden">
+                                <template x-for="(slide, index) in slides" :key="slide.image">
+                                    <div
+                                        x-show="active === index"
+                                        x-transition:enter="transition ease-out duration-700"
+                                        x-transition:enter-start="opacity-0 scale-105"
+                                        x-transition:enter-end="opacity-100 scale-100"
+                                        x-transition:leave="transition ease-in duration-500"
+                                        x-transition:leave-start="opacity-100 scale-100"
+                                        x-transition:leave-end="opacity-0 scale-95"
+                                        class="absolute inset-0"
+                                    >
+                                        <img
+                                            :src="slide.image"
+                                            :alt="slide.title"
+                                            class="photo-kenburns h-full w-full object-cover"
+                                        >
+                                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent"></div>
+                                        <div class="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                                            <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                                                <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                                                <span x-text="slide.badge"></span>
+                                            </span>
+                                            <h3 class="mt-3 text-xl font-extrabold text-white sm:text-2xl" x-text="slide.title"></h3>
+                                            <p class="mt-1.5 max-w-lg text-sm leading-6 text-slate-200" x-text="slide.caption"></p>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <div class="absolute right-4 top-4 z-10 flex items-center gap-2">
+                                    <button type="button" @click="prev(); start()" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/50 text-white backdrop-blur-md transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-white" aria-label="Previous photo">
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 0 1-.02 1.06L8.832 10l3.938 3.71a.75.75 0 1 1-1.04 1.08l-4.5-4.25a.75.75 0 0 1 0-1.08l4.5-4.25a.75.75 0 0 1 1.06.02Z" clip-rule="evenodd" /></svg>
+                                    </button>
+                                    <button type="button" @click="next(); start()" class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/50 text-white backdrop-blur-md transition hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-white" aria-label="Next photo">
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 0 1 .02-1.06L11.168 10 7.23 6.29a.75.75 0 1 1 1.04-1.08l4.5 4.25a.75.75 0 0 1 0 1.08l-4.5 4.25a.75.75 0 0 1-1.06-.02Z" clip-rule="evenodd" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between gap-3 bg-slate-950 px-5 py-3">
+                                <div class="flex items-center gap-2">
+                                    <template x-for="(slide, index) in slides" :key="'dot-' + index">
+                                        <button
+                                            type="button"
+                                            @click="goTo(index)"
+                                            class="h-2 rounded-full transition-all duration-300"
+                                            :class="active === index ? 'w-8 bg-indigo-400' : 'w-2 bg-slate-600 hover:bg-slate-400'"
+                                            :aria-label="`Show slide ${index + 1}: ${slide.badge}`"
+                                        ></button>
+                                    </template>
+                                </div>
+                                <span class="text-xs font-semibold text-slate-400" x-text="`0${active + 1} / 0${slides.length}`"></span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="text-sm font-bold uppercase tracking-widest text-indigo-600">About RiderHub</p>
+                            <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">Built for real riders and everyday city journeys</h2>
+                            <p class="mt-4 text-base leading-7 text-slate-600">
+                                RiderHub was created to make urban rides and package deliveries effortless, transparent, and safe. From instant fare estimates and live weather advisories to real-time GPS tracking and GCash/Maya payments, every detail is engineered for peace of mind.
+                            </p>
+
+                            <div class="mt-6 space-y-3">
+                                <template x-for="(slide, index) in slides" :key="'tab-' + index">
+                                    <button
+                                        type="button"
+                                        @click="goTo(index)"
+                                        class="flex w-full items-center justify-between gap-4 rounded-2xl border p-4 text-left transition duration-200"
+                                        :class="active === index
+                                            ? 'border-indigo-200 bg-indigo-50/70 shadow-sm'
+                                            : 'border-slate-200 bg-white hover:border-indigo-100 hover:bg-slate-50'"
+                                    >
+                                        <div>
+                                            <p class="text-sm font-bold text-slate-900" x-text="slide.badge"></p>
+                                            <p class="mt-0.5 text-xs text-slate-500" x-text="slide.title"></p>
+                                        </div>
+                                        <span class="shrink-0 rounded-xl bg-white px-3 py-1.5 text-right shadow-sm ring-1 ring-slate-100">
+                                            <span class="block text-xs font-extrabold text-indigo-600" x-text="slide.stat"></span>
+                                            <span class="block text-[10px] text-slate-400" x-text="slide.statSub"></span>
+                                        </span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <section id="how-it-works" class="reveal-on-scroll bg-slate-50 py-16 sm:py-20">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div class="mx-auto max-w-2xl text-center">
@@ -207,5 +360,6 @@
                 <a href="{{ route('login') }}" class="font-semibold text-slate-600 transition hover:text-indigo-600">Already have an account? Log in</a>
             </div>
         </footer>
+        <x-ai-assistant />
     </body>
 </html>

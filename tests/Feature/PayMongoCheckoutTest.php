@@ -21,7 +21,7 @@ class PayMongoCheckoutTest extends TestCase
             'services.paymongo.webhook_secret' => 'whsec_riderhub',
         ]);
         Http::fake([
-            'https://api.paymongo.com/v2/checkout_sessions' => Http::response([
+            'https://api.paymongo.com/v1/checkout_sessions' => Http::response([
                 'data' => [
                     'id' => 'cs_test_riderhub',
                     'attributes' => ['checkout_url' => 'https://checkout.paymongo.com/cs_test_riderhub'],
@@ -54,7 +54,7 @@ class PayMongoCheckoutTest extends TestCase
         $this->assertSame(0, $rider->notifications()->count());
 
         Http::assertSent(fn (ClientRequest $request): bool =>
-            $request->url() === 'https://api.paymongo.com/v2/checkout_sessions'
+            $request->url() === 'https://api.paymongo.com/v1/checkout_sessions'
             && $request->method() === 'POST'
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('sk_test_riderhub:'))
             && $request['data']['attributes']['payment_method_types'] === ['card', 'gcash', 'paymaya']
@@ -152,7 +152,7 @@ class PayMongoCheckoutTest extends TestCase
             'paymongo_reference' => 'cs_test_wrong_amount',
         ]);
         $event = json_decode($this->paidEventPayload($booking, $payment, 'cs_test_wrong_amount'), true);
-        $event['data']['data']['attributes']['payments'][0]['attributes']['amount'] = 1;
+        $event['data']['attributes']['data']['attributes']['payments'][0]['attributes']['amount'] = 1;
         $payload = json_encode($event, JSON_THROW_ON_ERROR);
 
         $this->postSignedWebhook($payload)->assertUnprocessable();
@@ -177,7 +177,7 @@ class PayMongoCheckoutTest extends TestCase
             'paymongo_reference' => 'cs_test_return',
         ]);
         Http::fake([
-            'https://api.paymongo.com/v2/checkout_sessions/cs_test_return' => Http::response([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_return' => Http::response([
                 'data' => [
                     'id' => 'cs_test_return',
                     'attributes' => [
@@ -209,7 +209,7 @@ class PayMongoCheckoutTest extends TestCase
         $this->assertSame(1, $rider->notifications()->count());
         Http::assertSent(fn (ClientRequest $request): bool =>
             $request->method() === 'GET'
-            && $request->url() === 'https://api.paymongo.com/v2/checkout_sessions/cs_test_return'
+            && $request->url() === 'https://api.paymongo.com/v1/checkout_sessions/cs_test_return'
             && $request->hasHeader('Authorization', 'Basic '.base64_encode('sk_test_riderhub:'))
         );
     }
@@ -240,6 +240,191 @@ class PayMongoCheckoutTest extends TestCase
             ->assertDontSee('Unpaid online pickup');
     }
 
+    public function test_expired_checkout_session_is_replaced_with_a_new_one(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub']);
+        [$booking] = $this->makeOnlineBookingAndRider();
+        Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_old',
+            'paymongo_checkout_url' => 'https://checkout.paymongo.com/cs_test_old',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_old' => Http::response($this->sessionResponse($booking, 'cs_test_old', 'expired')),
+            'https://api.paymongo.com/v1/checkout_sessions' => Http::response([
+                'data' => [
+                    'id' => 'cs_test_new',
+                    'attributes' => ['checkout_url' => 'https://checkout.paymongo.com/cs_test_new'],
+                ],
+            ], 201),
+        ]);
+
+        $this->actingAs($booking->customer)
+            ->post(route('customer.bookings.checkout', $booking))
+            ->assertRedirect('https://checkout.paymongo.com/cs_test_new');
+
+        $this->assertDatabaseHas('payments', [
+            'booking_id' => $booking->id,
+            'paymongo_reference' => 'cs_test_new',
+        ]);
+    }
+
+    public function test_active_checkout_session_is_reused(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub']);
+        [$booking] = $this->makeOnlineBookingAndRider();
+        Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_active',
+            'paymongo_checkout_url' => 'https://checkout.paymongo.com/cs_test_active',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_active' => Http::response($this->sessionResponse($booking, 'cs_test_active', 'active')),
+        ]);
+
+        $this->actingAs($booking->customer)
+            ->post(route('customer.bookings.checkout', $booking))
+            ->assertRedirect('https://checkout.paymongo.com/cs_test_active');
+
+        Http::assertNotSent(fn (ClientRequest $request): bool => $request->method() === 'POST');
+    }
+
+    public function test_returning_without_paying_shows_a_friendly_message(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub']);
+        [$booking, $rider] = $this->makeOnlineBookingAndRider();
+        Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_unpaid',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_unpaid' => Http::response($this->sessionResponse($booking, 'cs_test_unpaid', 'active')),
+        ]);
+
+        $this->actingAs($booking->customer)
+            ->get(route('customer.bookings.show', $booking).'?checkout=return')
+            ->assertRedirect(route('customer.bookings.show', $booking))
+            ->assertSessionHas('info');
+
+        $this->assertSame(0, $rider->notifications()->count());
+    }
+
+    public function test_customer_can_cancel_an_unpaid_online_booking_and_the_session_is_expired(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub']);
+        [$booking] = $this->makeOnlineBookingAndRider();
+        Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_cancel',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_cancel/expire' => Http::response($this->sessionResponse($booking, 'cs_test_cancel', 'expired')),
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_cancel' => Http::response($this->sessionResponse($booking, 'cs_test_cancel', 'active')),
+        ]);
+
+        $this->actingAs($booking->customer)
+            ->post(route('customer.bookings.cancel', $booking))
+            ->assertRedirect(route('customer.bookings.index'));
+
+        $this->assertSame('cancelled', $booking->fresh()->status);
+        Http::assertSent(fn (ClientRequest $request): bool => $request->method() === 'POST'
+            && $request->url() === 'https://api.paymongo.com/v1/checkout_sessions/cs_test_cancel/expire');
+    }
+
+    public function test_cancel_does_not_cancel_a_booking_that_was_already_paid(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub', 'services.paymongo.livemode' => false]);
+        [$booking, $rider] = $this->makeOnlineBookingAndRider();
+        $payment = Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_paid_cancel',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_paid_cancel' => Http::response($this->sessionResponse($booking, 'cs_test_paid_cancel', 'active', $payment)),
+        ]);
+
+        $this->actingAs($booking->customer)
+            ->post(route('customer.bookings.cancel', $booking))
+            ->assertRedirect(route('customer.bookings.show', $booking))
+            ->assertSessionHas('success');
+
+        $this->assertSame('pending', $booking->fresh()->status);
+        $this->assertSame('paid', $payment->fresh()->status);
+        $this->assertSame(1, $rider->notifications()->count());
+    }
+
+    public function test_webhook_for_an_unknown_session_is_acknowledged(): void
+    {
+        config(['services.paymongo.webhook_secret' => 'whsec_riderhub', 'services.paymongo.livemode' => false]);
+        [$booking] = $this->makeOnlineBookingAndRider();
+        $payment = Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_known',
+        ]);
+
+        $this->postSignedWebhook($this->paidEventPayload($booking, $payment, 'cs_test_other_app'))
+            ->assertOk()
+            ->assertJson(['ignored' => true]);
+
+        $this->assertSame('pending', $payment->fresh()->status);
+    }
+
+    public function test_sync_command_confirms_payments_that_were_paid_on_paymongo(): void
+    {
+        config(['services.paymongo.secret_key' => 'sk_test_riderhub', 'services.paymongo.livemode' => false]);
+        [$booking, $rider] = $this->makeOnlineBookingAndRider();
+        $payment = Payment::factory()->create([
+            'booking_id' => $booking->id,
+            'amount' => $booking->fare,
+            'method' => 'online',
+            'paymongo_reference' => 'cs_test_sync',
+        ]);
+        Http::fake([
+            'https://api.paymongo.com/v1/checkout_sessions/cs_test_sync' => Http::response($this->sessionResponse($booking, 'cs_test_sync', 'active', $payment)),
+        ]);
+
+        $this->artisan('paymongo:sync')->assertSuccessful();
+
+        $this->assertSame('paid', $payment->fresh()->status);
+        $this->assertSame(1, $rider->notifications()->count());
+    }
+
+    private function sessionResponse(Booking $booking, string $sessionId, string $status, ?Payment $paidPayment = null): array
+    {
+        return [
+            'data' => [
+                'id' => $sessionId,
+                'type' => 'checkout_session',
+                'attributes' => [
+                    'status' => $status,
+                    'livemode' => false,
+                    'checkout_url' => 'https://checkout.paymongo.com/'.$sessionId,
+                    'reference_number' => 'RIDERHUB-'.$booking->id,
+                    'metadata' => ['booking_id' => (string) $booking->id],
+                    'payments' => $paidPayment ? [[
+                        'id' => 'pay_test_'.$paidPayment->id,
+                        'attributes' => [
+                            'amount' => (int) round($paidPayment->amount * 100),
+                            'currency' => 'PHP',
+                            'status' => 'paid',
+                        ],
+                    ]] : [],
+                ],
+            ],
+        ];
+    }
+
     private function makeOnlineBookingAndRider(): array
     {
         $rider = User::factory()->create(['role' => 'rider']);
@@ -254,11 +439,13 @@ class PayMongoCheckoutTest extends TestCase
     private function paidEventPayload(Booking $booking, Payment $payment, string $sessionId): string
     {
         return json_encode([
-            'event_type' => 'send.webhook',
             'data' => [
-                'type' => 'checkout_session.payment.paid',
-                'livemode' => false,
-                'data' => [
+                'id' => 'evt_test_'.$payment->id,
+                'type' => 'event',
+                'attributes' => [
+                    'type' => 'checkout_session.payment.paid',
+                    'livemode' => false,
+                    'data' => [
                     'id' => $sessionId,
                     'attributes' => [
                         'reference_number' => 'RIDERHUB-'.$booking->id,
@@ -273,6 +460,7 @@ class PayMongoCheckoutTest extends TestCase
                         ]],
                     ],
                 ],
+            ],
             ],
         ], JSON_THROW_ON_ERROR);
     }

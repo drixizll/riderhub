@@ -89,6 +89,23 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        // Deleting an account mid-trip would orphan the booking (or erase a paid one).
+        $hasActiveBooking = \App\Models\Booking::query()
+            ->where(fn ($query) => $query->where('customer_id', $user->id)->orWhere('rider_id', $user->id))
+            ->where(fn ($query) => $query
+                ->whereIn('status', ['accepted', 'picked_up'])
+                ->orWhere(fn ($pending) => $pending
+                    ->where('status', 'pending')
+                    ->whereHas('payment', fn ($payment) => $payment->where('method', 'online')->where('status', 'paid'))))
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return Redirect::route('profile.edit')->withErrors([
+                'password' => 'You have an active or paid booking. Finish it before deleting your account.',
+            ], 'userDeletion');
+        }
+
         $profilePhoto = $user->profile_photo_path;
 
         Auth::logout();

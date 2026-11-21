@@ -70,4 +70,33 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
+
+    public function test_forgotten_account_can_be_recovered_by_phone_number(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create([
+            'email' => 'juan.delacruz@example.com',
+            'phone' => '+639171234567',
+        ]);
+
+        // Local 09 format matches +639 stored format
+        $response = $this->from('/forgot-password')->post('/recover-account', [
+            'phone' => '0917 123 4567',
+        ]);
+
+        $response
+            ->assertRedirect('/forgot-password')
+            ->assertSessionHas('status', 'Account found (ju***@example.com)! We sent a password reset link to your email.');
+
+        Notification::assertSentTo($user, ResetPassword::class);
+    }
+
+    public function test_account_recovery_rejects_unknown_phone_number(): void
+    {
+        $this->from('/forgot-password')
+            ->post('/recover-account', ['phone' => '09998887777'])
+            ->assertRedirect('/forgot-password')
+            ->assertSessionHasErrors('phone');
+    }
 }

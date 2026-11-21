@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\RiderHubAssistantService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class AssistantController extends Controller
+{
+    public function chat(Request $request, RiderHubAssistantService $assistant): JsonResponse
+    {
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:500'],
+            'lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'lng' => ['nullable', 'numeric', 'between:-180,180'],
+        ]);
+
+        $response = $assistant->respond(
+            $validated['message'],
+            $request->user(),
+            isset($validated['lat']) ? (float) $validated['lat'] : null,
+            isset($validated['lng']) ? (float) $validated['lng'] : null,
+        );
+
+        return response()->json($response);
+    }
+}

@@ -10,6 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class PayMongoWebhookController extends Controller
 {
+    /**
+     * Handles PayMongo webhook events. PayMongo sends events shaped like:
+     * { "data": { "id": "evt_...", "type": "event", "attributes": {
+     *     "type": "checkout_session.payment.paid", "livemode": false,
+     *     "data": { "id": "cs_...", "type": "checkout_session", "attributes": { ... } } } } }
+     */
     public function __invoke(
         Request $request,
         PayMongoCheckoutService $checkoutService,
@@ -32,20 +38,22 @@ class PayMongoWebhookController extends Controller
             return response()->json(['message' => 'Invalid webhook signature.'], 401);
         }
 
-        $event = $request->json()->all();
+        $event = json_decode($payload, true);
+        $eventAttributes = is_array($event) ? data_get($event, 'data.attributes') : null;
 
-        if (data_get($event, 'data.type') !== 'checkout_session.payment.paid') {
+        if (! is_array($eventAttributes) || data_get($eventAttributes, 'type') !== 'checkout_session.payment.paid') {
             return response()->json(['received' => true]);
         }
 
-        $session = data_get($event, 'data.data');
-        $attributes = data_get($session, 'attributes');
+        $session = data_get($eventAttributes, 'data');
         $sessionId = data_get($session, 'id');
+        $livemode = data_get($eventAttributes, 'livemode');
 
         if (
-            ! is_string($sessionId)
-            || ! is_string(data_get($attributes, 'reference_number'))
-            || data_get($event, 'data.livemode') !== (bool) config('services.paymongo.livemode')
+            ! is_array($session)
+            || ! is_string($sessionId)
+            || ! is_string(data_get($session, 'attributes.reference_number'))
+            || $livemode !== (bool) config('services.paymongo.livemode')
         ) {
             return response()->json(['message' => 'Invalid paid checkout event.'], 422);
         }
@@ -56,10 +64,13 @@ class PayMongoWebhookController extends Controller
             ->first();
 
         if (! $payment) {
-            return response()->json(['message' => 'Checkout session was not found.'], 404);
+            // Acknowledge so PayMongo does not keep retrying (e.g. sessions from another app on the same account).
+            Log::info('PayMongo webhook referenced an unknown checkout session.', ['checkout_session_id' => $sessionId]);
+
+            return response()->json(['received' => true, 'ignored' => true]);
         }
 
-        if (! $checkoutService->confirmPaidSession($payment, $session, (bool) data_get($event, 'data.livemode'))) {
+        if (! $checkoutService->confirmPaidSession($payment, $session, $livemode)) {
             return response()->json(['message' => 'Paid checkout details did not match the booking.'], 422);
         }
 

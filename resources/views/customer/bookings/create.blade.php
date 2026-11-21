@@ -76,13 +76,15 @@
                         </div>
                     </section>
 
-                    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+                    <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                         <div class="flex items-center justify-between">
                             <div><p class="text-sm font-bold text-slate-950">Estimated fare</p><p class="mt-1 text-xs text-slate-500">Calculated from straight-line distance</p></div>
                             <p id="fare-estimate" class="text-2xl font-extrabold text-indigo-700">₱—</p>
                         </div>
                         <p class="mt-4 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">Final fare is calculated from the selected coordinates. Actual road distance may differ.</p>
                     </section>
+
+                    <x-weather-widget title="Pickup Weather Advisory" :lat="old('pickup_lat', 14.5995)" :lng="old('pickup_lng', 120.9842)" />
                 </div>
             </section>
 
@@ -170,6 +172,7 @@
                 fareOutput.textContent = `₱${(baseFare + distance * ratePerKm).toFixed(2)}`;
             }
 
+            let weatherTimer = null;
             function setPoint(name, lat, lng) {
                 const point = points[name];
                 point.lat.value = Number(lat).toFixed(7);
@@ -177,6 +180,12 @@
                 point.marker.setLatLng([lat, lng]);
                 document.querySelector(`[data-coordinates="${name}"]`).textContent = `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
                 updateFare();
+                if (name === 'pickup') {
+                    window.clearTimeout(weatherTimer);
+                    weatherTimer = window.setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('riderhub-weather-coords', { detail: { lat: Number(lat), lng: Number(lng) } }));
+                    }, 500);
+                }
             }
 
             Object.entries(points).forEach(([name, point]) => {

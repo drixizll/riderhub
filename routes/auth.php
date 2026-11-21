@@ -28,6 +28,10 @@ Route::middleware('guest')->group(function () {
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
         ->name('password.email');
 
+    Route::post('recover-account', [PasswordResetLinkController::class, 'recover'])
+        ->middleware('throttle:10,1')
+        ->name('account.recover');
+
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 

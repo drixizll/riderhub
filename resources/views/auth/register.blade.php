@@ -78,13 +78,7 @@
                             <span data-strength-segment="{{ $segment }}" class="h-1.5 rounded-full bg-slate-200 transition-colors"></span>
                         @endfor
                     </div>
-                    <ul class="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px] text-slate-500 sm:grid-cols-3">
-                        <li data-password-check="length">8+ characters</li>
-                        <li data-password-check="lowercase">Lowercase letter</li>
-                        <li data-password-check="uppercase">Uppercase letter</li>
-                        <li data-password-check="number">Number</li>
-                        <li data-password-check="symbol">Symbol</li>
-                    </ul>
+                    <p class="text-[11px] text-slate-500">Use any password you like (at least 4 characters). Uppercase, numbers, and symbols are optional.</p>
                 </div>
                 <x-input-error :messages="$errors->get('password')" class="mt-2" />
             </div>

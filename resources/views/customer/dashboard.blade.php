@@ -19,22 +19,22 @@
         @endif
 
         <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Booking summary">
-            <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <p class="text-sm font-medium text-slate-500">All bookings</p>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">{{ $totalBookings }}</p>
                 <p class="mt-1 text-xs text-slate-500">Your RiderHub activity</p>
             </article>
-            <article class="rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
+            <article class="card-interactive rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
                 <p class="text-sm font-medium text-indigo-700">In progress</p>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-indigo-950">{{ $activeBookings }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">Accepted or on the way</p>
             </article>
-            <article class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+            <article class="card-interactive rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
                 <p class="text-sm font-medium text-emerald-700">Completed</p>
                 <p class="mt-2 text-3xl font-extrabold tracking-tight text-emerald-950">{{ $completedBookings }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">Trips and deliveries completed</p>
             </article>
-            <a href="{{ route('customer.bookings.create') }}" class="group flex min-h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-700 to-violet-700 p-5 text-white shadow-sm transition hover:shadow-lg hover:shadow-indigo-900/15">
+            <a href="{{ route('customer.bookings.create') }}" class="card-interactive group flex min-h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-700 to-violet-700 p-5 text-white shadow-sm">
                 <span class="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
                 </span>

@@ -33,4 +33,29 @@ class StoreBookingRequest extends FormRequest
             'payment_method' => ['required', 'in:cash,online'],
         ];
     }
+
+    /**
+     * Reject bookings whose pickup and drop-off pins are (almost) the same point.
+     */
+    public function after(): array
+    {
+        return [
+            function (\Illuminate\Validation\Validator $validator): void {
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $lat1 = deg2rad((float) $this->input('pickup_lat'));
+                $lat2 = deg2rad((float) $this->input('dropoff_lat'));
+                $deltaLat = $lat2 - $lat1;
+                $deltaLng = deg2rad((float) $this->input('dropoff_lng') - (float) $this->input('pickup_lng'));
+                $a = sin($deltaLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($deltaLng / 2) ** 2;
+                $distanceKm = 6371 * 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+                if ($distanceKm < 0.05) {
+                    $validator->errors()->add('dropoff_address', 'Pickup and drop-off must be at least 50 meters apart. Adjust the pins on the map.');
+                }
+            },
+        ];
+    }
 }

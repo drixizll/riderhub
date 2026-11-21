@@ -13,6 +13,8 @@ return [
         'http://localhost:3000',
         'https://riderhub.online',
         'https://www.riderhub.online',
+        'https://app.riderhub.online',
+        'https://api.riderhub.online',
     ],
 
     'allowed_origins_patterns' => [],

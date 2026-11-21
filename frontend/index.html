@@ -143,9 +143,12 @@
     <script type="module">
         import { RiderHubApi } from './js/api.js';
 
-        const defaultBase = window.location.origin.startsWith('http')
-            ? `${window.location.origin}/api/v1`
-            : 'http://127.0.0.1:8000/api/v1';
+        const host = window.location.hostname;
+        const defaultBase = host === 'app.riderhub.online'
+            ? 'https://api.riderhub.online/api/v1'
+            : (window.location.origin.startsWith('http')
+                ? `${window.location.origin}/api/v1`
+                : 'http://127.0.0.1:8000/api/v1');
         const api = new RiderHubApi(defaultBase);
 
         const routes = {

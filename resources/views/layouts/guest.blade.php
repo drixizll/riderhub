@@ -18,6 +18,7 @@
     </head>
     <body class="hero-mesh-bg min-h-screen font-sans text-slate-800 antialiased">
         <div class="hero-map-grid pointer-events-none fixed inset-0 z-0" aria-hidden="true"></div>
+        <canvas data-riderhub-canvas class="pointer-events-none fixed inset-0 z-0 h-full w-full" aria-hidden="true"></canvas>
         <div class="auth-ambience" aria-hidden="true">
             <span class="auth-glow auth-glow-one"></span>
             <span class="auth-glow auth-glow-two"></span>

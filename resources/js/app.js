@@ -223,3 +223,89 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
             .catch((error) => console.error('RiderHub could not register its offline app shell.', error));
     });
 }
+
+// Global 60fps Interactive RiderHub Mobility Network Background Canvas
+const techCanvas = document.querySelector('[data-riderhub-canvas]');
+if (techCanvas instanceof HTMLCanvasElement && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const ctx = techCanvas.getContext('2d');
+    let width = 0;
+    let height = 0;
+    let nodes = [];
+    let pointer = { x: -999, y: -999 };
+
+    const initNodes = () => {
+        const host = techCanvas.parentElement || document.body;
+        const rect = host.getBoundingClientRect();
+        width = techCanvas.width = Math.max(window.innerWidth, rect.width || window.innerWidth);
+        height = techCanvas.height = Math.max(window.innerHeight, rect.height || window.innerHeight);
+        const count = Math.min(54, Math.max(24, Math.floor((width * height) / 24000)));
+        nodes = Array.from({ length: count }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.58,
+            vy: (Math.random() - 0.5) * 0.58,
+            r: Math.random() * 2.2 + 1.4,
+            pulse: Math.random() * Math.PI * 2,
+        }));
+    };
+
+    window.addEventListener('mousemove', (event) => {
+        const rect = techCanvas.getBoundingClientRect();
+        pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }, { passive: true });
+    window.addEventListener('mouseleave', () => {
+        pointer = { x: -999, y: -999 };
+    });
+    window.addEventListener('resize', initNodes);
+    initNodes();
+
+    const render = () => {
+        if (!document.hidden && ctx) {
+            ctx.clearRect(0, 0, width, height);
+            const isDark = document.documentElement.dataset.theme === 'dark';
+            const lineRgb = isDark ? '167, 139, 250' : '124, 58, 237';
+            const pulseRgb = isDark ? '232, 121, 249' : '139, 92, 246';
+
+            for (let i = 0; i < nodes.length; i++) {
+                const a = nodes[i];
+                a.x += a.vx;
+                a.y += a.vy;
+                a.pulse += 0.03;
+                if (a.x < 0 || a.x > width) a.vx *= -1;
+                if (a.y < 0 || a.y > height) a.vy *= -1;
+
+                const mdist = Math.hypot(a.x - pointer.x, a.y - pointer.y);
+                if (mdist < 160) {
+                    ctx.strokeStyle = `rgba(${pulseRgb}, ${(1 - mdist / 160) * (isDark ? 0.42 : 0.32)})`;
+                    ctx.lineWidth = 1.25;
+                    ctx.beginPath();
+                    ctx.moveTo(a.x, a.y);
+                    ctx.lineTo(pointer.x, pointer.y);
+                    ctx.stroke();
+                }
+
+                for (let j = i + 1; j < nodes.length; j++) {
+                    const b = nodes[j];
+                    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+                    if (dist < 155) {
+                        const alpha = (1 - dist / 155) * (isDark ? 0.28 : 0.2);
+                        ctx.strokeStyle = `rgba(${lineRgb}, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(a.x, a.y);
+                        ctx.lineTo(b.x, b.y);
+                        ctx.stroke();
+                    }
+                }
+
+                const glowR = a.r + Math.sin(a.pulse) * 0.55;
+                ctx.fillStyle = isDark ? 'rgba(196, 181, 253, 0.78)' : 'rgba(109, 40, 217, 0.52)';
+                ctx.beginPath();
+                ctx.arc(a.x, a.y, Math.max(1, glowR), 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        window.requestAnimationFrame(render);
+    };
+    render();
+}

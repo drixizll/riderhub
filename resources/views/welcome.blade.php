@@ -53,25 +53,8 @@
 
         <main class="relative z-10">
             <section class="hero-mesh-bg relative overflow-hidden border-b border-indigo-100/80">
-                <div class="hero-map-grid pointer-events-none absolute inset-0" aria-hidden="true"></div>
-                <div class="aurora-blob aurora-blob-1 pointer-events-none !absolute !opacity-35" aria-hidden="true"></div>
-                <div class="aurora-blob aurora-blob-2 pointer-events-none !absolute !opacity-30" aria-hidden="true"></div>
-                <svg class="pointer-events-none absolute inset-0 h-full w-full opacity-40" viewBox="0 0 1440 720" fill="none" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                    <path d="M-80 540 C 260 440, 420 220, 760 280 C 1060 330, 1180 140, 1520 90" stroke="url(#hero-line-1)" stroke-width="2.5" class="hero-route-sweep" />
-                    <path d="M-60 660 C 310 610, 520 430, 880 460 C 1180 485, 1280 340, 1540 270" stroke="url(#hero-line-2)" stroke-width="2" class="hero-route-sweep" style="animation-duration: 4.5s; animation-direction: reverse;" />
-                    <defs>
-                        <linearGradient id="hero-line-1" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0"/>
-                            <stop offset="50%" stop-color="#7c3aed" stop-opacity="0.7"/>
-                            <stop offset="100%" stop-color="#c084fc" stop-opacity="0"/>
-                        </linearGradient>
-                        <linearGradient id="hero-line-2" x1="0" y1="0" x2="1440" y2="0" gradientUnits="userSpaceOnUse">
-                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0"/>
-                            <stop offset="50%" stop-color="#6d28d9" stop-opacity="0.5"/>
-                            <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
-                        </linearGradient>
-                    </defs>
-                </svg>
+                <canvas data-riderhub-canvas class="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true"></canvas>
+                <div class="hero-map-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true"></div>
                 <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
                     <div class="home-hero-copy max-w-2xl reveal-on-scroll" data-revealed="true">
                         <span class="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm">
@@ -101,73 +84,84 @@
                         </div>
                     </div>
 
-                    <div class="home-hero-visual relative mx-auto w-full max-w-xl reveal-on-scroll" data-revealed="true">
-                        <div class="hero-orb absolute -left-6 -top-6 h-28 w-28 rounded-full bg-violet-300/60 blur-2xl" aria-hidden="true"></div>
-                        <div class="hero-orb-delayed absolute -bottom-6 -right-6 h-32 w-32 rounded-full bg-indigo-300/70 blur-2xl" aria-hidden="true"></div>
+                    <div class="home-hero-visual relative mx-auto w-full max-w-lg reveal-on-scroll" data-revealed="true">
+                        <div class="hero-orb absolute -left-8 -top-8 h-36 w-36 rounded-full bg-violet-400/35 blur-3xl" aria-hidden="true"></div>
+                        <div class="hero-orb-delayed absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-fuchsia-400/30 blur-3xl" aria-hidden="true"></div>
 
-                        <div class="relative overflow-hidden rounded-3xl border border-white/80 bg-white/85 p-3.5 shadow-2xl shadow-indigo-950/15 backdrop-blur-md sm:p-4">
-                            <div class="grid grid-cols-2 gap-3">
-                                <figure class="group relative col-span-2 h-52 overflow-hidden rounded-2xl bg-slate-900 sm:h-60">
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg"
-                                        alt="Tagoloan River and Bridge, Misamis Oriental"
-                                        referrerpolicy="no-referrer"
-                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                    >
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-slate-950/15 to-transparent"></div>
-                                    <div class="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-extrabold text-indigo-700 shadow-md backdrop-blur-md">
-                                        <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-500"></span>
-                                        <span>MISAMIS ORIENTAL LIVE</span>
-                                    </div>
-                                    <figcaption class="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-4 text-white">
-                                        <div>
-                                            <p class="text-sm font-extrabold">Across Tagoloan &amp; Misamis Oriental</p>
-                                            <p class="text-[11px] text-slate-200">Fast rides &amp; express deliveries every day</p>
-                                        </div>
-                                        <span class="shrink-0 rounded-xl bg-white/20 px-2.5 py-1 text-[11px] font-bold backdrop-blur-md">Live GPS</span>
-                                    </figcaption>
-                                </figure>
-
-                                <figure class="group relative h-36 overflow-hidden rounded-2xl bg-slate-900 sm:h-40">
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg"
-                                        alt="Tagoloan Municipal Hall, Misamis Oriental"
-                                        referrerpolicy="no-referrer"
-                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                    >
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent"></div>
-                                    <figcaption class="absolute inset-x-0 bottom-0 p-3 text-white">
-                                        <p class="text-xs font-extrabold">Locals &amp; Students</p>
-                                        <p class="text-[10px] text-slate-200">Upfront fares</p>
-                                    </figcaption>
-                                </figure>
-
-                                <figure class="group relative h-36 overflow-hidden rounded-2xl bg-slate-900 sm:h-40">
-                                    <img
-                                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Angkas_riders_in_the_Philippines_03.jpg/1280px-Angkas_riders_in_the_Philippines_03.jpg"
-                                        alt="Philippine motorcycle riders"
-                                        referrerpolicy="no-referrer"
-                                        class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                                    >
-                                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/10 to-transparent"></div>
-                                    <figcaption class="absolute inset-x-0 bottom-0 p-3 text-white">
-                                        <p class="text-xs font-extrabold">Trusted Riders</p>
-                                        <p class="text-[10px] text-slate-200">Verified &amp; rated</p>
-                                    </figcaption>
-                                </figure>
-                            </div>
-
-                            <div class="mt-3 flex items-center justify-between rounded-2xl bg-indigo-50/80 px-4 py-3">
-                                <div class="flex items-center gap-3">
-                                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+                        <!-- Futuristic Live App Preview Card -->
+                        <div class="relative overflow-hidden rounded-[2rem] border border-white/80 bg-white/90 p-5 shadow-2xl shadow-indigo-950/20 backdrop-blur-xl sm:p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-indigo-700 text-white shadow-md shadow-indigo-600/30">
                                         <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" stroke-width="2" /></svg>
                                     </span>
                                     <div>
-                                        <p class="text-xs font-bold text-slate-900">Your rider is ready nearby</p>
-                                        <p class="text-[11px] text-slate-500">Street &amp; Satellite tracking · GCash, Maya &amp; Cash</p>
+                                        <p class="text-xs font-extrabold uppercase tracking-wider text-indigo-600">RiderHub App · Live</p>
+                                        <p class="text-sm font-bold text-slate-900">Tagoloan → Cagayan de Oro</p>
                                     </div>
                                 </div>
-                                <a href="{{ route('register') }}" class="shrink-0 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700">Let’s go</a>
+                                <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-extrabold text-emerald-700 ring-1 ring-emerald-200/70">
+                                    <span class="h-2 w-2 animate-ping rounded-full bg-emerald-500"></span>
+                                    LIVE GPS
+                                </span>
+                            </div>
+
+                            <!-- Live Animated Route Radar Display -->
+                            <div class="relative mt-5 h-56 overflow-hidden rounded-2xl border border-indigo-200/60 bg-gradient-to-br from-slate-950 via-indigo-950 to-violet-950 shadow-inner">
+                                <div class="hero-map-grid absolute inset-0 opacity-45" aria-hidden="true"></div>
+                                <svg class="absolute inset-0 h-full w-full" viewBox="0 0 420 224" fill="none" preserveAspectRatio="none" aria-hidden="true">
+                                    <path d="M 36 184 C 96 176, 108 112, 168 118 C 228 124, 224 58, 286 72 C 330 82, 336 42, 376 34" stroke="rgba(167,139,250,0.28)" stroke-width="18" stroke-linecap="round" />
+                                    <path d="M 36 184 C 96 176, 108 112, 168 118 C 228 124, 224 58, 286 72 C 330 82, 336 42, 376 34" stroke="#a78bfa" stroke-width="3.5" stroke-dasharray="8 8" stroke-linecap="round" class="route-dash-animated" />
+                                </svg>
+
+                                <!-- Animated moving rider pulse along the route -->
+                                <div class="hero-rider-orbit absolute left-0 top-0 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 text-white shadow-lg shadow-violet-500/60 ring-2 ring-white">
+                                    <span class="hero-radar-ring absolute -inset-2 rounded-full bg-violet-400/50"></span>
+                                    <svg class="relative h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3" /></svg>
+                                </div>
+
+                                <!-- Pickup Pin -->
+                                <div class="absolute left-[6%] top-[73%] flex items-center gap-1.5">
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-indigo-600 text-white shadow-lg">
+                                        <span class="h-2 w-2 rounded-full bg-white"></span>
+                                    </span>
+                                    <span class="rounded-md bg-slate-900/80 px-2 py-0.5 text-[10px] font-bold text-indigo-100 backdrop-blur-sm">Pickup</span>
+                                </div>
+
+                                <!-- Drop-off Pin -->
+                                <div class="absolute right-[4%] top-[8%] flex items-center gap-1.5">
+                                    <span class="rounded-md bg-slate-900/80 px-2 py-0.5 text-[10px] font-bold text-amber-200 backdrop-blur-sm">Drop-off</span>
+                                    <span class="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-amber-400 text-slate-950 shadow-lg">
+                                        <span class="h-2 w-2 rounded-full bg-slate-950"></span>
+                                    </span>
+                                </div>
+
+                                <!-- Floating Telemetry Pills -->
+                                <div class="hero-float-card absolute left-3 top-3 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/75 px-3 py-1.5 text-[11px] font-bold text-white backdrop-blur-md">
+                                    <span class="text-amber-300">⛅</span>
+                                    <span>Misamis Oriental · Clear</span>
+                                </div>
+                                <div class="hero-float-card-delayed absolute bottom-3 right-3 inline-flex items-center gap-2 rounded-xl border border-white/15 bg-slate-900/75 px-3 py-1.5 text-[11px] font-bold text-emerald-300 backdrop-blur-md">
+                                    <span>ETA 4 mins</span>
+                                    <span class="text-white/40">·</span>
+                                    <span class="text-white">₱92.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Action Bar -->
+                            <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Tracking</p>
+                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">Satellite + GPS</p>
+                                </div>
+                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Payments</p>
+                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">GCash · Maya</p>
+                                </div>
+                                <div class="rounded-xl bg-indigo-50/80 px-2.5 py-2.5">
+                                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Smart AI</p>
+                                    <p class="mt-0.5 text-xs font-extrabold text-slate-900">24/7 Assistant</p>
+                                </div>
                             </div>
                         </div>
                     </div>

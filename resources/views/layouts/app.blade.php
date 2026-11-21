@@ -18,9 +18,11 @@
     </head>
     <body class="aurora-bg min-h-screen bg-slate-50 font-sans text-slate-800 antialiased">
         <div class="aurora-layer" aria-hidden="true">
+            <div class="hero-map-grid absolute inset-0 opacity-50"></div>
             <div class="aurora-blob aurora-blob-1"></div>
             <div class="aurora-blob aurora-blob-2"></div>
             <div class="aurora-blob aurora-blob-3"></div>
+            <canvas data-riderhub-canvas class="h-full w-full"></canvas>
         </div>
         <div class="page-loading fixed inset-x-0 top-0 z-[100]" role="status" aria-live="polite" aria-label="Loading page">
             <div class="h-1 bg-indigo-100/70">

@@ -37,7 +37,7 @@
         sidebarHover ? 'lg:w-64 lg:shadow-2xl lg:shadow-indigo-950/15' : 'lg:w-20 lg:shadow-none'
     ]"
 >
-    <div class="flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
+    <div class="no-scrollbar flex-1 overflow-y-auto overflow-x-hidden px-3 py-6">
         <p class="whitespace-nowrap px-3 text-[11px] font-bold uppercase tracking-widest text-slate-400 transition-all duration-200"
            :class="sidebarHover || sidebarOpen ? 'opacity-100 translate-x-0' : 'lg:opacity-0 lg:-translate-x-2'">
             Workspace

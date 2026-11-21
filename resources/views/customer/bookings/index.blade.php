@@ -27,7 +27,7 @@
             </select>
             <label class="sr-only" for="status">Booking status</label>
             <select id="status" name="status" class="rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                <option value="">All statuses</option>
+                <option value="">All status</option>
                 @foreach (['pending', 'accepted', 'picked_up', 'completed', 'cancelled'] as $status)
                     <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
                 @endforeach

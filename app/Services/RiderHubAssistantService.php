@@ -151,22 +151,22 @@ class RiderHubAssistantService
             ];
         }
 
-        // 5. Try real LLM (Gemini or OpenAI) if an API key is configured in .env
+        // 5. Direct math evaluation (e.g. "what is 245 * 18", "100 + 55 / 5")
+        if ($mathReply = $this->tryMath($message)) {
+            return [
+                'reply' => $mathReply,
+                'actions' => [],
+                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather', 'Tell me about Tagoloan'],
+            ];
+        }
+
+        // 6. Try real LLM (Repohive AI, Gemini, Groq, or OpenAI) if configured
         if ($llmReply = $this->askConfiguredLlm($message, $user, $history)) {
             return [
                 'reply' => $llmReply,
                 'actions' => [],
                 'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km', 'Ask another question'],
                 'source' => 'ai',
-            ];
-        }
-
-        // 6. Direct math evaluation (e.g. "what is 245 * 18", "100 + 55 / 5")
-        if ($mathReply = $this->tryMath($message)) {
-            return [
-                'reply' => $mathReply,
-                'actions' => [],
-                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather', 'Tell me about Tagoloan'],
             ];
         }
 
@@ -471,6 +471,10 @@ class RiderHubAssistantService
      */
     private function askConfiguredLlm(string $message, ?User $user, array $history): ?string
     {
+        if (app()->runningUnitTests()) {
+            return null;
+        }
+
         $systemPrompt = $this->buildSystemPrompt($user);
 
         // 0. Repohive Cloud AI Gateway (Sir Kent's Cloud AI — GPT-4o Mini / GPT-4o)

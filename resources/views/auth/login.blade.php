@@ -11,8 +11,13 @@
 
         <x-auth-session-status class="mb-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" :status="session('status')" />
 
-        <form method="POST" action="{{ route('login') }}" class="auth-form-stagger space-y-5">
+        <form method="POST" action="{{ route('login') }}" id="login-form" class="auth-form-stagger space-y-5">
             @csrf
+
+            <div id="saved-accounts-wrap" class="hidden rounded-2xl border border-indigo-100 bg-indigo-50/70 p-3">
+                <p class="text-[11px] font-bold uppercase tracking-wider text-indigo-700">Saved emails</p>
+                <div id="saved-accounts-list" class="mt-2 flex flex-wrap gap-1.5"></div>
+            </div>
 
             <div>
                 <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
@@ -51,4 +56,90 @@
             </p>
         </div>
     </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const rememberCheckbox = document.getElementById('remember_me');
+            const savedWrap = document.getElementById('saved-accounts-wrap');
+            const savedList = document.getElementById('saved-accounts-list');
+            const KEY_LAST = 'riderhub-remembered-email';
+            const KEY_LIST = 'riderhub-saved-emails';
+
+            const getSavedEmails = () => {
+                try {
+                    const parsed = JSON.parse(localStorage.getItem(KEY_LIST) || '[]');
+                    return Array.isArray(parsed) ? parsed.filter((v) => typeof v === 'string' && v.includes('@')) : [];
+                } catch {
+                    return [];
+                }
+            };
+
+            const renderSavedEmails = () => {
+                const emails = getSavedEmails();
+                savedList.innerHTML = '';
+                if (!emails.length) {
+                    savedWrap.classList.add('hidden');
+                    return;
+                }
+                savedWrap.classList.remove('hidden');
+                emails.forEach((savedEmail) => {
+                    const chip = document.createElement('div');
+                    chip.className = 'inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm';
+
+                    const pickBtn = document.createElement('button');
+                    pickBtn.type = 'button';
+                    pickBtn.textContent = savedEmail;
+                    pickBtn.className = 'hover:text-indigo-600';
+                    pickBtn.addEventListener('click', () => {
+                        emailInput.value = savedEmail;
+                        rememberCheckbox.checked = true;
+                        passwordInput?.focus();
+                    });
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.textContent = '×';
+                    removeBtn.setAttribute('aria-label', `Remove ${savedEmail}`);
+                    removeBtn.className = 'ml-0.5 text-slate-400 hover:text-rose-600';
+                    removeBtn.addEventListener('click', () => {
+                        const updated = getSavedEmails().filter((e) => e !== savedEmail);
+                        try {
+                            localStorage.setItem(KEY_LIST, JSON.stringify(updated));
+                            if (localStorage.getItem(KEY_LAST) === savedEmail) localStorage.removeItem(KEY_LAST);
+                        } catch {}
+                        renderSavedEmails();
+                    });
+
+                    chip.append(pickBtn, removeBtn);
+                    savedList.append(chip);
+                });
+            };
+
+            try {
+                const rememberedEmail = localStorage.getItem(KEY_LAST);
+                if (rememberedEmail && !emailInput.value) {
+                    emailInput.value = rememberedEmail;
+                    rememberCheckbox.checked = true;
+                }
+            } catch {}
+
+            renderSavedEmails();
+
+            form?.addEventListener('submit', () => {
+                const email = emailInput.value.trim();
+                try {
+                    if (rememberCheckbox.checked && email) {
+                        localStorage.setItem(KEY_LAST, email);
+                        const existing = getSavedEmails().filter((e) => e.toLowerCase() !== email.toLowerCase());
+                        localStorage.setItem(KEY_LIST, JSON.stringify([email, ...existing].slice(0, 4)));
+                    } else {
+                        localStorage.removeItem(KEY_LAST);
+                    }
+                } catch {}
+            });
+        });
+    </script>
 </x-guest-layout>

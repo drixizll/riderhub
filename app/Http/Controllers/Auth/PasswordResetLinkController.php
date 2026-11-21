@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Notifications\RiderHubNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -21,37 +24,49 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
+     * Handle an incoming password reset link request (applicable to all roles).
      *
      * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $request->merge([
+            'email' => Str::lower(trim((string) $request->input('email', ''))),
+        ]);
+
+        $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [$validated['email']])
+            ->first();
 
-        if ($status !== Password::RESET_LINK_SENT) {
+        if (! $user) {
             return back()
                 ->withInput($request->only('email'))
-                ->withErrors(['email' => __($status)]);
+                ->withErrors(['email' => __('passwords.user')]);
         }
 
-        $response = back()->with('status', __($status));
+        $result = $this->dispatchResetForUser($user, 'email');
 
-        if ($localUrl = $this->localPreviewResetUrl($request->string('email')->toString())) {
-            $response->with('local_reset_url', $localUrl);
+        if (! $result['ok']) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => $result['message']]);
+        }
+
+        $response = back()->with('status', $result['message']);
+
+        if ($result['reset_url']) {
+            $response->with('local_reset_url', $result['reset_url']);
         }
 
         return $response;
     }
 
     /**
-     * Recover a forgotten account by registered phone number and send a password reset link.
+     * Recover a forgotten account by registered phone number and issue a password reset link.
      */
     public function recover(Request $request): RedirectResponse
     {
@@ -68,13 +83,13 @@ class PasswordResetLinkController extends Controller
                 ->withErrors(['phone' => 'We could not find a RiderHub account linked to that phone number.']);
         }
 
-        $status = Password::sendResetLink(['email' => $user->email]);
+        $result = $this->dispatchResetForUser($user, 'phone');
 
-        if ($status !== Password::RESET_LINK_SENT) {
+        if (! $result['ok']) {
             return back()
                 ->withInput($request->only('phone'))
                 ->with('recovery_tab', 'phone')
-                ->withErrors(['phone' => __($status)]);
+                ->withErrors(['phone' => $result['message']]);
         }
 
         $maskedEmail = $this->maskEmail($user->email);
@@ -82,11 +97,58 @@ class PasswordResetLinkController extends Controller
             ->with('recovery_tab', 'phone')
             ->with('status', "Account found ({$maskedEmail})! We sent a password reset link to your email.");
 
-        if ($localUrl = $this->localPreviewResetUrl($user->email)) {
-            $response->with('local_reset_url', $localUrl);
+        if ($result['reset_url']) {
+            $response->with('local_reset_url', $result['reset_url']);
         }
 
         return $response;
+    }
+
+    /**
+     * Generates a single valid password reset token, sends the email notification
+     * (when SMTP is configured), records an in-app security notification, and exposes
+     * the same one-time reset URL directly whenever no live SMTP mailer is active.
+     *
+     * @return array{ok: bool, emailed: bool, message: string, reset_url: ?string}
+     */
+    private function dispatchResetForUser(User $user, string $channel): array
+    {
+        $mailer = (string) config('mail.default', 'log');
+        $hasLiveMailer = ! in_array($mailer, ['log', 'array'], true);
+        $broker = Password::broker();
+        $token = $broker->createToken($user);
+        $emailed = false;
+
+        try {
+            $user->sendPasswordResetNotification($token);
+            $emailed = $hasLiveMailer;
+        } catch (\Throwable $exception) {
+            Log::warning('Password reset email transport failed; falling back to direct reset link.', [
+                'user_id' => $user->id,
+                'error' => $exception->getMessage(),
+            ]);
+            $emailed = false;
+        }
+
+        // Record an in-app security notification for the user account.
+        try {
+            $viaLabel = $channel === 'phone' ? 'phone number recovery' : 'email recovery';
+            $user->notify(new RiderHubNotification(
+                title: 'Password reset requested',
+                message: "A password reset link was requested for your account via {$viaLabel}. If this wasn't you, update your password immediately.",
+                url: route('profile.edit'),
+                category: 'security',
+            ));
+        } catch (\Throwable) {
+            // Never block password reset if notification storage fails.
+        }
+
+        return [
+            'ok' => true,
+            'emailed' => $emailed,
+            'message' => __('passwords.sent'),
+            'reset_url' => $emailed ? null : route('password.reset', ['token' => $token, 'email' => $user->email]),
+        ];
     }
 
     private function findUserByPhone(string $input): ?User
@@ -99,7 +161,7 @@ class PasswordResetLinkController extends Controller
 
         return User::query()
             ->whereNotNull('phone')
-            ->get(['id', 'email', 'phone'])
+            ->get(['id', 'name', 'email', 'phone', 'role'])
             ->first(fn (User $candidate): bool => $this->normalizePhone((string) $candidate->phone) === $normalized);
     }
 
@@ -125,26 +187,5 @@ class PasswordResetLinkController extends Controller
         $visible = strlen($local) <= 2 ? substr($local, 0, 1) : substr($local, 0, 2);
 
         return $visible.'***@'.$domain;
-    }
-
-    /**
-     * In local development with MAIL_MAILER=log, expose a direct reset link so the flow
-     * can be tested immediately without configuring an external SMTP server.
-     */
-    private function localPreviewResetUrl(string $email): ?string
-    {
-        if (! app()->isLocal() || config('mail.default') !== 'log') {
-            return null;
-        }
-
-        $user = User::where('email', $email)->first();
-
-        if (! $user) {
-            return null;
-        }
-
-        $token = Password::broker()->createToken($user);
-
-        return route('password.reset', ['token' => $token, 'email' => $user->email]);
     }
 }

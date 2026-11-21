@@ -38,9 +38,9 @@
 
         @if (session('local_reset_url'))
             <div class="mt-4 rounded-2xl border border-indigo-200 bg-indigo-50 p-4 text-sm text-indigo-900">
-                <p class="font-bold">Local preview link (email is in log mode)</p>
-                <p class="mt-1 text-xs text-indigo-700">Click below to open your password reset page directly:</p>
-                <a href="{{ session('local_reset_url') }}" class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700">
+                <p class="font-bold">Instant password reset link ready</p>
+                <p class="mt-1 text-xs text-indigo-700">Tap the button below to set your new password immediately (valid for 60 minutes):</p>
+                <a href="{{ session('local_reset_url') }}" class="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:shadow-lg">
                     Open password reset page
                     <span aria-hidden="true">→</span>
                 </a>

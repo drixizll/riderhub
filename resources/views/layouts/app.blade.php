@@ -42,14 +42,15 @@
 
             <div class="min-h-[calc(100dvh-4rem)] transition-[padding] duration-300 ease-out lg:pl-20">
                 @isset($header)
-                    <header class="border-b border-slate-200 bg-white">
+                    <header class="app-header-enter relative overflow-hidden border-b border-indigo-100/80 bg-white/85 backdrop-blur-md">
+                        <div class="pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-indigo-600 via-violet-500 to-fuchsia-500" aria-hidden="true"></div>
                         <div class="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
                             {{ $header }}
                         </div>
                     </header>
                 @endisset
 
-                <main>
+                <main class="app-page-enter">
                     {{ $slot }}
                 </main>
             </div>

@@ -32,7 +32,8 @@
         .btn-primary { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: #fff; box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4); }
         .btn-ghost { background: rgba(255,255,255,0.1); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.16); }
 
-        .receipt { max-width: 580px; margin: 34px auto; background: #fff; border-radius: 26px; overflow: hidden; box-shadow: 0 30px 70px rgba(10, 5, 30, 0.5); }
+        .receipt { max-width: 580px; margin: 34px auto; background: #fff; border-radius: 26px; overflow: hidden; box-shadow: 0 30px 70px rgba(10, 5, 30, 0.5); animation: receipt-enter 650ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+        @keyframes receipt-enter { from { opacity: 0; transform: translateY(22px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .hero {
             position: relative;
             overflow: hidden;

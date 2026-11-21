@@ -623,6 +623,17 @@ html[data-theme="dark"] .leaflet-container {
     background: #0f172a;
 }
 
+html[data-theme="dark"] .leaflet-control-layers {
+    background: rgb(17 24 39 / 0.94);
+    color: #f8fafc;
+    border: 1px solid #334155;
+    border-radius: 0.75rem;
+}
+
+html[data-theme="dark"] .leaflet-control-layers label {
+    color: #e2e8f0;
+}
+
 html[data-theme="dark"] .role-choice {
     border-color: #334155;
     background-color: #111827;

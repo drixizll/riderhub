@@ -183,29 +183,28 @@
                 maxBoundsViscosity: 0.9,
             });
             const tileLayers = {
-                'Clean Street': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
-                    maxZoom: 20,
+                'Street Map': L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri',
+                    maxZoom: 19,
                 }),
                 'Satellite': L.layerGroup([
                     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                         attribution: 'Tiles &copy; Esri',
                         maxZoom: 19,
                     }),
-                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-                        subdomains: 'abcd',
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+                        maxZoom: 19,
+                    }),
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
                         maxZoom: 19,
                     }),
                 ]),
-                'Dark Map': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                    attribution: '&copy; OpenStreetMap &copy; CARTO',
-                    subdomains: 'abcd',
-                    maxZoom: 20,
+                'OpenStreetMap': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
+                    maxZoom: 19,
                 }),
             };
-            const defaultLayerName = document.documentElement.dataset.theme === 'dark' ? 'Dark Map' : 'Clean Street';
-            tileLayers[defaultLayerName].addTo(map);
+            tileLayers['Street Map'].addTo(map);
             L.control.layers(tileLayers, null, { position: 'topright', collapsed: false }).addTo(map);
 
             const points = {

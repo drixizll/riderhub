@@ -15,8 +15,8 @@ class WeatherController extends Controller
             'lng' => ['nullable', 'numeric', 'between:-180,180'],
         ]);
 
-        $lat = isset($validated['lat']) ? (float) $validated['lat'] : 14.5995;
-        $lng = isset($validated['lng']) ? (float) $validated['lng'] : 120.9842;
+        $lat = isset($validated['lat']) ? (float) $validated['lat'] : (float) config('riderhub.map.center.lat', 8.5378);
+        $lng = isset($validated['lng']) ? (float) $validated['lng'] : (float) config('riderhub.map.center.lng', 124.7536);
 
         return response()->json($weather->current($lat, $lng));
     }

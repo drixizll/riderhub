@@ -14,7 +14,7 @@ class WeatherService
      *
      * @return array<string, mixed>
      */
-    public function current(float $lat = 14.5995, float $lng = 120.9842): array
+    public function current(float $lat = 8.5378, float $lng = 124.7536): array
     {
         $roundedLat = round($lat, 2);
         $roundedLng = round($lng, 2);

@@ -463,6 +463,20 @@ html[data-theme="dark"] select {
     color-scheme: dark;
 }
 
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="file"]),
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+    background-color: #0f172a !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+    caret-color: #818cf8;
+}
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+    color: #94a3b8 !important;
+}
+
 html[data-theme="dark"] .leaflet-container {
     background: #0f172a;
 }

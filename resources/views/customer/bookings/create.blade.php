@@ -33,13 +33,31 @@
             <section class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
                 <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
                     <div class="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div><h2 class="font-bold text-slate-950">Choose your route</h2><p class="mt-1 text-xs text-slate-500">Click the map to place the selected pin.</p></div>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h2 class="font-bold text-slate-950">Choose your route</h2>
+                                <span class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">
+                                    <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                                    {{ $mapConfig['region_name'] ?? 'Tagoloan, Misamis Oriental' }}
+                                </span>
+                            </div>
+                            <p class="mt-1 text-xs text-slate-500">Click the map or tap a barangay below to place the selected pin.</p>
+                        </div>
                         <div class="flex gap-2">
                             <button type="button" data-select-point="pickup" class="rounded-lg bg-indigo-50 px-3 py-2 text-xs font-bold text-indigo-700 ring-1 ring-indigo-200">Set pickup</button>
                             <button type="button" data-select-point="dropoff" class="rounded-lg border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50">Set drop-off</button>
                         </div>
                     </div>
-                    <div id="booking-map" class="h-72 w-full bg-slate-100 sm:h-96" aria-label="Interactive pickup and drop-off map"></div>
+                    <div class="flex flex-wrap items-center gap-1.5 border-b border-slate-100 bg-slate-50/70 px-5 py-2.5">
+                        <span class="mr-1 text-[11px] font-semibold text-slate-400">Quick pins:</span>
+                        <button type="button" data-quick-pin='{"name":"Poblacion, Tagoloan, Misamis Oriental","lat":8.5378,"lng":124.7536}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Poblacion</button>
+                        <button type="button" data-quick-pin='{"name":"Baluarte, Tagoloan, Misamis Oriental","lat":8.5515,"lng":124.7615}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Baluarte</button>
+                        <button type="button" data-quick-pin='{"name":"Casinglot, Tagoloan, Misamis Oriental","lat":8.5245,"lng":124.7495}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Casinglot</button>
+                        <button type="button" data-quick-pin='{"name":"Sta. Ana, Tagoloan, Misamis Oriental","lat":8.5572,"lng":124.7734}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Sta. Ana</button>
+                        <button type="button" data-quick-pin='{"name":"Natumolan, Tagoloan, Misamis Oriental","lat":8.5458,"lng":124.7648}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Natumolan</button>
+                        <button type="button" data-quick-pin='{"name":"Mohon, Tagoloan, Misamis Oriental","lat":8.5635,"lng":124.7568}' class="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Mohon</button>
+                    </div>
+                    <div id="booking-map" class="h-72 w-full bg-slate-100 sm:h-96" aria-label="Interactive pickup and drop-off map for Tagoloan, Misamis Oriental"></div>
                     <div class="flex flex-col gap-2 border-t border-slate-100 px-5 py-3 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
                         <span>Map data &copy; OpenStreetMap contributors</span>
                         <button type="button" id="use-current-location" class="inline-flex items-center gap-1.5 self-start font-bold text-indigo-600 hover:text-indigo-800 sm:self-auto">
@@ -84,7 +102,7 @@
                         <p class="mt-4 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">Final fare is calculated from the selected coordinates. Actual road distance may differ.</p>
                     </section>
 
-                    <x-weather-widget title="Pickup Weather Advisory" :lat="old('pickup_lat', 14.5995)" :lng="old('pickup_lng', 120.9842)" />
+                    <x-weather-widget title="Tagoloan Weather Advisory" :lat="old('pickup_lat', $mapConfig['default_pickup']['lat'] ?? 8.5378)" :lng="old('pickup_lng', $mapConfig['default_pickup']['lng'] ?? 124.7536)" />
                 </div>
             </section>
 
@@ -96,13 +114,13 @@
                     </div>
                     <label for="pickup_address" class="mt-5 block text-sm font-semibold text-slate-700">Pickup address</label>
                     <div class="mt-2 flex gap-2">
-                        <input type="text" id="pickup_address" name="pickup_address" value="{{ old('pickup_address') }}" required maxlength="255" placeholder="Enter a place or address"
-                               class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        <input type="text" id="pickup_address" name="pickup_address" list="tagoloan-places" value="{{ old('pickup_address') }}" required maxlength="255" placeholder="e.g. Poblacion, Baluarte, Casinglot, Tagoloan"
+                               class="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                         <button type="button" data-geocode="pickup" class="shrink-0 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Find</button>
                     </div>
                     <x-input-error :messages="$errors->get('pickup_address')" class="mt-2" />
-                    <input type="hidden" id="pickup_lat" name="pickup_lat" value="{{ old('pickup_lat', 14.5995) }}">
-                    <input type="hidden" id="pickup_lng" name="pickup_lng" value="{{ old('pickup_lng', 120.9842) }}">
+                    <input type="hidden" id="pickup_lat" name="pickup_lat" value="{{ old('pickup_lat', $mapConfig['default_pickup']['lat'] ?? 8.5378) }}">
+                    <input type="hidden" id="pickup_lng" name="pickup_lng" value="{{ old('pickup_lng', $mapConfig['default_pickup']['lng'] ?? 124.7536) }}">
                     <p data-coordinates="pickup" class="mt-3 text-xs text-slate-400"></p>
                 </article>
 
@@ -113,13 +131,13 @@
                     </div>
                     <label for="dropoff_address" class="mt-5 block text-sm font-semibold text-slate-700">Drop-off address</label>
                     <div class="mt-2 flex gap-2">
-                        <input type="text" id="dropoff_address" name="dropoff_address" value="{{ old('dropoff_address') }}" required maxlength="255" placeholder="Enter a place or address"
-                               class="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        <input type="text" id="dropoff_address" name="dropoff_address" list="tagoloan-places" value="{{ old('dropoff_address') }}" required maxlength="255" placeholder="e.g. Sta. Ana, Natumolan, Phividec, Tagoloan"
+                               class="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                         <button type="button" data-geocode="dropoff" class="shrink-0 rounded-xl border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Find</button>
                     </div>
                     <x-input-error :messages="$errors->get('dropoff_address')" class="mt-2" />
-                    <input type="hidden" id="dropoff_lat" name="dropoff_lat" value="{{ old('dropoff_lat', 14.5995) }}">
-                    <input type="hidden" id="dropoff_lng" name="dropoff_lng" value="{{ old('dropoff_lng', 121.0244) }}">
+                    <input type="hidden" id="dropoff_lat" name="dropoff_lat" value="{{ old('dropoff_lat', $mapConfig['default_dropoff']['lat'] ?? 8.5515) }}">
+                    <input type="hidden" id="dropoff_lng" name="dropoff_lng" value="{{ old('dropoff_lng', $mapConfig['default_dropoff']['lng'] ?? 124.7615) }}">
                     <p data-coordinates="dropoff" class="mt-3 text-xs text-slate-400"></p>
                 </article>
             </section>
@@ -131,13 +149,39 @@
                     <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.69L10.22 5.03a.75.75 0 1 1 1.06-1.06l5.5 5.5a.75.75 0 0 1 0 1.06l-5.5 5.5a.75.75 0 1 1-1.06-1.06l4.22-4.22H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" /></svg>
                 </button>
             </div>
+            <datalist id="tagoloan-places">
+                <option value="Poblacion, Tagoloan, Misamis Oriental"></option>
+                <option value="Baluarte, Tagoloan, Misamis Oriental"></option>
+                <option value="Casinglot, Tagoloan, Misamis Oriental"></option>
+                <option value="Gracia, Tagoloan, Misamis Oriental"></option>
+                <option value="Mohon, Tagoloan, Misamis Oriental"></option>
+                <option value="Natumolan, Tagoloan, Misamis Oriental"></option>
+                <option value="Rosario, Tagoloan, Misamis Oriental"></option>
+                <option value="Sta. Ana, Tagoloan, Misamis Oriental"></option>
+                <option value="Sta. Cruz, Tagoloan, Misamis Oriental"></option>
+                <option value="Sugbongcogon, Tagoloan, Misamis Oriental"></option>
+                <option value="Tagoloan Municipal Hall, Poblacion, Tagoloan"></option>
+                <option value="Tagoloan Community College, Baluarte, Tagoloan"></option>
+                <option value="Tagoloan Public Market, Poblacion, Tagoloan"></option>
+                <option value="Phividec Industrial Estate, Sta. Cruz, Tagoloan"></option>
+            </datalist>
         </form>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const initial = { lat: 14.5995, lng: 120.9842 };
-            const map = L.map('booking-map').setView([initial.lat, initial.lng], 12);
+            const mapCfg = @json($mapConfig);
+            const serviceBounds = L.latLngBounds(
+                [mapCfg.bounds.south, mapCfg.bounds.west],
+                [mapCfg.bounds.north, mapCfg.bounds.east],
+            );
+            const map = L.map('booking-map', {
+                center: [mapCfg.center.lat, mapCfg.center.lng],
+                zoom: mapCfg.default_zoom || 14,
+                minZoom: mapCfg.min_zoom || 12,
+                maxBounds: serviceBounds,
+                maxBoundsViscosity: 0.9,
+            });
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
                 maxZoom: 19,
@@ -204,6 +248,15 @@
                 });
             });
 
+            document.querySelectorAll('[data-quick-pin]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const place = JSON.parse(button.dataset.quickPin);
+                    setPoint(selectedPoint, place.lat, place.lng);
+                    points[selectedPoint].address.value = place.name;
+                    map.setView([place.lat, place.lng], 15);
+                });
+            });
+
             map.on('click', (event) => setPoint(selectedPoint, event.latlng.lat, event.latlng.lng));
 
             async function findAddress(name) {
@@ -221,13 +274,21 @@
                 button.disabled = true;
                 button.textContent = 'Searching…';
                 try {
+                    const query = /tagoloan/i.test(address) ? address : `${address}, ${mapCfg.region_name}`;
                     const url = new URL('https://nominatim.openstreetmap.org/search');
-                    url.search = new URLSearchParams({ format: 'jsonv2', limit: '1', q: address });
+                    url.search = new URLSearchParams({
+                        format: 'jsonv2',
+                        limit: '1',
+                        countrycodes: 'ph',
+                        bounded: '1',
+                        viewbox: `${mapCfg.bounds.west},${mapCfg.bounds.north},${mapCfg.bounds.east},${mapCfg.bounds.south}`,
+                        q: query,
+                    });
                     const response = await fetch(url, { headers: { Accept: 'application/json' } });
                     if (!response.ok) throw new Error('Address search is unavailable.');
                     const results = await response.json();
                     if (!results.length) {
-                        point.address.setCustomValidity('No location found. Try a more specific address or select the point on the map.');
+                        point.address.setCustomValidity(`No location found in ${mapCfg.region_name}. Try a barangay name or tap directly on the map.`);
                         point.address.reportValidity();
                         point.address.setCustomValidity('');
                         return;
@@ -256,6 +317,10 @@
                 if (!navigator.geolocation) return;
                 navigator.geolocation.getCurrentPosition(
                     ({ coords }) => {
+                        if (!serviceBounds.contains([coords.latitude, coords.longitude])) {
+                            window.alert(`Your current GPS location appears to be outside ${mapCfg.region_name}. Please pin your location directly on the Tagoloan map.`);
+                            return;
+                        }
                         setPoint('pickup', coords.latitude, coords.longitude);
                         map.setView([coords.latitude, coords.longitude], 15);
                     },

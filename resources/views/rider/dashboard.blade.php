@@ -113,7 +113,7 @@
             </section>
 
             <div class="space-y-4">
-                <x-weather-widget title="Road & Riding Weather" :lat="$activeBooking?->pickup_lat ?? 14.5995" :lng="$activeBooking?->pickup_lng ?? 120.9842" />
+                <x-weather-widget title="Tagoloan Road Weather" :lat="$activeBooking?->pickup_lat ?? 8.5378" :lng="$activeBooking?->pickup_lng ?? 124.7536" />
             </div>
         </div>
     </div>

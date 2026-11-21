@@ -1,8 +1,8 @@
 @props([
     'variant' => 'card',
-    'lat' => 14.5995,
-    'lng' => 120.9842,
-    'title' => 'Live Riding Weather',
+    'lat' => 8.5378,
+    'lng' => 124.7536,
+    'title' => 'Tagoloan Live Weather',
 ])
 
 @if ($variant === 'compact')

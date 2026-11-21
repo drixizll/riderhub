@@ -23,7 +23,10 @@ class RiderHubAssistantService
 
         // 1. Weather inquiry
         if (Str::contains($text, ['weather', 'ulan', 'rain', 'panahon', 'bagyo', 'init', 'temp', 'forecast'])) {
-            $data = $this->weather->current($lat ?? 14.5995, $lng ?? 120.9842);
+            $data = $this->weather->current(
+                $lat ?? (float) config('riderhub.map.center.lat', 8.5378),
+                $lng ?? (float) config('riderhub.map.center.lng', 124.7536),
+            );
 
             if ($data['available']) {
                 return [

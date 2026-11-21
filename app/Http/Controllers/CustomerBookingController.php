@@ -37,10 +37,12 @@ class CustomerBookingController extends Controller
     public function create(): View
     {
         $fare = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
+        $map = config('riderhub.map');
 
         return view('customer.bookings.create', [
             'fareBase' => $fare['base'],
             'farePerKm' => $fare['per_km'],
+            'mapConfig' => $map,
         ]);
     }
 

@@ -61,7 +61,7 @@ class AppServiceProvider extends ServiceProvider
                     'mail.mailers.smtp.username' => $smtpUser,
                     'mail.mailers.smtp.password' => $smtpPass,
                     'mail.from.address' => $smtpUser,
-                    'mail.from.name' => 'RiderHub Security',
+                    'mail.from.name' => 'RiderHub',
                 ]);
                 $this->app->forgetInstance('mail.manager');
             }
@@ -77,9 +77,8 @@ class AppServiceProvider extends ServiceProvider
             $firstName = Str::before((string) ($notifiable->name ?? 'RiderHub User'), ' ');
 
             return (new MailMessage)
-                ->from((string) config('mail.from.address', 'riderhub.misor@gmail.com'), 'RiderHub Security')
-                ->replyTo('riderhub.misor@gmail.com', 'RiderHub Official Support')
-                ->subject('RiderHub — Your 6-Digit Password Reset Code')
+                ->from((string) config('mail.from.address', 'drexelljhon72@gmail.com'), 'RiderHub')
+                ->subject('RiderHub Password Reset Verification Code')
                 ->view(['html' => 'emails.password-reset-otp', 'text' => 'emails.password-reset-otp-text'], [
                     'firstName' => $firstName,
                     'otp' => is_string($otp) ? $otp : null,

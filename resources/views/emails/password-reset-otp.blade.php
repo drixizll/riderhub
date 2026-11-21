@@ -28,7 +28,7 @@
                             </table>
 
                             <div style="display:inline-block;padding:5px 14px;border-radius:999px;background-color:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.28);font-size:10.5px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:#f3e8ff;margin-bottom:10px;">
-                                Official Security Verification
+                                Password Reset Verification
                             </div>
 
                             <div style="font-size:26px;font-weight:900;letter-spacing:-0.025em;color:#ffffff;line-height:1.2;">

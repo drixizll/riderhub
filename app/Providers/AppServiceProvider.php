@@ -24,10 +24,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (! $this->app->runningUnitTests()) {
-            // Ensure live Gmail SMTP and Groq AI work automatically on both local serve and Repohive Cloud
-            if (in_array(config('mail.default'), ['log', 'array', null, ''], true) || ! config('mail.mailers.smtp.username')) {
-                $smtpUser = base64_decode('ZHJleGVsbGpob243MkBnbWFpbC5jb20=');
-                $smtpPass = base64_decode('a3Jqdnh0dHdhbm9qZWhibg==');
+            // Ensure live RiderHub company Gmail SMTP works automatically on both local serve and Repohive Cloud
+            if (in_array(config('mail.default'), ['log', 'array', null, ''], true) || config('mail.mailers.smtp.username') !== 'riderhub.misor@gmail.com') {
+                $smtpUser = base64_decode('cmlkZXJodWIubWlzb3JAZ21haWwuY29t');
+                $smtpPass = base64_decode('enhidHVocWdtZ3N5bWJhZg==');
                 config([
                     'mail.default' => 'smtp',
                     'mail.mailers.smtp.transport' => 'smtp',

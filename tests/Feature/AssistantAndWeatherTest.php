@@ -82,7 +82,28 @@ class AssistantAndWeatherTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('About RiderHub')
-            ->assertSee('rider-city-ride.jpg')
+            ->assertSee('Tagoloan_Municipal_Hall.jpg')
             ->assertSee('RiderHub AI');
+    }
+
+    public function test_assistant_evaluates_math_and_general_knowledge_queries(): void
+    {
+        $this->postJson('/api/assistant/chat', ['message' => 'What is 250 * 4?'])
+            ->assertOk()
+            ->assertJsonPath('reply', '250 * 4 = 1,000');
+
+        Http::fake([
+            'https://en.wikipedia.org/w/api.php*' => Http::response([
+                'query' => ['search' => [['title' => 'Tagoloan, Misamis Oriental']]],
+            ]),
+            'https://en.wikipedia.org/api/rest_v1/page/summary/*' => Http::response([
+                'extract' => 'Tagoloan is a first class municipality in the province of Misamis Oriental, Philippines.',
+            ]),
+        ]);
+
+        $response = $this->postJson('/api/assistant/chat', ['message' => 'Tell me about Tagoloan, Misamis Oriental'])
+            ->assertOk();
+
+        $this->assertStringContainsString('Misamis Oriental', $response->json('reply'));
     }
 }

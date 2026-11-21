@@ -203,9 +203,30 @@
                         const pickupPoint = [{{ $booking->pickup_lat }}, {{ $booking->pickup_lng }}];
                         const dropoffPoint = [{{ $booking->dropoff_lat }}, {{ $booking->dropoff_lng }}];
                         const map = L.map('tracking-map').setView(pickupPoint, 13);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            attribution: '&copy; OpenStreetMap contributors',
-                        }).addTo(map);
+                        const trackLayers = {
+                            'Clean Street': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                                subdomains: 'abcd',
+                                maxZoom: 20,
+                            }),
+                            'Satellite': L.layerGroup([
+                                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                                    attribution: 'Tiles &copy; Esri',
+                                    maxZoom: 19,
+                                }),
+                                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+                                    subdomains: 'abcd',
+                                    maxZoom: 19,
+                                }),
+                            ]),
+                            'Dark Map': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                                subdomains: 'abcd',
+                                maxZoom: 20,
+                            }),
+                        };
+                        trackLayers[document.documentElement.dataset.theme === 'dark' ? 'Dark Map' : 'Clean Street'].addTo(map);
+                        L.control.layers(trackLayers, null, { position: 'topright' }).addTo(map);
 
                         L.marker(pickupPoint).addTo(map).bindPopup('Pickup');
                         L.marker(dropoffPoint).addTo(map).bindPopup('Drop-off');

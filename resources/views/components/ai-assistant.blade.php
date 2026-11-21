@@ -67,10 +67,13 @@
             </template>
 
             <div x-show="sending" x-cloak class="flex justify-start">
-                <div class="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                    <span class="ai-typing-dot h-2 w-2 rounded-full bg-indigo-500"></span>
-                    <span class="ai-typing-dot h-2 w-2 rounded-full bg-indigo-500" style="animation-delay: 140ms"></span>
-                    <span class="ai-typing-dot h-2 w-2 rounded-full bg-indigo-500" style="animation-delay: 280ms"></span>
+                <div class="inline-flex items-center gap-2 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-500 shadow-sm">
+                    <span class="inline-flex items-center gap-1">
+                        <span class="ai-typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500"></span>
+                        <span class="ai-typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500" style="animation-delay: 140ms"></span>
+                        <span class="ai-typing-dot h-1.5 w-1.5 rounded-full bg-indigo-500" style="animation-delay: 280ms"></span>
+                    </span>
+                    <span>Thinking…</span>
                 </div>
             </div>
         </div>
@@ -162,6 +165,7 @@
 
                     try {
                         const token = document.querySelector('meta[name="csrf-token"]')?.content || @json(csrf_token());
+                        const history = this.messages.slice(-8, -1).map((m) => ({ role: m.role, text: m.text }));
                         const response = await fetch(@json(route('assistant.chat')), {
                             method: 'POST',
                             headers: {
@@ -169,7 +173,7 @@
                                 'Content-Type': 'application/json',
                                 'X-CSRF-TOKEN': token,
                             },
-                            body: JSON.stringify({ message: clean }),
+                            body: JSON.stringify({ message: clean, history }),
                         });
 
                         if (!response.ok) throw new Error('Assistant unavailable');

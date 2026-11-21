@@ -17,9 +17,20 @@
         @include('layouts.theme-init')
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="bg-white font-sans text-slate-800 antialiased">
-        <div class="page-loading fixed inset-x-0 top-0 z-[100] h-1 bg-indigo-100/70" role="status" aria-live="polite" aria-label="Loading page">
-            <span class="page-loading-progress block h-full w-full origin-left bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-400" aria-hidden="true"></span>
+    <body class="aurora-bg bg-white font-sans text-slate-800 antialiased">
+        <div class="aurora-layer" aria-hidden="true">
+            <div class="aurora-blob aurora-blob-1"></div>
+            <div class="aurora-blob aurora-blob-2"></div>
+            <div class="aurora-blob aurora-blob-3"></div>
+        </div>
+        <div class="page-loading fixed inset-x-0 top-0 z-[100]" role="status" aria-live="polite" aria-label="Loading page">
+            <div class="h-1 bg-indigo-100/70">
+                <span class="page-loading-progress block h-full w-full origin-left bg-gradient-to-r from-indigo-500 via-fuchsia-500 to-cyan-400" aria-hidden="true"></span>
+            </div>
+            <div class="page-loading-pill fixed left-1/2 top-4 inline-flex items-center gap-2.5 rounded-full border border-indigo-200/80 bg-white/95 px-4 py-2 text-xs font-bold text-indigo-700 shadow-xl shadow-indigo-900/15 backdrop-blur-md">
+                <span class="loading-spinner inline-block h-3.5 w-3.5 rounded-full border-2 border-indigo-600 border-r-transparent" aria-hidden="true"></span>
+                <span>Loading RiderHub…</span>
+            </div>
         </div>
         <header class="sticky top-0 z-30 border-b border-slate-100/80 bg-white/90 backdrop-blur-md">
             <nav class="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Main navigation">
@@ -57,7 +68,7 @@
                         <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
                             Every trip.<br>
                             Every delivery.<br>
-                            <span class="text-indigo-600">One easy booking.</span>
+                            <span class="text-gradient-brand">One easy booking.</span>
                         </h1>
                         <p class="mt-6 max-w-xl text-lg leading-8 text-slate-600">
                             Get where you need to go or send what matters. RiderHub brings reliable rides and package delivery together in one simple app.
@@ -129,7 +140,7 @@
                     <p class="mt-4 text-lg leading-7 text-slate-600">From your daily commute to a package across town, we make getting there simple.</p>
                 </div>
 
-                <div class="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="reveal-stagger mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     <article class="reveal-on-scroll rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
                         <span class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
                             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 17h2m10 0h2M7 17l2-6h6l2 6m-8-6 1-3h4l1 3M5 17a2 2 0 1 0 4 0m6 0a2 2 0 1 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -170,28 +181,31 @@
                             timer: null,
                             slides: [
                                 {
-                                    image: @js(asset('images/rider-city-ride.jpg')),
-                                    badge: 'Everyday Commute',
-                                    title: 'Trained riders ready across your city',
-                                    caption: 'Verified riders, smooth navigation, and transparent upfront fares from pickup to drop-off.',
-                                    stat: 'Fast pickup',
-                                    statSub: 'Smart matching'
+                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
+                                    badge: 'Tagoloan, Misamis Oriental',
+                                    title: 'Connecting every barangay across Tagoloan',
+                                    caption: 'From Santa Cruz and Tagoloan Bridge to Poblacion, Baluarte, and Casinglot — built by locals for everyday Tagoloan commuters.',
+                                    credit: 'Real photo · Tagoloan River & Bridge (Wikimedia Commons, CC BY-SA 4.0)',
+                                    stat: 'Tagoloan Local',
+                                    statSub: 'Misamis Oriental'
                                 },
                                 {
-                                    image: @js(asset('images/rider-express-delivery.jpg')),
-                                    badge: 'Express Delivery',
-                                    title: 'Door-to-door parcel care you can trust',
-                                    caption: 'Send documents, food, or gifts across town with live status milestones and instant notifications.',
-                                    stat: '100% Tracked',
-                                    statSub: 'Door-to-door'
+                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg',
+                                    badge: 'For Locals & Students',
+                                    title: 'Reliable daily rides for students and workers',
+                                    caption: 'Heading to Tagoloan Community College, Poblacion, or work? Book affordable rides and deliveries with upfront fares and live weather alerts.',
+                                    credit: 'Real photo · Tagoloan Municipal Hall (Wikimedia Commons, CC BY-SA 4.0)',
+                                    stat: 'Student-Friendly',
+                                    statSub: 'Upfront fares'
                                 },
                                 {
-                                    image: @js(asset('images/rider-live-tracking.jpg')),
-                                    badge: 'Smart Mobility Tech',
-                                    title: 'Real-time GPS & weather-aware routing',
-                                    caption: 'Follow your rider live on the map with real-time ETA, weather advisories, and secure PayMongo checkout.',
+                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Angkas_riders_in_the_Philippines_03.jpg/1280px-Angkas_riders_in_the_Philippines_03.jpg',
+                                    badge: 'Philippine Riders',
+                                    title: 'Trusted Filipino riders with real-time GPS tracking',
+                                    caption: 'Follow your rider live on the Tagoloan map with real-time ETA, verified ratings, and secure Cash or PayMongo GCash/Maya payments.',
+                                    credit: 'Real photo · Philippine Riders (Wikimedia Commons, CC BY-SA 4.0)',
                                     stat: 'Live GPS + AI',
-                                    statSub: 'Weather-aware'
+                                    statSub: 'Safe & tracked'
                                 }
                             ],
                             start() {
@@ -238,6 +252,7 @@
                                         <img
                                             :src="slide.image"
                                             :alt="slide.title"
+                                            referrerpolicy="no-referrer"
                                             class="photo-kenburns h-full w-full object-cover"
                                         >
                                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent"></div>
@@ -248,6 +263,7 @@
                                             </span>
                                             <h3 class="mt-3 text-xl font-extrabold text-white sm:text-2xl" x-text="slide.title"></h3>
                                             <p class="mt-1.5 max-w-lg text-sm leading-6 text-slate-200" x-text="slide.caption"></p>
+                                            <p class="mt-2 text-[11px] font-medium text-slate-300/80" x-text="slide.credit"></p>
                                         </div>
                                     </div>
                                 </template>

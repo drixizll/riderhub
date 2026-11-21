@@ -182,10 +182,31 @@
                 maxBounds: serviceBounds,
                 maxBoundsViscosity: 0.9,
             });
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 19,
-            }).addTo(map);
+            const tileLayers = {
+                'Clean Street': L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 20,
+                }),
+                'Satellite': L.layerGroup([
+                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                        attribution: 'Tiles &copy; Esri',
+                        maxZoom: 19,
+                    }),
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+                        subdomains: 'abcd',
+                        maxZoom: 19,
+                    }),
+                ]),
+                'Dark Map': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    subdomains: 'abcd',
+                    maxZoom: 20,
+                }),
+            };
+            const defaultLayerName = document.documentElement.dataset.theme === 'dark' ? 'Dark Map' : 'Clean Street';
+            tileLayers[defaultLayerName].addTo(map);
+            L.control.layers(tileLayers, null, { position: 'topright', collapsed: false }).addTo(map);
 
             const points = {
                 pickup: {

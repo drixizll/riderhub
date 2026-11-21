@@ -110,7 +110,8 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Verify a 6-digit OTP code sent via email/phone recovery and reset the user's password.
+     * Step 2: Verify the 6-digit OTP code sent via email/phone recovery,
+     * then redirect the user to the Set New Password screen.
      */
     public function resetWithCode(Request $request): RedirectResponse
     {
@@ -122,7 +123,6 @@ class PasswordResetLinkController extends Controller
         $validated = $request->validate([
             'otp_email' => ['required', 'email'],
             'code' => ['required', 'digits:6'],
-            'password' => ['required', 'string', 'min:4', 'confirmed'],
         ]);
 
         $user = User::query()
@@ -136,30 +136,15 @@ class PasswordResetLinkController extends Controller
             return back()
                 ->with('otp_email', $validated['otp_email'])
                 ->withInput($request->only('otp_email', 'code'))
-                ->withErrors(['code' => 'Invalid or expired 6-digit verification code. Please request a new code.']);
+                ->withErrors(['code' => 'Invalid or expired 6-digit verification code. Please check your email and try again.']);
         }
-
-        $user->forceFill([
-            'password' => Hash::make($validated['password']),
-            'remember_token' => Str::random(60),
-        ])->save();
 
         Cache::forget($cacheKey);
-        Password::broker()->deleteToken($user);
+        $token = Password::broker()->createToken($user);
 
-        try {
-            $user->notify(new RiderHubNotification(
-                title: 'Password updated successfully',
-                message: 'Your RiderHub password was changed using a 6-digit verification code.',
-                url: route('profile.edit'),
-                category: 'security',
-            ));
-        } catch (\Throwable) {
-            // Non-blocking
-        }
-
-        return redirect()->route('login')
-            ->with('status', 'Your password has been reset successfully! You can now log in with your new password.');
+        return redirect()
+            ->route('password.reset', ['token' => $token, 'email' => $user->email])
+            ->with('status', '6-digit code verified! You can now set your new password.');
     }
 
     /**

@@ -36,15 +36,15 @@
 
         <x-auth-session-status class="mt-5 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800" :status="session('status')" />
 
-        @if (session('otp_email') || old('otp_email') || $errors->hasAny(['code', 'otp_email', 'password']))
+        @if (session('otp_email') || old('otp_email') || $errors->hasAny(['code', 'otp_email']))
             <div class="mt-5 rounded-2xl border border-indigo-200 bg-indigo-50/70 p-5 shadow-sm">
                 <div class="flex items-center gap-2.5">
                     <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 text-white shadow-sm">
                         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" /></svg>
                     </span>
                     <div>
-                        <p class="text-sm font-extrabold text-indigo-950">Enter 6-Digit Verification Code</p>
-                        <p class="text-xs text-indigo-700">Check your Gmail inbox for the 6-digit code, then set your new password below.</p>
+                        <p class="text-sm font-extrabold text-indigo-950">Step 2: Enter 6-Digit Verification Code</p>
+                        <p class="text-xs text-indigo-700">Check your email inbox for the 6-digit code. After verifying, you will be taken to set your new password.</p>
                     </div>
                 </div>
 
@@ -64,28 +64,16 @@
                             autocomplete="one-time-code"
                             value="{{ old('code') }}"
                             required
+                            autofocus
                             placeholder="000000"
                             class="mt-1.5 block w-full rounded-xl border border-indigo-200 bg-white px-4 py-3 text-center text-xl font-extrabold tracking-[0.45em] text-slate-900 shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                         >
                         <x-input-error :messages="$errors->get('code')" class="mt-1.5" />
                     </div>
 
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <div>
-                            <label for="otp_password" class="block text-xs font-bold text-slate-700">New password</label>
-                            <input id="otp_password" name="password" type="password" required minlength="4" autocomplete="new-password" placeholder="At least 4 characters"
-                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                            <x-input-error :messages="$errors->get('password')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="otp_password_confirmation" class="block text-xs font-bold text-slate-700">Confirm password</label>
-                            <input id="otp_password_confirmation" name="password_confirmation" type="password" required minlength="4" autocomplete="new-password" placeholder="Repeat new password"
-                                   class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                        </div>
-                    </div>
-
-                    <button type="submit" class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:shadow-lg">
-                        Verify 6-Digit Code &amp; Reset Password
+                    <button type="submit" class="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-3 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:shadow-lg">
+                        <span>Verify 6-Digit Code</span>
+                        <span aria-hidden="true">→</span>
                     </button>
                 </form>
             </div>

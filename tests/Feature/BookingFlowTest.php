@@ -259,4 +259,39 @@ class BookingFlowTest extends TestCase
         $this->assertSame('cancelled', $booking->fresh()->status);
         $this->assertSame('cancelled', $payment->fresh()->status);
     }
+
+    public function test_admin_can_update_and_delete_a_user_account(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $target = User::factory()->create(['role' => 'customer', 'name' => 'Old Name']);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $target), [
+                'name' => 'Updated Rider',
+                'email' => 'Updated@Example.com',
+                'phone' => '09171234567',
+                'role' => 'rider',
+            ])
+            ->assertRedirect(route('admin.users.index'));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $target->id,
+            'name' => 'Updated Rider',
+            'email' => 'updated@example.com',
+            'role' => 'rider',
+        ]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $target))
+            ->assertRedirect(route('admin.users.index'));
+
+        $this->assertNull($target->fresh());
+
+        // Admin cannot delete themselves
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $admin))
+            ->assertRedirect(route('admin.users.index'))
+            ->assertSessionHas('error');
+        $this->assertNotNull($admin->fresh());
+    }
 }

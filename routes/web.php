@@ -68,6 +68,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     Route::get('/bookings/export/pdf', [ReportController::class, 'adminPdf'])->name('bookings.export.pdf');
     Route::get('/bookings/export/csv', [ReportController::class, 'adminCsv'])->name('bookings.export.csv');
     Route::get('/users', [AdminDashboardController::class, 'users'])->name('users.index');
+    Route::patch('/users/{user}', [AdminDashboardController::class, 'updateUser'])->name('users.update');
+    Route::delete('/users/{user}', [AdminDashboardController::class, 'destroyUser'])->name('users.destroy');
 });
 
 Route::middleware('auth')->group(function () {

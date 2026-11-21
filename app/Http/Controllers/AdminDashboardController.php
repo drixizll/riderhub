@@ -109,4 +109,56 @@ class AdminDashboardController extends Controller
 
         return view('admin.users.index', compact('users'));
     }
+
+    public function updateUser(Request $request, User $user): \Illuminate\Http\RedirectResponse
+    {
+        if ($request->filled('email')) {
+            $request->merge(['email' => strtolower(trim((string) $request->input('email')))]);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique(User::class)->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:25'],
+            'role' => ['required', 'in:customer,rider,admin'],
+        ]);
+
+        if ($user->id === $request->user()->id && $validated['role'] !== 'admin') {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'You cannot remove your own administrator role.');
+        }
+
+        $user->update($validated);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Account for {$user->name} has been updated.");
+    }
+
+    public function destroyUser(Request $request, User $user): \Illuminate\Http\RedirectResponse
+    {
+        if ($user->id === $request->user()->id) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'You cannot delete your own administrator account here.');
+        }
+
+        $hasActiveBooking = Booking::query()
+            ->where(fn ($q) => $q->where('customer_id', $user->id)->orWhere('rider_id', $user->id))
+            ->whereIn('status', ['accepted', 'picked_up'])
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return redirect()->route('admin.users.index')
+                ->with('error', "Cannot delete {$user->name} while they have an active trip.");
+        }
+
+        $name = $user->name;
+        if ($user->profile_photo_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_photo_path)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_photo_path);
+        }
+        $user->notifications()->delete();
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', "Account for {$name} has been deleted.");
+    }
 }

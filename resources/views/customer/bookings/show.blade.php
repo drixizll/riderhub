@@ -366,9 +366,14 @@
                                 <span x-text="editOpen ? 'Close editor' : 'Edit Pickup / Drop-off'"></span>
                             </button>
                         @endif
-                        <form action="{{ route('customer.bookings.cancel', $booking) }}" method="POST" onsubmit="return confirm('Cancel this booking?');">
+                        <form action="{{ route('customer.bookings.cancel', $booking) }}"
+                              method="POST"
+                              data-confirm-title="Cancel this booking?"
+                              data-confirm-message="Are you sure you want to cancel booking #{{ $booking->id }}? If you started an unpaid online checkout, it will be safely expired."
+                              data-confirm-button="Yes, cancel"
+                              data-confirm-tone="danger">
                             @csrf
-                            <button type="submit" class="rounded-xl border border-rose-200 px-4 py-2.5 text-sm font-bold text-rose-700 transition hover:bg-rose-50 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2">Cancel booking</button>
+                            <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-rose-600/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95">Cancel booking</button>
                         </form>
                     </div>
 

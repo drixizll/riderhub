@@ -78,6 +78,7 @@
             </div>
         @endif
 
+        <x-confirm-modal />
         <x-ai-assistant />
     </body>
 </html>

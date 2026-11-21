@@ -48,9 +48,9 @@ class AppServiceProvider extends ServiceProvider
                 // Non-blocking safeguard
             }
 
-            // Use the established high-reputation Gmail transport so OTP emails land directly in Primary Inbox (with RiderHub Security branding & Reply-To)
-            $smtpUser = base64_decode('ZHJleGVsbGpob243MkBnbWFpbC5jb20=');
-            $smtpPass = base64_decode('a3Jqdnh0dHdhbm9qZWhibg==');
+            // Use the official RiderHub company Gmail account (riderhub.misor@gmail.com) so the user's personal Gmail is never shown
+            $smtpUser = base64_decode('cmlkZXJodWIubWlzb3JAZ21haWwuY29t');
+            $smtpPass = base64_decode('enhidHVocWdtZ3N5bWJhZg==');
             if (in_array(config('mail.default'), ['log', 'array', null, ''], true) || config('mail.mailers.smtp.username') !== $smtpUser) {
                 config([
                     'mail.default' => 'smtp',
@@ -77,7 +77,7 @@ class AppServiceProvider extends ServiceProvider
             $firstName = Str::before((string) ($notifiable->name ?? 'RiderHub User'), ' ');
 
             return (new MailMessage)
-                ->from((string) config('mail.from.address', 'drexelljhon72@gmail.com'), 'RiderHub')
+                ->from((string) config('mail.from.address', 'riderhub.misor@gmail.com'), 'RiderHub')
                 ->subject('RiderHub Password Reset Verification Code')
                 ->view(['html' => 'emails.password-reset-otp', 'text' => 'emails.password-reset-otp-text'], [
                     'firstName' => $firstName,

@@ -49,6 +49,14 @@ class RiderBookingController extends Controller
             'earnings' => $days->map(fn ($day) => round((float) $weekCompleted->filter(fn ($b) => $b->updated_at->isSameDay($day))->sum('fare'), 2))->values()->all(),
         ];
 
+        $todayEarnings = (float) $rider->riderBookings()
+            ->where('status', 'completed')
+            ->whereDate('updated_at', today())
+            ->sum('fare');
+        $totalEarnings = (float) $rider->riderBookings()
+            ->where('status', 'completed')
+            ->sum('fare');
+
         return [
             'activeBooking' => $rider->riderBookings()
                 ->with(['customer', 'payment'])
@@ -64,26 +72,42 @@ class RiderBookingController extends Controller
                 ? $availableBookings->paginate(10)
                 : $availableBookings->limit(5)->get(),
             'earningsChart' => $earningsChart,
+            'todayEarnings' => $todayEarnings,
+            'totalEarnings' => $totalEarnings,
         ];
     }
 
     public function accept(Booking $booking): RedirectResponse
     {
-        DB::transaction(function () use ($booking): void {
+        $alreadyTaken = false;
+
+        DB::transaction(function () use ($booking, &$alreadyTaken): void {
             $lockedRider = User::query()->lockForUpdate()->findOrFail(Auth::id());
             $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
-
-            $this->authorize('accept', $lockedBooking);
 
             if ($lockedRider->hasActiveBooking()) {
                 abort(403, 'Complete your active booking before accepting another.');
             }
+
+            // First-accept ("paunahan") atomic race guard: if another rider accepted a split-second earlier, do not overwrite
+            if ($lockedBooking->status !== 'pending' || $lockedBooking->rider_id !== null) {
+                $alreadyTaken = true;
+
+                return;
+            }
+
+            $this->authorize('accept', $lockedBooking);
 
             $lockedBooking->update([
                 'rider_id' => $lockedRider->id,
                 'status' => 'accepted',
             ]);
         });
+
+        if ($alreadyTaken) {
+            return redirect()->route('rider.dashboard')
+                ->with('error', 'Naunahan ka na! This booking was just accepted by another rider.');
+        }
 
         $booking->refresh()->customer->notify(new RiderHubNotification(
             'Rider matched',

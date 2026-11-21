@@ -43,6 +43,19 @@ class AdminDashboardController extends Controller
             ],
         ];
 
+        $topRiders = User::where('role', 'rider')
+            ->withCount(['riderBookings as completed_trips_count' => fn ($q) => $q->where('status', 'completed')])
+            ->withSum(['riderBookings as completed_fare_sum' => fn ($q) => $q->where('status', 'completed')], 'fare')
+            ->withAvg('ratingsReceived as rating_avg', 'score')
+            ->orderByDesc('completed_trips_count')
+            ->limit(5)
+            ->get();
+
+        $availableRiders = User::where('role', 'rider')
+            ->whereDoesntHave('riderBookings', fn ($q) => $q->whereIn('status', ['accepted', 'picked_up']))
+            ->orderBy('name')
+            ->get(['id', 'name', 'phone']);
+
         return view('admin.dashboard', [
             'totalBookings' => Booking::count(),
             'activeBookings' => Booking::whereIn('status', ['accepted', 'picked_up'])->count(),
@@ -59,7 +72,41 @@ class AdminDashboardController extends Controller
             'recentBookings' => Booking::with(['customer', 'rider', 'payment'])->latest()->limit(8)->get(),
             'dailyChart' => $dailyChart,
             'statusChart' => $statusChart,
+            'topRiders' => $topRiders,
+            'availableRiders' => $availableRiders,
         ]);
+    }
+
+    public function assignRider(Request $request, Booking $booking): \Illuminate\Http\RedirectResponse
+    {
+        $validated = $request->validate([
+            'rider_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $assigned = false;
+        $riderName = '';
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($booking, $validated, &$assigned, &$riderName): void {
+            $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
+            $lockedRider = User::query()->where('role', 'rider')->lockForUpdate()->findOrFail($validated['rider_id']);
+
+            if ($lockedBooking->status !== 'pending' || $lockedBooking->rider_id !== null || $lockedRider->hasActiveBooking()) {
+                return;
+            }
+
+            $lockedBooking->update([
+                'rider_id' => $lockedRider->id,
+                'status' => 'accepted',
+            ]);
+            $assigned = true;
+            $riderName = $lockedRider->name;
+        });
+
+        if (! $assigned) {
+            return back()->with('error', 'Could not assign rider — the booking was already taken or the rider is currently on an active trip.');
+        }
+
+        return back()->with('success', "Booking #{$booking->id} has been dispatched to {$riderName}.");
     }
 
     public function bookings(Request $request): View

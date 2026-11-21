@@ -26,6 +26,8 @@ class ProfileUpdateRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:20'],
+            'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
+            'municipality' => ['nullable', 'string', 'max:80'],
             'email' => [
                 'required',
                 'string',

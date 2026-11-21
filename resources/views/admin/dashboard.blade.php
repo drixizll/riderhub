@@ -17,6 +17,13 @@
     </x-slot>
 
     <div class="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+        @if (session('success'))
+            <div role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">{{ session('success') }}</div>
+        @endif
+        @if (session('error'))
+            <div role="alert" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-800">{{ session('error') }}</div>
+        @endif
+
         <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform metrics">
             <a href="{{ route('admin.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div class="flex items-center justify-between"><p class="text-sm font-medium text-slate-500">Total bookings</p><span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span></div>
@@ -92,14 +99,28 @@
                 @else
                     <div class="divide-y divide-slate-100">
                         @foreach ($recentBookings as $booking)
-                            <div class="flex items-center justify-between gap-4 px-5 py-4 sm:px-6">
+                            <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                                 <div class="min-w-0">
                                     <p class="truncate text-sm font-bold text-slate-900">{{ $booking->customer->name }} <span class="font-normal text-slate-400">· {{ ucfirst($booking->type) }}</span></p>
                                     <p class="mt-1 truncate text-xs text-slate-500">{{ $booking->pickup_address }} → {{ $booking->dropoff_address }}</p>
                                 </div>
-                                <div class="shrink-0 text-right">
-                                    <p class="text-sm font-bold text-slate-900">₱{{ number_format($booking->fare, 2) }}</p>
-                                    <span class="text-xs font-semibold capitalize text-slate-500">{{ str_replace('_', ' ', $booking->status) }}</span>
+                                <div class="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
+                                    @if ($booking->status === 'pending' && ! $booking->rider_id && isset($availableRiders) && $availableRiders->isNotEmpty())
+                                        <form method="POST" action="{{ route('admin.bookings.assign', $booking) }}" class="flex items-center gap-1.5">
+                                            @csrf
+                                            <select name="rider_id" required aria-label="Assign rider" class="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-700">
+                                                <option value="">Dispatch rider…</option>
+                                                @foreach ($availableRiders as $availRider)
+                                                    <option value="{{ $availRider->id }}">{{ $availRider->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="rounded-lg bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white transition hover:bg-indigo-700">Assign</button>
+                                        </form>
+                                    @endif
+                                    <div class="text-right">
+                                        <p class="text-sm font-bold text-slate-900">₱{{ number_format($booking->fare, 2) }}</p>
+                                        <span class="text-xs font-semibold capitalize text-slate-500">{{ str_replace('_', ' ', $booking->status) }}</span>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -107,6 +128,32 @@
                 @endif
             </article>
         </section>
+
+        @if (isset($topRiders) && $topRiders->isNotEmpty())
+            <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-950">Top Performing Riders Leaderboard</h2>
+                        <p class="mt-0.5 text-xs text-slate-500">Ranked by completed trips, fare volume, and customer rating across Misamis Oriental.</p>
+                    </div>
+                    <a href="{{ route('admin.users.index', ['role' => 'rider']) }}" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">All riders →</a>
+                </div>
+                <div class="grid divide-y divide-slate-100 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-3">
+                    @foreach ($topRiders->take(3) as $idx => $topRider)
+                        <div class="flex items-center justify-between gap-3 p-5">
+                            <div class="flex min-w-0 items-center gap-3">
+                                <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-xs font-extrabold text-indigo-700">#{{ $idx + 1 }}</span>
+                                <div class="min-w-0">
+                                    <p class="truncate text-sm font-bold text-slate-900">{{ $topRider->name }}</p>
+                                    <p class="text-xs text-slate-500">{{ $topRider->completed_trips_count }} completed · ★ {{ $topRider->rating_avg ? number_format((float) $topRider->rating_avg, 1) : 'New' }}</p>
+                                </div>
+                            </div>
+                            <span class="shrink-0 rounded-xl bg-emerald-50 px-3 py-1.5 text-xs font-extrabold text-emerald-700">₱{{ number_format((float) ($topRider->completed_fare_sum ?? 0), 2) }}</span>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+        @endif
 
         <section class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>

@@ -49,43 +49,72 @@
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-2">
+            <div class="grid gap-3.5 sm:grid-cols-2">
                 <div>
                     <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
                     <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username"
                            placeholder="you@example.com"
-                           class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                           class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <x-input-error :messages="$errors->get('email')" class="mt-1.5" />
                 </div>
                 <div>
                     <label for="phone" class="block text-sm font-semibold text-slate-700">{{ __('Phone number') }} <span class="font-normal text-slate-400">(optional)</span></label>
                     <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel"
                            placeholder="+63 9XX XXX XXXX"
-                           class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
-                    <x-input-error :messages="$errors->get('phone')" class="mt-2" />
+                           class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <x-input-error :messages="$errors->get('phone')" class="mt-1.5" />
                 </div>
             </div>
 
-            <div>
-                <x-password-input id="password" name="password" :label="__('Password')" autocomplete="new-password" data-password-input />
-                <div data-password-strength class="mt-3 space-y-2" aria-live="polite">
-                    <div class="flex items-center justify-between gap-3">
-                        <span class="text-xs font-semibold text-slate-500">Password strength</span>
-                        <span data-strength-label class="text-xs font-bold text-slate-500">Enter a password</span>
+            <!-- Compact 2-Column Gender Pill + Home Town Selector (Modern Tech Layout) -->
+            <div class="grid gap-3.5 sm:grid-cols-2">
+                <div>
+                    <span class="block text-sm font-semibold text-slate-700">Gender</span>
+                    <div class="mt-1.5 grid grid-cols-2 gap-2">
+                        <label class="role-choice relative flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50/50">
+                            <input class="peer sr-only" type="radio" name="gender" value="male" @checked(old('gender', 'male') === 'male')>
+                            <svg class="h-4 w-4 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="14" r="5" /><path stroke-linecap="round" stroke-linejoin="round" d="M19 5l-5.4 5.4M19 5h-5m5 0v5" /></svg>
+                            <span>Male</span>
+                        </label>
+                        <label class="role-choice relative flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-bold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50/50">
+                            <input class="peer sr-only" type="radio" name="gender" value="female" @checked(old('gender') === 'female')>
+                            <svg class="h-4 w-4 text-fuchsia-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="9" r="5" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 14v7m-3-3h6" /></svg>
+                            <span>Female</span>
+                        </label>
                     </div>
-                    <div class="grid grid-cols-5 gap-1.5" aria-hidden="true">
-                        @for ($segment = 1; $segment <= 5; $segment++)
-                            <span data-strength-segment="{{ $segment }}" class="h-1.5 rounded-full bg-slate-200 transition-colors"></span>
-                        @endfor
-                    </div>
-                    <p class="text-[11px] text-slate-500">Use any password you like (at least 4 characters). Uppercase, numbers, and symbols are optional.</p>
+                    <x-input-error :messages="$errors->get('gender')" class="mt-1.5" />
                 </div>
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                <div>
+                    <label for="municipality" class="block text-sm font-semibold text-slate-700">Town / City <span class="font-normal text-slate-400">(MisOr)</span></label>
+                    <select id="municipality" name="municipality" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                        @foreach (['Tagoloan', 'Cagayan de Oro City', 'Villanueva', 'Jasaan', 'Opol', 'El Salvador City', 'Balingasag', 'Claveria', 'Initao', 'Gingoog City'] as $town)
+                            <option value="{{ $town }}" @selected(old('municipality', 'Tagoloan') === $town)>{{ $town }}</option>
+                        @endforeach
+                    </select>
+                    <x-input-error :messages="$errors->get('municipality')" class="mt-1.5" />
+                </div>
             </div>
 
-            <div>
-                <x-password-input id="password_confirmation" name="password_confirmation" :label="__('Confirm password')" autocomplete="new-password" />
-                <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+            <div class="grid gap-3.5 sm:grid-cols-2">
+                <div>
+                    <x-password-input id="password" name="password" :label="__('Password')" autocomplete="new-password" data-password-input />
+                    <x-input-error :messages="$errors->get('password')" class="mt-1.5" />
+                </div>
+                <div>
+                    <x-password-input id="password_confirmation" name="password_confirmation" :label="__('Confirm password')" autocomplete="new-password" />
+                    <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1.5" />
+                </div>
+            </div>
+            <div data-password-strength class="space-y-1.5" aria-live="polite">
+                <div class="flex items-center justify-between gap-3">
+                    <span class="text-xs font-semibold text-slate-500">Password strength</span>
+                    <span data-strength-label class="text-xs font-bold text-slate-500">At least 4 characters</span>
+                </div>
+                <div class="grid grid-cols-5 gap-1.5" aria-hidden="true">
+                    @for ($segment = 1; $segment <= 5; $segment++)
+                        <span data-strength-segment="{{ $segment }}" class="h-1.5 rounded-full bg-slate-200 transition-colors"></span>
+                    @endfor
+                </div>
             </div>
 
             <button type="submit" class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">

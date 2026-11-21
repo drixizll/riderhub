@@ -30,12 +30,30 @@
                     </div>
                     <p class="mt-3 text-sm text-slate-500">Created {{ $booking->created_at->format('M j, Y · g:i A') }}</p>
                 </div>
-                <div class="flex items-center justify-between gap-4 sm:flex-col sm:items-end">
+                <div class="flex flex-wrap items-center justify-between gap-3 sm:flex-col sm:items-end">
                     <div class="sm:text-right"><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total fare</p><p class="mt-1 text-3xl font-extrabold text-slate-950">₱{{ number_format($booking->fare, 2) }}</p></div>
-                    <a href="{{ route('customer.bookings.receipt', $booking) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-white px-3.5 py-2 text-xs font-bold text-indigo-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-50">
-                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
-                        PDF Receipt
-                    </a>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <a href="{{ route('customer.bookings.create', ['type' => $booking->type, 'pickup_address' => $booking->pickup_address, 'pickup_lat' => $booking->pickup_lat, 'pickup_lng' => $booking->pickup_lng, 'dropoff_address' => $booking->dropoff_address, 'dropoff_lat' => $booking->dropoff_lat, 'dropoff_lng' => $booking->dropoff_lng]) }}"
+                           class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:shadow-md">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.64 18.36A9 9 0 0 0 20 12M18.36 5.64A9 9 0 0 0 4 12" /></svg>
+                            Book Again
+                        </a>
+                        <button type="button"
+                                x-data="{ copied: false }"
+                                @click="
+                                    const text = `RiderHub Trip #{{ $booking->id }} ({{ ucfirst($booking->status) }}): {{ addslashes($booking->pickup_address) }} → {{ addslashes($booking->dropoff_address) }} (₱{{ number_format($booking->fare, 2) }})`;
+                                    if (navigator.share) { navigator.share({ title: 'RiderHub Trip Status', text, url: window.location.href }).catch(() => {}); }
+                                    else if (navigator.clipboard) { navigator.clipboard.writeText(text + ' ' + window.location.href); copied = true; setTimeout(() => copied = false, 2500); }
+                                "
+                                class="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
+                            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.933-2.185 2.25 2.25 0 0 0-3.933 2.185Z" /></svg>
+                            <span x-text="copied ? 'Copied ✓' : 'Share Trip'">Share Trip</span>
+                        </button>
+                        <a href="{{ route('customer.bookings.receipt', $booking) }}" target="_blank" class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-white px-3.5 py-2 text-xs font-bold text-indigo-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-indigo-50">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
+                            PDF Receipt
+                        </a>
+                    </div>
                 </div>
             </div>
 

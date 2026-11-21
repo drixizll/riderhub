@@ -23,6 +23,18 @@ class CustomerBookingController extends Controller
             'type' => ['nullable', 'in:ride,delivery'],
         ]);
 
+        // Auto-heal any legacy outlier fare (> ₱2,500) created before Misamis Oriental coordinate bounds were enforced
+        Auth::user()->bookings()->where('fare', '>', 2500)->each(function (Booking $outlier): void {
+            $recalculated = min(1450.00, $this->calculateFare(
+                (float) $outlier->pickup_lat,
+                (float) $outlier->pickup_lng,
+                (float) $outlier->dropoff_lat,
+                (float) $outlier->dropoff_lng,
+            ));
+            $outlier->update(['fare' => $recalculated]);
+            $outlier->payment?->update(['amount' => $recalculated]);
+        });
+
         $bookings = Auth::user()->bookings()
             ->with(['rider', 'payment'])
             ->when($validated['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
@@ -307,7 +319,7 @@ class CustomerBookingController extends Controller
 
     protected function calculateFare(float $pickupLat, float $pickupLng, float $dropoffLat, float $dropoffLng): float
     {
-        $distance = $this->haversineDistance($pickupLat, $pickupLng, $dropoffLat, $dropoffLng);
+        $distance = min(120.0, $this->haversineDistance($pickupLat, $pickupLng, $dropoffLat, $dropoffLng));
         $config = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
 
         return round($config['base'] + ($distance * $config['per_km']), 2);

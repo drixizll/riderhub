@@ -38,6 +38,8 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
             'phone' => ['nullable', 'string', 'max:20'],
+            'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
+            'municipality' => ['nullable', 'string', 'max:80'],
             'role' => ['required', Rule::in(['customer', 'rider'])],
             'password' => ['required', 'string', 'min:4', 'confirmed'],
         ]);
@@ -46,6 +48,8 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'phone' => $request->phone,
+            'gender' => $request->input('gender'),
+            'municipality' => $request->input('municipality'),
             'role' => $request->string('role')->toString(),
             'password' => $request->password,
         ]);

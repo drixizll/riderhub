@@ -14,6 +14,9 @@
         @if (session('success'))
             <div role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">{{ session('success') }}</div>
         @endif
+        @if (session('error'))
+            <div role="alert" class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-800">{{ session('error') }}</div>
+        @endif
 
         <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Rider summary">
             <a href="{{ route('rider.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm active:scale-[0.98]">
@@ -180,6 +183,31 @@
                     </div>
                     <div class="relative mt-4 h-48">
                         <canvas id="rider-earnings-chart"></canvas>
+                    </div>
+                </section>
+
+                <!-- Interactive Daily Earnings Goal Tracker Card -->
+                <section x-data="{ goal: 1000, today: {{ (float) ($todayEarnings ?? 0) }}, total: {{ (float) ($totalEarnings ?? 0) }} }"
+                         class="card-interactive rounded-2xl border border-indigo-100 bg-gradient-to-br from-indigo-50/80 via-white to-violet-50/60 p-5 shadow-sm">
+                    <div class="flex items-center justify-between gap-2">
+                        <div>
+                            <p class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-600">Daily Goal Tracker</p>
+                            <p class="mt-1 text-xl font-extrabold text-slate-950">₱<span x-text="today.toFixed(2)"></span> <span class="text-xs font-semibold text-slate-500">/ ₱<span x-text="goal"></span> today</span></p>
+                        </div>
+                        <select x-model.number="goal" aria-label="Daily earnings goal" class="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-700">
+                            <option value="500">Goal: ₱500</option>
+                            <option value="1000">Goal: ₱1,000</option>
+                            <option value="1500">Goal: ₱1,500</option>
+                            <option value="2500">Goal: ₱2,500</option>
+                        </select>
+                    </div>
+                    <div class="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+                        <div class="h-full rounded-full bg-gradient-to-r from-indigo-600 via-violet-500 to-emerald-500 transition-all duration-500"
+                             :style="`width: ${Math.min(100, Math.round((today / Math.max(1, goal)) * 100))}%`"></div>
+                    </div>
+                    <div class="mt-2.5 flex items-center justify-between text-xs text-slate-500">
+                        <span x-text="`${Math.min(100, Math.round((today / Math.max(1, goal)) * 100))}% of daily target`"></span>
+                        <span class="font-bold text-indigo-700">All-time: ₱{{ number_format((float) ($totalEarnings ?? 0), 2) }}</span>
                     </div>
                 </section>
             </div>

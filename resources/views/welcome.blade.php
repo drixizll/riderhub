@@ -48,8 +48,8 @@
                     <x-weather-widget variant="compact" />
                     <x-theme-toggle />
                     <x-install-app-button />
-                    <a href="{{ route('login') }}" class="whitespace-nowrap rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-700 transition hover:text-indigo-600 sm:px-3 sm:text-sm">Log in</a>
-                    <a href="{{ route('register') }}" class="whitespace-nowrap rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-4 sm:py-2.5 sm:text-sm">Sign up</a>
+                    <a href="{{ route('login') }}" class="whitespace-nowrap rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-800 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95 sm:px-4 sm:py-2.5 sm:text-sm">Log in</a>
+                    <a href="{{ route('register') }}" class="whitespace-nowrap rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-bold text-white shadow-md shadow-indigo-600/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:px-4 sm:py-2.5 sm:text-sm">Sign up</a>
                 </div>
             </nav>
         </header>

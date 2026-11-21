@@ -49,9 +49,9 @@
                             <a href="{{ route('register') }}" class="rounded-lg bg-indigo-600 px-4 py-2.5 text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Create account</a>
                         @elseif (request()->routeIs('register'))
                             <span class="hidden text-slate-500 sm:inline">Already a member?</span>
-                            <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-slate-700 transition hover:text-indigo-600">Log in</a>
+                            <a href="{{ route('login') }}" class="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">Log in</a>
                         @else
-                            <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-slate-700 transition hover:text-indigo-600">Back to log in</a>
+                            <a href="{{ route('login') }}" class="rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700">Back to log in</a>
                         @endif
                     </div>
                 </nav>

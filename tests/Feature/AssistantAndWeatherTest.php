@@ -110,6 +110,11 @@ class AssistantAndWeatherTest extends TestCase
         $loginHelp = $this->postJson('/api/assistant/chat', ['message' => 'san mag log in?'])
             ->assertOk();
         $this->assertStringContainsString('Login page', $loginHelp->json('reply'));
+
+        // Casual greetings like "halo" should reply warmly with time-aware greeting, not Wikipedia "Halo" video game
+        $greeting = $this->postJson('/api/assistant/chat', ['message' => 'halo'])
+            ->assertOk();
+        $this->assertStringContainsString("What's up? How can I assist you", $greeting->json('reply'));
     }
 
     public function test_route_endpoint_returns_real_road_steps_and_eta(): void

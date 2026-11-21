@@ -31,9 +31,14 @@
                     @if ($activeBooking)
                         <button type="button" disabled class="cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-400" title="Complete your active booking first">Already on a trip</button>
                     @else
-                        <form method="POST" action="{{ route('rider.bookings.accept', $booking) }}" onsubmit="return confirm('Accept this booking request?');">
+                        <form method="POST"
+                              action="{{ route('rider.bookings.accept', $booking) }}"
+                              data-confirm-title="Accept this booking?"
+                              data-confirm-message="Ready to accept booking #{{ $booking->id }} ({{ ucfirst($booking->type) }}) for ₱{{ number_format($booking->fare, 2) }}?"
+                              data-confirm-button="Yes, accept trip"
+                              data-confirm-tone="primary">
                             @csrf
-                            <button type="submit" class="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Accept booking</button>
+                            <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95">Accept booking →</button>
                         </form>
                     @endif
                 </div>

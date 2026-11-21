@@ -181,23 +181,74 @@ class RiderHubAssistantService
             ];
         }
 
-        // 8. Pure greetings
-        if (preg_match('/^(hi|hello|hey|kumusta|kamusta|yo|good morning|good afternoon|good evening|maayong (buntag|hapon|gabii))[\s!?.]*$/i', trim($message))) {
+        // 8. Natural time-aware greetings & small talk (Philippine Standard Time)
+        if (preg_match('/^(h+i+|h+e+l+o+|h+a+l+o+|h+e+y+|y+o+|s+u+p+|what\'?s\s+up|kumusta|kamusta|musta|uy+|oi+|good\s+(morning|afternoon|evening|night)|maayong\s+(buntag|hapon|gabii))[\s!?.]*$/i', trim($message))) {
+            $hour = (int) now()->timezone('Asia/Manila')->format('G');
             $greetingName = $user ? ' '.Str::before($user->name, ' ') : '';
+            $timeGreeting = match (true) {
+                $hour >= 5 && $hour < 12 => "Hey{$greetingName}, good morning! What's up? How can I assist you today?",
+                $hour >= 12 && $hour < 18 => "Hey{$greetingName}, good afternoon! What's up? How can I assist you today?",
+                default => "Hey{$greetingName}, good evening! What's up? How can I assist you tonight?",
+            };
 
             return [
-                'reply' => "Kumusta{$greetingName}! I'm RiderHub AI. You can ask me about your bookings, Tagoloan weather, or fare estimates — or ask me any general question (history, science, math, places, study topics) and I'll look up an accurate answer for you!",
+                'reply' => $timeGreeting,
                 'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km', 'Tell me about Tagoloan, Misamis Oriental', 'What is photosynthesis?'],
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'Where to log in?'],
             ];
         }
 
-        // 9. General knowledge lookup (Wikipedia REST & Search API — free, no key needed)
-        if ($wikiReply = $this->lookupWikipedia($message)) {
+        if ($this->matchesAny($text, ['how are you', 'kumusta ka', 'kamusta ka', 'okay ka lang', 'ok ka lang'])) {
+            $hour = (int) now()->timezone('Asia/Manila')->format('G');
+            $period = $hour >= 18 || $hour < 5 ? 'tonight' : 'today';
+
+            return [
+                'reply' => "I'm doing great and ready to help! How's your trip going {$period}? Need a fare estimate, live weather check, or help with a booking?",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Estimate fare for 5 km', 'Check Misamis Oriental weather', 'How to book a ride?'],
+            ];
+        }
+
+        if (preg_match('/^(thanks|thank you|ty|salamat|maraming salamat|daghang salamat|tnx)[\s!?.]*$/i', trim($message))) {
+            return [
+                'reply' => "You're very welcome! Let me know anytime if you need help with rides, deliveries, weather, or anything else. Ride safe!",
+                'actions' => [],
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km'],
+            ];
+        }
+
+        if (preg_match('/^(bye|goodbye|see ya|see you|paalam|babye)[\s!?.]*$/i', trim($message))) {
+            return [
+                'reply' => 'Take care and ride safe across Misamis Oriental! Just tap me anytime you need assistance.',
+                'actions' => [],
+                'suggestions' => ['Check Misamis Oriental weather', 'About RiderHub'],
+            ];
+        }
+
+        if ($this->matchesAny($text, ['who are you', 'what is your name', 'sino ka', 'kinsa ka', 'what should i call you'])) {
+            return [
+                'reply' => "I'm RiderHub AI — your smart mobility assistant for Misamis Oriental. I can check live weather, compute trip fares, track your bookings, guide you around the app, and answer general questions!",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
+            ];
+        }
+
+        if (preg_match('/^(ok|okay|nice|cool|wow|sige|ge|goods|ayos|great|awesome)[\s!?.]*$/i', trim($message))) {
+            return [
+                'reply' => 'Awesome! Let me know what you want to do next — I’m right here whenever you need me.',
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Estimate fare for 5 km', 'Check Misamis Oriental weather', 'How to book a ride?'],
+            ];
+        }
+
+        // 9. General knowledge lookup (Wikipedia REST & Search API — only for explicit questions or multi-word topics)
+        $isKnowledgeQuery = preg_match('/^(what|who|where|when|why|how|tell me|explain|define|ano|sino|saan|unsa|kinsa|asa)\b/i', trim($message))
+            || str_word_count(trim($message)) >= 2;
+        if ($isKnowledgeQuery && ($wikiReply = $this->lookupWikipedia($message))) {
             return [
                 'reply' => $wikiReply,
                 'actions' => [],
-                'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km', 'About RiderHub'],
+                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'About RiderHub'],
                 'source' => 'knowledge',
             ];
         }

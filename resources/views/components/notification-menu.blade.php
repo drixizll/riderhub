@@ -30,7 +30,7 @@
         x-transition:leave="transition ease-in duration-140"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-1 scale-95"
-        class="absolute right-0 z-50 mt-3 w-[min(23rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-indigo-950/15"
+        class="fixed inset-x-4 top-[4.5rem] z-50 mx-auto max-w-sm overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-2xl shadow-indigo-950/15 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-3 sm:w-[23rem] sm:max-w-none"
     >
         <div class="relative overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 px-4 py-3.5 text-white">
             <div class="flex items-center justify-between gap-2">

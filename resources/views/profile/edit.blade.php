@@ -53,7 +53,7 @@
                     <div class="flex items-center gap-5">
                         <div class="group relative shrink-0">
                             @if ($user->profile_photo_path)
-                                <img data-profile-photo-preview src="{{ \Illuminate\Support\Facades\Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }} profile photo" class="h-20 w-20 rounded-2xl border-2 border-white/40 object-cover shadow-xl transition duration-300 group-hover:scale-105 sm:h-24 sm:w-24">
+                                <img data-profile-photo-preview src="{{ route('profile.photo.show', ['user' => $user->id, 'v' => $user->updated_at?->timestamp]) }}" alt="{{ $user->name }} profile photo" class="h-20 w-20 rounded-2xl border-2 border-white/40 object-cover shadow-xl transition duration-300 group-hover:scale-105 sm:h-24 sm:w-24">
                             @else
                                 <span data-profile-photo-preview class="flex h-20 w-20 items-center justify-center rounded-2xl border-2 border-white/30 bg-white/15 text-2xl font-extrabold shadow-xl backdrop-blur-sm transition duration-300 group-hover:scale-105 sm:h-24 sm:w-24">{{ \Illuminate\Support\Str::of($user->name)->explode(' ')->take(2)->map(fn ($part) => mb_substr($part, 0, 1))->implode('') }}</span>
                             @endif
@@ -73,11 +73,11 @@
                     </div>
                     <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">
                         @csrf
-                        <label for="profile_photo" class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/30 bg-white/15 px-4 py-2.5 text-sm font-bold text-white backdrop-blur-md transition duration-200 hover:-translate-y-0.5 hover:bg-white/25 active:scale-95 focus-within:ring-2 focus-within:ring-white">
-                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
-                            <span>{{ $user->profile_photo_path ? 'Change photo' : 'Add profile photo' }}</span>
+                        <label for="profile_photo" class="relative inline-flex cursor-pointer items-center gap-2 overflow-hidden rounded-xl border border-white/30 bg-white/15 px-4 py-2.5 text-sm font-bold text-white backdrop-blur-md transition duration-200 hover:-translate-y-0.5 hover:bg-white/25 active:scale-95 focus-within:ring-2 focus-within:ring-white">
+                            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h3l2-3h6l2 3h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Zm8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" /></svg>
+                            <span data-profile-photo-label>{{ $user->profile_photo_path ? 'Change photo' : 'Add profile photo' }}</span>
+                            <input id="profile_photo" name="profile_photo" type="file" accept="image/*" data-profile-photo-input class="absolute inset-0 h-full w-full cursor-pointer opacity-0">
                         </label>
-                        <input id="profile_photo" name="profile_photo" type="file" accept="image/jpeg,image/png,image/webp" data-profile-photo-input class="sr-only">
                         <button type="submit" class="rounded-xl bg-white px-4 py-2.5 text-sm font-extrabold text-indigo-700 shadow-lg shadow-indigo-950/20 transition duration-200 hover:-translate-y-0.5 hover:bg-indigo-50 active:scale-95">Save photo</button>
                     </form>
                 </div>

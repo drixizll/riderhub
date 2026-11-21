@@ -92,21 +92,68 @@ if (passwordInput && strengthPanel) {
 }
 
 document.querySelectorAll('[data-profile-photo-input]').forEach((input) => {
-    input.addEventListener('change', () => {
+    input.addEventListener('change', async () => {
         const file = input.files?.[0];
         if (!file) return;
 
-        const preview = document.querySelector('[data-profile-photo-preview]');
-        if (!preview) return;
+        const form = input.closest('form');
+        const label = form?.querySelector('[data-profile-photo-label]');
+        if (label) label.textContent = 'Preparing photo…';
 
-        const image = document.createElement('img');
-        image.src = URL.createObjectURL(file);
-        image.alt = 'Selected profile photo preview';
-        image.className = 'h-20 w-20 rounded-2xl border-2 border-white/40 object-cover shadow-lg sm:h-24 sm:w-24';
-        image.addEventListener('load', () => URL.revokeObjectURL(image.src), { once: true });
-        preview.replaceWith(image);
-        image.dataset.profilePhotoPreview = '';
-        input.closest('form')?.querySelector('button[type="submit"]')?.removeAttribute('disabled');
+        let finalFile = file;
+        try {
+            // Compress & resize large iOS/Android camera photos in-browser so uploads never exceed server limits
+            const bitmap = await new Promise((resolve, reject) => {
+                const img = new Image();
+                const objUrl = URL.createObjectURL(file);
+                img.onload = () => {
+                    URL.revokeObjectURL(objUrl);
+                    resolve(img);
+                };
+                img.onerror = (err) => {
+                    URL.revokeObjectURL(objUrl);
+                    reject(err);
+                };
+                img.src = objUrl;
+            });
+
+            const maxDim = 900;
+            const scale = Math.min(1, maxDim / Math.max(bitmap.naturalWidth || 1, bitmap.naturalHeight || 1));
+            const targetW = Math.max(1, Math.round((bitmap.naturalWidth || maxDim) * scale));
+            const targetH = Math.max(1, Math.round((bitmap.naturalHeight || maxDim) * scale));
+
+            const canvas = document.createElement('canvas');
+            canvas.width = targetW;
+            canvas.height = targetH;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(bitmap, 0, 0, targetW, targetH);
+                const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.85));
+                if (blob && typeof DataTransfer !== 'undefined') {
+                    const compressed = new File([blob], 'profile-photo.jpg', { type: 'image/jpeg', lastModified: Date.now() });
+                    const dt = new DataTransfer();
+                    dt.items.add(compressed);
+                    input.files = dt.files;
+                    finalFile = compressed;
+                }
+            }
+        } catch {
+            // Keep original file if browser cannot decode/re-encode
+        }
+
+        const preview = document.querySelector('[data-profile-photo-preview]');
+        if (preview) {
+            const image = document.createElement('img');
+            image.src = URL.createObjectURL(finalFile);
+            image.alt = 'Selected profile photo preview';
+            image.className = 'h-20 w-20 rounded-2xl border-2 border-white/40 object-cover shadow-xl sm:h-24 sm:w-24';
+            image.addEventListener('load', () => URL.revokeObjectURL(image.src), { once: true });
+            preview.replaceWith(image);
+            image.dataset.profilePhotoPreview = '';
+        }
+
+        if (label) label.textContent = 'Photo ready ✓';
+        form?.querySelector('button[type="submit"]')?.removeAttribute('disabled');
     });
 });
 

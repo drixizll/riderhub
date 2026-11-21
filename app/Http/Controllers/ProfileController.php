@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProfileController extends Controller
 {
@@ -56,10 +58,21 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
+    public function showPhoto(User $user): StreamedResponse
+    {
+        if (! $user->profile_photo_path || ! Storage::disk('public')->exists($user->profile_photo_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($user->profile_photo_path, null, [
+            'Cache-Control' => 'public, max-age=86400',
+        ]);
+    }
+
     public function updatePhoto(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'profile_photo' => ['required', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'profile_photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp,gif', 'max:8192'],
         ]);
 
         $user = $request->user();

@@ -37,7 +37,7 @@
                     <button class="group relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 p-0.5 shadow-md shadow-indigo-600/20 transition duration-200 hover:scale-105 hover:shadow-lg hover:shadow-indigo-600/30 active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" aria-label="Open account menu">
                         <span class="flex h-full w-full items-center justify-center overflow-hidden rounded-full bg-indigo-50 text-xs font-extrabold text-indigo-700">
                             @if (Auth::user()->profile_photo_path)
-                                <img src="{{ \Illuminate\Support\Facades\Storage::url(Auth::user()->profile_photo_path) }}" alt="" class="h-full w-full object-cover">
+                                <img src="{{ route('profile.photo.show', ['user' => Auth::id(), 'v' => Auth::user()->updated_at?->timestamp]) }}" alt="" class="h-full w-full object-cover">
                             @else
                                 {{ \Illuminate\Support\Str::of(Auth::user()->name)->explode(' ')->take(2)->map(fn ($part) => mb_substr($part, 0, 1))->implode('') }}
                             @endif
@@ -52,7 +52,7 @@
                         <div class="relative flex items-center gap-3">
                             <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/30 bg-white/15 text-sm font-extrabold text-white shadow-inner">
                                 @if (Auth::user()->profile_photo_path)
-                                    <img src="{{ \Illuminate\Support\Facades\Storage::url(Auth::user()->profile_photo_path) }}" alt="" class="h-full w-full object-cover">
+                                    <img src="{{ route('profile.photo.show', ['user' => Auth::id(), 'v' => Auth::user()->updated_at?->timestamp]) }}" alt="" class="h-full w-full object-cover">
                                 @else
                                     {{ \Illuminate\Support\Str::of(Auth::user()->name)->explode(' ')->take(2)->map(fn ($part) => mb_substr($part, 0, 1))->implode('') }}
                                 @endif

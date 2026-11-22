@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="noindex, nofollow">
-    <title>For Merry 🖤 — Mahal Magmahal</title>
+    <title>For My Love 🖤 — Mahal Magmahal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -664,7 +664,7 @@
         <div class="intro-scrim"></div>
         <div class="intro-content">
             <p class="intro-eyebrow">Coded with love · For you only</p>
-            <h1 class="intro-title">Hi, Merry 🖤</h1>
+            <h1 class="intro-title">Hi, My Love 🖤</h1>
             <p class="intro-sub">Gumawa ako ng maliit na sulat gamit ang code — para lang sa'yo.</p>
             <div class="intro-collage" aria-hidden="true">
                 <div class="intro-mini"><img src="{{ asset('images/merry/sunset.jpg') }}" alt=""></div>
@@ -681,7 +681,7 @@
 
     <main id="page" class="page">
         <p class="top-tag">In black &amp; white · Always you</p>
-        <h1 class="hero-name">Merry</h1>
+        <h1 class="hero-name">My Love</h1>
         <p class="hero-caption">Every quiet night feels like home when I’m holding you.</p>
 
         <!-- Black & White Portrait -->
@@ -712,7 +712,7 @@
                 <p class="lyric-line active">“Hindi man perpekto ang mundo, pero sa’yo ako laging sigurado.”</p>
                 <p class="lyric-line">“Kahit gaano kahirap ang araw, isang yakap mo lang, kumpleto na ako.”</p>
                 <p class="lyric-line">“Mahal magmahal — pero kung ikaw lang din, handa akong piliin ka araw-araw.”</p>
-                <p class="lyric-line">“Sa bawat pangarap ko, Merry, palagi kang kasama.”</p>
+                <p class="lyric-line">“Sa bawat pangarap ko, my love, palagi kang kasama.”</p>
             </div>
 
             <div id="music-embed-wrap" style="margin-top:16px;overflow:hidden;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:#000;display:none;">
@@ -742,7 +742,7 @@
         <!-- BSIT Romantic Code Block -->
         <section class="code-card" aria-label="Love code">
             <div class="code-dots"><span></span><span></span><span></span></div>
-            <div><span class="kw">const</span> myHeart = <span class="str">"Merry"</span>;</div>
+            <div><span class="kw">const</span> myHeart = <span class="str">"My Love"</span>;</div>
             <div><span class="kw">while</span> (true) {</div>
             <div>&nbsp;&nbsp;choose(myHeart);</div>
             <div>&nbsp;&nbsp;protect(myHeart);</div>
@@ -752,7 +752,7 @@
 
         <!-- Love Letter -->
         <article class="letter">
-            <h3>Dear Merry,</h3>
+            <h3>Dear My Love,</h3>
             <p>
                 Alam kong busy tayo minsan sa school at sa mga pangarap natin, pero gusto ko lang ipaalala sa’yo na kahit anong mangyari, ikaw pa rin ang pahinga ko at paborito kong tao sa buong mundo.
             </p>
@@ -760,7 +760,7 @@
                 Sabi nga nila, mahal magmahal — pero sa’yo, hindi ako kailanman mapapagod mag-effort, maghintay, at mahalin ka nang buo. Salamat sa pagmamahal, sa pasensya, at sa bawat ngiti mo na nagpapagaan ng araw ko.
             </p>
             <p>
-                I love you so much, Merry. Always. 🖤
+                I love you so much, my love. Always. 🖤
             </p>
             <div class="signature">— Always yours, Drexell 🤍</div>
         </article>
@@ -958,8 +958,8 @@
         document.getElementById('hug-btn').addEventListener('click', (e) => {
             hugs++;
             hugMsg.textContent = hugs === 1
-                ? 'Hug received! Missing you right now, Merry 🤍'
-                : `${hugs} hugs sent! I love you always, Merry 🖤✨`;
+                ? 'Hug received! Missing you right now, my love 🤍'
+                : `${hugs} hugs sent! I love you always, my love 🖤✨`;
             for (let i = 0; i < 7; i++) {
                 const el = document.createElement('span');
                 el.className = 'floating-heart';

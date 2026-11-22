@@ -56,6 +56,30 @@
             visibility: hidden;
             pointer-events: none;
         }
+        .intro-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(1.12) brightness(0.68);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .intro-scrim {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(circle at center, rgba(8, 8, 12, 0.42) 0%, rgba(5, 5, 7, 0.84) 100%);
+            pointer-events: none;
+        }
+        .intro-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         .intro-eyebrow {
             font-size: 11px;
             letter-spacing: 0.35em;
@@ -528,15 +552,21 @@
     <div class="ambient"></div>
     <canvas id="stars"></canvas>
 
-    <!-- Intro Envelope -->
+    <!-- Intro Envelope with Cinematic B&W Background Video -->
     <div id="intro" class="intro">
-        <p class="intro-eyebrow">Coded with love · For you only</p>
-        <h1 class="intro-title">Hi, Merry 🖤</h1>
-        <p class="intro-sub">Gumawa ako ng maliit na sulat gamit ang code — para lang sa'yo.</p>
-        <button id="open-btn" type="button" class="open-btn">
-            <span>✉</span>
-            <span>Tap to Open</span>
-        </button>
+        <video id="intro-video" class="intro-video" autoplay muted loop playsinline preload="auto">
+            <source src="{{ asset('videos/merry-intro.mp4') }}" type="video/mp4">
+        </video>
+        <div class="intro-scrim"></div>
+        <div class="intro-content">
+            <p class="intro-eyebrow">Coded with love · For you only</p>
+            <h1 class="intro-title">Hi, Merry 🖤</h1>
+            <p class="intro-sub">Gumawa ako ng maliit na sulat gamit ang code — para lang sa'yo.</p>
+            <button id="open-btn" type="button" class="open-btn">
+                <span>✉</span>
+                <span>Tap to Open</span>
+            </button>
+        </div>
     </div>
 
     <main id="page" class="page">
@@ -631,6 +661,10 @@
             <span>Tap photo to view in HD ✨</span>
         </div>
         <section class="gallery-grid" aria-label="Our memories">
+            <div class="mem-card wide" style="aspect-ratio: 4 / 5;" data-mem-src="{{ asset('images/merry/sunset.jpg') }}" data-mem-cap="Chasing sunsets with you, always. 🌅🖤">
+                <img src="{{ asset('images/merry/sunset.jpg') }}" alt="Sunset together" style="transform:scale(1.01);object-position:center 60%;">
+                <div class="mem-cap">Chasing sunsets with you, always. 🌅🖤</div>
+            </div>
             <div class="mem-card" data-mem-src="{{ asset('images/merry/cute.jpg') }}" data-mem-cap="Cutest face in the world. 🤍">
                 <img src="{{ asset('images/merry/cute.jpg') }}" alt="Merry" style="transform:scale(1.02);">
                 <div class="mem-cap">Cutest face in the world. 🤍</div>
@@ -668,9 +702,13 @@
         const page = document.getElementById('page');
         const ytPlayer = document.getElementById('yt-player');
         const musicWrap = document.getElementById('music-embed-wrap');
+        const introVideo = document.getElementById('intro-video');
         document.getElementById('open-btn').addEventListener('click', () => {
             intro.classList.add('opened');
             page.classList.add('visible');
+            if (introVideo) {
+                setTimeout(() => introVideo.pause(), 900);
+            }
             if (ytPlayer && musicWrap) {
                 musicWrap.style.display = 'block';
                 ytPlayer.src = 'https://www.youtube.com/embed/5mnZcoQldHM?autoplay=1&loop=1&playlist=5mnZcoQldHM&playsinline=1&rel=0';

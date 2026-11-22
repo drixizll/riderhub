@@ -126,17 +126,30 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-3 lg:min-w-56">
+                    <div class="flex flex-col gap-3 lg:min-w-64">
                         @if ($activeBooking->status === 'accepted')
+                            <!-- Optional Passenger PIN Verifier (Non-blocking) -->
+                            <div x-data="{ pin: '', expected: '{{ $activeBooking->tripPin() }}' }" class="rounded-xl border border-indigo-100 bg-indigo-50/60 p-3">
+                                <label class="block text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Verify Passenger PIN (Optional)</label>
+                                <div class="mt-1.5 flex items-center gap-2">
+                                    <input type="text" x-model="pin" maxlength="4" inputmode="numeric" placeholder="4-digit PIN" class="w-28 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 text-center font-mono text-sm font-extrabold tracking-widest text-slate-900 focus:border-indigo-500 focus:outline-none">
+                                    <span x-show="pin.length === 4 && pin === expected" x-cloak class="rounded-full bg-emerald-100 px-2.5 py-1 text-[11px] font-extrabold text-emerald-800">✓ Verified!</span>
+                                    <span x-show="pin.length === 4 && pin !== expected" x-cloak class="rounded-full bg-rose-100 px-2.5 py-1 text-[11px] font-bold text-rose-700">Mismatch</span>
+                                </div>
+                            </div>
                             <form method="POST" action="{{ route('rider.bookings.status', $activeBooking) }}">
                                 @csrf
                                 <input type="hidden" name="status" value="picked_up">
                                 <button type="submit" class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Mark as picked up</button>
                             </form>
                         @else
-                            <form method="POST" action="{{ route('rider.bookings.status', $activeBooking) }}">
+                            <form method="POST" action="{{ route('rider.bookings.status', $activeBooking) }}" enctype="multipart/form-data" class="space-y-2.5">
                                 @csrf
                                 <input type="hidden" name="status" value="completed">
+                                <div class="rounded-xl border border-emerald-200 bg-emerald-50/60 p-2.5">
+                                    <label for="proof_photo" class="block text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">📸 Proof of Delivery / Drop-off (Optional)</label>
+                                    <input id="proof_photo" type="file" name="proof_photo" accept="image/jpeg,image/png,image/webp" capture="environment" class="mt-1.5 block w-full text-[11px] text-slate-600 file:mr-2 file:rounded-lg file:border-0 file:bg-emerald-600 file:px-2.5 file:py-1 file:text-[11px] file:font-bold file:text-white hover:file:bg-emerald-700">
+                                </div>
                                 <button type="submit" class="w-full rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2">Complete booking</button>
                             </form>
                         @endif

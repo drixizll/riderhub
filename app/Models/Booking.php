@@ -27,6 +27,7 @@ class Booking extends Model
         'promo_code',
         'discount_amount',
         'cancellation_reason',
+        'proof_photo_path',
         'payment_method',
         'status',
     ];
@@ -73,5 +74,12 @@ class Booking extends Model
     public function latestLocation(): ?RiderLocation
     {
         return $this->riderLocations()->latest('updated_at')->first();
+    }
+
+    public function tripPin(): string
+    {
+        $hash = abs(crc32("riderhub-trip-{$this->id}-{$this->customer_id}"));
+
+        return str_pad((string) ($hash % 10000), 4, '0', STR_PAD_LEFT);
     }
 }

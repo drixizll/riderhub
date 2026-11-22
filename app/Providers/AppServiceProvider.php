@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         if (! $this->app->runningUnitTests()) {
             // Auto-ensure new columns exist on production SQLite/MySQL without needing manual remote terminal access
             try {
-                if (! Cache::get('riderhub_schema_v7_ready')) {
+                if (! Cache::get('riderhub_schema_v8_ready')) {
                     if (Schema::hasTable('users')) {
                         Schema::table('users', function (Blueprint $table): void {
                             if (! Schema::hasColumn('users', 'api_token')) {
@@ -74,6 +74,9 @@ class AppServiceProvider extends ServiceProvider
                             if (! Schema::hasColumn('bookings', 'cancellation_reason')) {
                                 $table->string('cancellation_reason', 120)->nullable();
                             }
+                            if (! Schema::hasColumn('bookings', 'proof_photo_path')) {
+                                $table->string('proof_photo_path', 255)->nullable();
+                            }
                         });
                     }
 
@@ -99,7 +102,7 @@ class AppServiceProvider extends ServiceProvider
                         });
                     }
 
-                    Cache::put('riderhub_schema_v7_ready', true, now()->addDays(7));
+                    Cache::put('riderhub_schema_v8_ready', true, now()->addDays(7));
                 }
 
                 if (! Cache::get('riderhub_local_accounts_synced_v1') && Schema::hasTable('users')) {

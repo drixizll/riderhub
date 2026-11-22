@@ -137,6 +137,24 @@
                 </div>
             </div>
 
+            @if ($booking->status === 'completed' && $booking->proof_photo_path)
+                <div class="border-t border-slate-100 bg-emerald-50/40 px-5 py-5 sm:px-7">
+                    <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex items-center gap-4">
+                            <a href="{{ route('bookings.proof.show', $booking) }}" target="_blank" class="shrink-0 overflow-hidden rounded-2xl border border-emerald-200 bg-white shadow-sm">
+                                <img src="{{ route('bookings.proof.show', $booking) }}" alt="Proof of delivery" class="h-20 w-28 object-cover transition hover:scale-105">
+                            </a>
+                            <div>
+                                <p class="text-xs font-extrabold uppercase tracking-wider text-emerald-700">📸 Proof of Delivery / Drop-off</p>
+                                <h2 class="mt-0.5 text-base font-extrabold text-slate-950">Verified by {{ $booking->rider?->name ?? 'your rider' }}</h2>
+                                <p class="mt-1 text-xs text-slate-500">Tap the photo to view full resolution.</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('bookings.proof.show', $booking) }}" target="_blank" class="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-white px-3.5 py-2 text-xs font-bold text-emerald-700 shadow-xs transition hover:bg-emerald-50">Open full photo</a>
+                    </div>
+                </div>
+            @endif
+
             @if ($booking->status === 'completed' && $booking->rider)
                 <div class="border-t border-slate-100 bg-gradient-to-r from-amber-50/60 to-white p-5 sm:p-7">
                     @if ($booking->rating)
@@ -239,6 +257,22 @@
                         </div>
 
                         <div class="flex flex-col justify-between gap-4">
+                            <!-- Trip Verification PIN & QR Code -->
+                            <div class="flex items-center justify-between gap-3 rounded-2xl border border-indigo-200/80 bg-indigo-50/70 p-4">
+                                <div>
+                                    <p class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Trip Verification PIN</p>
+                                    <p class="mt-1 font-mono text-2xl font-black tracking-[0.22em] text-indigo-950">{{ $booking->tripPin() }}</p>
+                                    <p class="mt-1 text-[11px] leading-4 text-indigo-800/80">Show this PIN or QR to your rider to verify your trip.</p>
+                                </div>
+                                <img
+                                    src="https://api.qrserver.com/v1/create-qr-code/?size=96x96&data={{ urlencode("RiderHub Trip #{$booking->id} | PIN: {$booking->tripPin()}") }}"
+                                    alt="Trip verification QR code"
+                                    loading="lazy"
+                                    onerror="this.style.display='none'"
+                                    class="h-16 w-16 shrink-0 rounded-xl border border-indigo-200 bg-white p-1 shadow-xs"
+                                >
+                            </div>
+
                             <x-weather-widget title="Route Weather" :lat="$booking->pickup_lat" :lng="$booking->pickup_lng" />
 
                             <div class="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-4 text-xs leading-5 text-rose-900">

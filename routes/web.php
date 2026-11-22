@@ -69,6 +69,7 @@ Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('ri
 
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/fleet/live', [AdminDashboardController::class, 'liveFleet'])->name('fleet.live');
     Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings.index');
     Route::get('/bookings/export/pdf', [ReportController::class, 'adminPdf'])->name('bookings.export.pdf');
     Route::get('/bookings/export/csv', [ReportController::class, 'adminCsv'])->name('bookings.export.csv');
@@ -91,6 +92,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/bookings/{booking}/messages', [BookingMessageController::class, 'index'])->name('bookings.messages.index');
     Route::post('/bookings/{booking}/messages', [BookingMessageController::class, 'store'])->middleware('throttle:60,1')->name('bookings.messages.store');
     Route::get('/bookings/{booking}/messages/{message}/image', [BookingMessageController::class, 'showImage'])->name('bookings.messages.image');
+    Route::get('/bookings/{booking}/proof', [RiderBookingController::class, 'showProof'])->name('bookings.proof.show');
 });
 
 require __DIR__.'/auth.php';

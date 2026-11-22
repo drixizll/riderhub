@@ -10,8 +10,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class RiderBookingController extends Controller
 {
@@ -180,9 +182,18 @@ class RiderBookingController extends Controller
     {
         $validated = $request->validate([
             'status' => ['required', Rule::in(['picked_up', 'completed'])],
+            'proof_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:8192'],
         ]);
 
-        DB::transaction(function () use ($booking, $validated): void {
+        $proofPath = null;
+        if ($validated['status'] === 'completed' && $request->hasFile('proof_photo')) {
+            $stored = $request->file('proof_photo')->store('delivery-proofs', 'public');
+            if ($stored !== false) {
+                $proofPath = $stored;
+            }
+        }
+
+        DB::transaction(function () use ($booking, $validated, $proofPath): void {
             $lockedBooking = Booking::query()->lockForUpdate()->with('payment')->findOrFail($booking->id);
 
             $this->authorize('updateStatus', $lockedBooking);
@@ -197,7 +208,12 @@ class RiderBookingController extends Controller
                 abort(422, 'This booking cannot move to the selected status.');
             }
 
-            $lockedBooking->update(['status' => $validated['status']]);
+            $updates = ['status' => $validated['status']];
+            if ($proofPath !== null) {
+                $updates['proof_photo_path'] = $proofPath;
+            }
+
+            $lockedBooking->update($updates);
 
             if ($validated['status'] === 'completed' && $lockedBooking->payment?->method === 'cash') {
                 $lockedBooking->payment->update([
@@ -217,5 +233,22 @@ class RiderBookingController extends Controller
         }
 
         return redirect()->route('rider.dashboard')->with('success', 'Booking status updated.');
+    }
+
+    public function showProof(Request $request, Booking $booking): StreamedResponse
+    {
+        $user = $request->user();
+        abort_unless(
+            $user && ($user->isAdmin() || $booking->customer_id === $user->id || $booking->rider_id === $user->id),
+            403
+        );
+
+        if (! $booking->proof_photo_path || ! Storage::disk('public')->exists($booking->proof_photo_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($booking->proof_photo_path, null, [
+            'Cache-Control' => 'private, max-age=86400',
+        ]);
     }
 }

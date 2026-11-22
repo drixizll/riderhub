@@ -233,4 +233,48 @@ class TripChatAndRadarTest extends TestCase
         $this->assertSame('cancelled', $booking->fresh()->status);
         $this->assertSame('Changed my mind', $booking->fresh()->cancellation_reason);
     }
+
+    public function test_admin_live_fleet_and_proof_of_delivery_and_trip_pin_work(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $customer = User::factory()->create(['role' => 'customer']);
+        $rider = User::factory()->create(['role' => 'rider', 'is_online' => true, 'rider_status' => 'verified']);
+
+        $booking = Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'rider_id' => $rider->id,
+            'status' => 'picked_up',
+            'payment_method' => 'cash',
+        ]);
+
+        // Trip PIN is always a 4-digit numeric string
+        $this->assertMatchesRegularExpression('/^\d{4}$/', $booking->tripPin());
+
+        // Admin live fleet endpoint returns active trip
+        $this->actingAs($admin)
+            ->getJson(route('admin.fleet.live'))
+            ->assertOk()
+            ->assertJsonCount(1, 'trips')
+            ->assertJsonPath('trips.0.id', $booking->id);
+
+        // Rider completes booking with Proof of Delivery photo
+        $pod = \Illuminate\Http\UploadedFile::fake()->image('proof.jpg', 600, 400);
+        $this->actingAs($rider)
+            ->post(route('rider.bookings.status', $booking), [
+                'status' => 'completed',
+                'proof_photo' => $pod,
+            ])
+            ->assertRedirect(route('rider.dashboard'));
+
+        $booking->refresh();
+        $this->assertSame('completed', $booking->status);
+        $this->assertNotNull($booking->proof_photo_path);
+
+        // Customer can view the POD photo
+        $this->actingAs($customer)
+            ->get(route('bookings.proof.show', $booking))
+            ->assertOk();
+    }
 }

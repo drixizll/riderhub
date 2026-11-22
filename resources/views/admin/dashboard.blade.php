@@ -47,6 +47,91 @@
             </a>
         </section>
 
+        <!-- Live Fleet Command Center Map -->
+        <section class="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm" aria-label="Live Fleet Command Center">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-700 px-5 py-4 text-white sm:px-6">
+                <div class="flex items-center gap-3">
+                    <span class="relative flex h-3 w-3 shrink-0">
+                        <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75"></span>
+                        <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
+                    </span>
+                    <div>
+                        <p class="text-[11px] font-bold uppercase tracking-widest text-indigo-100">Misamis Oriental Operations</p>
+                        <h2 class="text-lg font-extrabold text-white">Live Fleet Command Center</h2>
+                    </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <span id="fleet-count-pill" class="rounded-full bg-white/15 px-3 py-1 text-indigo-50 backdrop-blur-sm">Syncing live fleet…</span>
+                    <span id="fleet-updated-pill" class="rounded-full bg-white/10 px-2.5 py-1 text-indigo-100">10s auto-refresh</span>
+                </div>
+            </div>
+            <div id="admin-fleet-map" class="h-80 w-full bg-slate-100 sm:h-96" aria-label="Live map of active RiderHub trips and riders"></div>
+            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50 px-5 py-2.5 text-xs text-slate-600 sm:px-6">
+                <div class="flex flex-wrap items-center gap-4">
+                    <span class="inline-flex items-center gap-1.5 font-semibold"><span class="h-2.5 w-2.5 rounded-full bg-indigo-600"></span>Active Rider GPS</span>
+                    <span class="inline-flex items-center gap-1.5 font-semibold"><span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>Active Trip Pickup</span>
+                    <span class="inline-flex items-center gap-1.5 font-semibold"><span class="h-2.5 w-2.5 rounded-full bg-amber-500"></span>Pending Request</span>
+                </div>
+                <span class="text-[11px] text-slate-400">Click any pin for booking &amp; rider details</span>
+            </div>
+        </section>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const mapEl = document.getElementById('admin-fleet-map');
+                if (!mapEl || !window.L) return;
+
+                const map = L.map('admin-fleet-map').setView([8.5378, 124.7536], 12);
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri',
+                    maxZoom: 19,
+                }).addTo(map);
+
+                const layerGroup = L.layerGroup().addTo(map);
+                const countPill = document.getElementById('fleet-count-pill');
+                const updatedPill = document.getElementById('fleet-updated-pill');
+
+                const dotIcon = (color) => L.divIcon({
+                    className: 'riderhub-fleet-dot',
+                    html: `<div style="width:14px;height:14px;border-radius:9999px;background:${color};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.35);"></div>`,
+                    iconSize: [14, 14],
+                    iconAnchor: [7, 7],
+                });
+
+                const refreshFleet = async () => {
+                    try {
+                        const res = await fetch(@js(route('admin.fleet.live')), { headers: { 'Accept': 'application/json' } });
+                        if (!res.ok) return;
+                        const data = await res.json();
+                        layerGroup.clearLayers();
+
+                        const trips = data.trips || [];
+                        trips.forEach((t) => {
+                            const isPending = t.status === 'pending';
+                            const popup = `<div style="font-size:12px;line-height:1.45;"><strong>#${t.id} · ${t.type}</strong> (${t.status.replace('_', ' ')})<br>Customer: ${t.customer}<br>${t.rider ? `Rider: ${t.rider}${t.plate ? ` (${t.plate})` : ''}<br>` : ''}Route: ${t.pickup_address} → ${t.dropoff_address}<br><strong>${t.fare}</strong></div>`;
+
+                            L.marker([t.pickup_lat, t.pickup_lng], { icon: dotIcon(isPending ? '#f59e0b' : '#10b981') })
+                                .bindPopup(popup)
+                                .addTo(layerGroup);
+
+                            if (!isPending && t.rider_lat && t.rider_lng) {
+                                L.marker([t.rider_lat, t.rider_lng], { icon: dotIcon('#4f46e5') })
+                                    .bindPopup(`<strong>🏍 Live Rider: ${t.rider || 'Rider'}</strong><br>Trip #${t.id} · ${t.fare}`)
+                                    .addTo(layerGroup);
+                                L.polyline([[t.rider_lat, t.rider_lng], [t.dropoff_lat, t.dropoff_lng]], { color: '#6366f1', weight: 3, dashArray: '6,6', opacity: 0.7 }).addTo(layerGroup);
+                            }
+                        });
+
+                        if (countPill) countPill.textContent = `${trips.length} Live Trip(s) · ${data.online_riders ?? 0} Online Rider(s)`;
+                        if (updatedPill && data.timestamp_pht) updatedPill.textContent = `Updated ${data.timestamp_pht}`;
+                    } catch {}
+                };
+
+                refreshFleet();
+                setInterval(refreshFleet, 10000);
+            });
+        </script>
+
         <section class="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]" aria-label="Platform analytics">
             <article class="card-interactive rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
                 <div class="flex flex-wrap items-center justify-between gap-2">

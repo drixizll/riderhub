@@ -80,6 +80,47 @@ class AdminDashboardController extends Controller
         ]);
     }
 
+    public function liveFleet(): \Illuminate\Http\JsonResponse
+    {
+        $trips = Booking::query()
+            ->with(['customer:id,name', 'rider:id,name,plate_number,vehicle_model'])
+            ->whereIn('status', ['accepted', 'picked_up', 'pending'])
+            ->where(function ($q): void {
+                $q->whereIn('status', ['accepted', 'picked_up'])
+                    ->orWhere(fn ($p) => $p->where('status', 'pending')->where(fn ($pay) => $pay->where('payment_method', 'cash')->orWhereHas('payment', fn ($pm) => $pm->where('status', 'paid'))));
+            })
+            ->latest('id')
+            ->limit(25)
+            ->get()
+            ->map(function (Booking $b): array {
+                $loc = $b->latestLocation();
+
+                return [
+                    'id' => $b->id,
+                    'type' => ucfirst($b->type),
+                    'status' => $b->status,
+                    'fare' => '₱'.number_format((float) $b->fare, 2),
+                    'customer' => $b->customer?->name ?? 'Customer',
+                    'rider' => $b->rider?->name,
+                    'plate' => $b->rider?->plate_number,
+                    'pickup_address' => $b->pickup_address,
+                    'dropoff_address' => $b->dropoff_address,
+                    'pickup_lat' => (float) $b->pickup_lat,
+                    'pickup_lng' => (float) $b->pickup_lng,
+                    'dropoff_lat' => (float) $b->dropoff_lat,
+                    'dropoff_lng' => (float) $b->dropoff_lng,
+                    'rider_lat' => $loc ? (float) $loc->lat : null,
+                    'rider_lng' => $loc ? (float) $loc->lng : null,
+                ];
+            });
+
+        return response()->json([
+            'trips' => $trips,
+            'online_riders' => User::where('role', 'rider')->where('is_online', true)->count(),
+            'timestamp_pht' => now()->timezone('Asia/Manila')->format('g:i:s A'),
+        ]);
+    }
+
     public function assignRider(Request $request, Booking $booking): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([

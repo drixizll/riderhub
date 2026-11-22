@@ -16,9 +16,12 @@ class BookingRatingController extends Controller
         $validated = $request->validate([
             'score' => ['required', 'integer', 'between:1,5'],
             'comment' => ['nullable', 'string', 'max:500'],
+            'tip_amount' => ['nullable', 'numeric', 'min:0', 'max:500'],
         ]);
 
-        $rating = DB::transaction(function () use ($booking, $request, $validated): BookingRating {
+        $tipAmount = round((float) ($validated['tip_amount'] ?? 0), 2);
+
+        $rating = DB::transaction(function () use ($booking, $request, $validated, $tipAmount): BookingRating {
             $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
 
             abort_unless($lockedBooking->customer_id === $request->user()->id, 403);
@@ -30,12 +33,15 @@ class BookingRatingController extends Controller
                 'rider_id' => $lockedBooking->rider_id,
                 'score' => $validated['score'],
                 'comment' => $validated['comment'] ?? null,
+                'tip_amount' => $tipAmount,
             ]);
         });
 
+        $tipText = $tipAmount > 0 ? ' with a ₱'.number_format($tipAmount, 2).' tip!' : '.';
+
         $rating->rider->notify(new RiderHubNotification(
             'New rider review',
-            "{$request->user()->name} left you a {$rating->score}-star rating.",
+            "{$request->user()->name} left you a {$rating->score}-star rating{$tipText}",
             route('rider.dashboard', absolute: false),
             'rating',
         ));

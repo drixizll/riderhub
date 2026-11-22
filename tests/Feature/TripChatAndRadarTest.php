@@ -310,4 +310,47 @@ class TripChatAndRadarTest extends TestCase
 
         $this->assertDatabaseHas('bookings', ['id' => $completed->id, 'deleted_at' => null]);
     }
+
+    public function test_rider_tip_and_admin_audit_log_are_recorded(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $customer = User::factory()->create(['role' => 'customer']);
+        $rider = User::factory()->create(['role' => 'rider']);
+
+        $booking = Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'rider_id' => $rider->id,
+            'status' => 'completed',
+        ]);
+
+        // Customer rates rider with ₱20 tip
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.rating', $booking), [
+                'score' => 5,
+                'comment' => 'Super fast and safe!',
+                'tip_amount' => 20,
+            ])
+            ->assertRedirect(route('customer.bookings.show', $booking));
+
+        $this->assertDatabaseHas('booking_ratings', [
+            'booking_id' => $booking->id,
+            'tip_amount' => 20,
+        ]);
+
+        // Admin updates rider and creates an audit log entry
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $rider), [
+                'name' => $rider->name,
+                'email' => $rider->email,
+                'phone' => $rider->phone,
+                'role' => 'rider',
+                'rider_status' => 'verified',
+            ])
+            ->assertRedirect(route('admin.users.index'));
+
+        $this->assertDatabaseHas('admin_activity_logs', [
+            'admin_id' => $admin->id,
+            'action' => 'UPDATE_ACCOUNT',
+        ]);
+    }
 }

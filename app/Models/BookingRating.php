@@ -13,6 +13,11 @@ class BookingRating extends Model
         'rider_id',
         'score',
         'comment',
+        'tip_amount',
+    ];
+
+    protected $casts = [
+        'tip_amount' => 'float',
     ];
 
     public function booking(): BelongsTo

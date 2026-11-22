@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminActivityLog;
 use App\Models\Booking;
 use App\Models\User;
 use App\Notifications\RiderHubNotification;
@@ -77,6 +78,9 @@ class AdminDashboardController extends Controller
             'statusChart' => $statusChart,
             'topRiders' => $topRiders,
             'availableRiders' => $availableRiders,
+            'recentActivityLogs' => \Illuminate\Support\Facades\Schema::hasTable('admin_activity_logs')
+                ? AdminActivityLog::with('admin:id,name')->latest()->limit(8)->get()
+                : collect(),
         ]);
     }
 
@@ -156,6 +160,13 @@ class AdminDashboardController extends Controller
             \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
         }
 
+        AdminActivityLog::record(
+            \Illuminate\Support\Facades\Auth::id(),
+            'RESET_TEST_DATA',
+            'Cleared all test bookings, payments, chats, ratings, and notifications back to #1.',
+            request()->ip(),
+        );
+
         return redirect()->route('admin.dashboard')
             ->with('success', 'All test bookings, payments, chats, and notifications cleared! Next booking starts fresh at #1.');
     }
@@ -204,6 +215,13 @@ class AdminDashboardController extends Controller
             route('rider.dashboard', absolute: false),
             'booking',
         ));
+
+        AdminActivityLog::record(
+            $request->user()->id,
+            'DISPATCH_RIDER',
+            "Dispatched Booking #{$booking->id} to {$riderName}.",
+            $request->ip(),
+        );
 
         return back()->with('success', "Booking #{$booking->id} has been dispatched to {$riderName}.");
     }
@@ -282,6 +300,13 @@ class AdminDashboardController extends Controller
         }
 
         $user->update($validated);
+
+        AdminActivityLog::record(
+            $request->user()->id,
+            'UPDATE_ACCOUNT',
+            "Updated {$user->name} ({$user->role}".($user->role === 'rider' ? ", KYC: {$user->rider_status}" : '').').',
+            $request->ip(),
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', "Account for {$user->name} has been updated.");

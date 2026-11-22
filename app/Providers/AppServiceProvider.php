@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         if (! $this->app->runningUnitTests()) {
             // Auto-ensure new columns exist on production SQLite/MySQL without needing manual remote terminal access
             try {
-                if (! Cache::get('riderhub_schema_v10_ready')) {
+                if (! Cache::get('riderhub_schema_v11_ready')) {
                     if (Schema::hasTable('users')) {
                         Schema::table('users', function (Blueprint $table): void {
                             if (! Schema::hasColumn('users', 'api_token')) {
@@ -86,6 +86,24 @@ class AppServiceProvider extends ServiceProvider
                         });
                     }
 
+                    if (Schema::hasTable('booking_ratings') && ! Schema::hasColumn('booking_ratings', 'tip_amount')) {
+                        Schema::table('booking_ratings', function (Blueprint $table): void {
+                            $table->decimal('tip_amount', 8, 2)->default(0);
+                        });
+                    }
+
+                    if (! Schema::hasTable('admin_activity_logs')) {
+                        Schema::create('admin_activity_logs', function (Blueprint $table): void {
+                            $table->id();
+                            $table->foreignId('admin_id')->nullable()->constrained('users')->nullOnDelete();
+                            $table->string('action', 60);
+                            $table->string('description', 255);
+                            $table->string('ip_address', 45)->nullable();
+                            $table->timestamps();
+                            $table->index('created_at');
+                        });
+                    }
+
                     if (! Schema::hasTable('booking_messages')) {
                         Schema::create('booking_messages', function (Blueprint $table): void {
                             $table->id();
@@ -108,7 +126,7 @@ class AppServiceProvider extends ServiceProvider
                         });
                     }
 
-                    Cache::put('riderhub_schema_v10_ready', true, now()->addDays(7));
+                    Cache::put('riderhub_schema_v11_ready', true, now()->addDays(7));
                 }
 
                 // Auto-purge Recycle Bin bookings older than 30 days (runs every 6 hours)

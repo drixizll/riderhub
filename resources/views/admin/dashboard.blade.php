@@ -251,6 +251,33 @@
             </section>
         @endif
 
+        <!-- Admin Activity & Audit Log -->
+        <section class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" aria-label="Admin audit log">
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                <div>
+                    <h2 class="text-base font-bold text-slate-950">🛡️ Admin Activity &amp; Audit Log</h2>
+                    <p class="mt-0.5 text-xs text-slate-500">Accountability trail of recent dispatches, KYC updates, and admin actions (PHT).</p>
+                </div>
+                <span class="rounded-full bg-indigo-50 px-2.5 py-1 text-[11px] font-bold text-indigo-700">Live Trail</span>
+            </div>
+            @if (($recentActivityLogs ?? collect())->isEmpty())
+                <div class="px-6 py-8 text-center text-xs text-slate-400">No admin actions recorded yet. Dispatches, account edits, and resets will appear here.</div>
+            @else
+                <ul class="divide-y divide-slate-100">
+                    @foreach ($recentActivityLogs as $log)
+                        <li class="flex flex-col gap-1 px-5 py-3.5 text-xs sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-extrabold text-indigo-700">{{ $log->action }}</span>
+                                <span class="font-semibold text-slate-800">{{ $log->description }}</span>
+                                <span class="text-slate-400">by {{ $log->admin?->name ?? 'Admin' }}</span>
+                            </div>
+                            <span class="shrink-0 text-[11px] font-medium text-slate-400">{{ $log->created_at?->timezone('Asia/Manila')->format('M j, g:i A') }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </section>
+
         <section class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
             <div>
                 <h2 class="font-bold text-slate-950">People directory</h2>

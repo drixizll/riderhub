@@ -119,6 +119,46 @@
                 </div>
             </section>
 
+            <!-- Saved Favorite Places Quick-Fill -->
+            <section
+                x-data="{
+                    target: 'pickup',
+                    places: [
+                        { icon: '🏠', label: 'Home (Baluarte)', address: 'Baluarte, Tagoloan, Misamis Oriental', lat: 8.5450, lng: 124.7640 },
+                        { icon: '🎓', label: 'School (TCC)', address: 'Tagoloan Community College, Tagoloan, Misamis Oriental', lat: 8.5389, lng: 124.7568 },
+                        { icon: '🏛️', label: 'Tagoloan Plaza', address: 'Poblacion, Tagoloan, Misamis Oriental', lat: 8.5378, lng: 124.7536 },
+                        { icon: '🏢', label: 'Work (SM CDO)', address: 'SM CDO Downtown, Cagayan de Oro, Misamis Oriental', lat: 8.4856, lng: 124.6565 },
+                    ],
+                    applyPlace(p) {
+                        const addrEl = document.getElementById(this.target + '_address');
+                        const latEl = document.getElementById(this.target + '_lat');
+                        const lngEl = document.getElementById(this.target + '_lng');
+                        if (addrEl) addrEl.value = p.address;
+                        if (latEl) latEl.value = p.lat;
+                        if (lngEl) lngEl.value = p.lng;
+                        const findBtn = document.querySelector(`[data-geocode='${this.target}']`);
+                        if (findBtn) findBtn.click();
+                    }
+                }"
+                class="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-xs"
+            >
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <p class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">📍 Saved Favorite Places</p>
+                    <div class="inline-flex rounded-xl border border-indigo-200 bg-white p-0.5 text-[11px] font-bold">
+                        <button type="button" @click="target = 'pickup'" :class="target === 'pickup' ? 'bg-indigo-600 text-white' : 'text-slate-600'" class="rounded-lg px-2.5 py-1 transition">Fill Pickup</button>
+                        <button type="button" @click="target = 'dropoff'" :class="target === 'dropoff' ? 'bg-amber-500 text-white' : 'text-slate-600'" class="rounded-lg px-2.5 py-1 transition">Fill Drop-off</button>
+                    </div>
+                </div>
+                <div class="mt-2.5 flex flex-wrap gap-2">
+                    <template x-for="place in places" :key="place.label">
+                        <button type="button" @click="applyPlace(place)" class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200/80 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 shadow-xs transition hover:-translate-y-0.5 hover:border-indigo-400 hover:text-indigo-700">
+                            <span x-text="place.icon"></span>
+                            <span x-text="place.label"></span>
+                        </button>
+                    </template>
+                </div>
+            </section>
+
             <section class="grid gap-5 lg:grid-cols-2">
                 <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
                     <div class="flex items-center gap-3">

@@ -88,7 +88,7 @@
                             <div class="flex items-center justify-between gap-4 py-3 text-sm">
                                 <dt class="text-slate-500">Trip Verification PIN</dt>
                                 <dd class="flex items-center gap-2">
-                                    <span class="rounded-lg bg-indigo-100 px-2.5 py-1 font-mono text-base font-black tracking-[0.2em] text-indigo-800">{{ $booking->tripPin() }}</span>
+                                    <span class="rounded-lg bg-indigo-600 px-3 py-1 font-mono text-base font-black tracking-[0.2em] text-white shadow-sm">{{ $booking->tripPin() }}</span>
                                 </dd>
                             </div>
                         @endif
@@ -174,6 +174,9 @@
                                 @if ($booking->rating->comment)
                                     <p class="mt-2 text-sm leading-6 text-slate-600">“{{ $booking->rating->comment }}”</p>
                                 @endif
+                                @if ((float) ($booking->rating->tip_amount ?? 0) > 0)
+                                    <span class="mt-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-xs font-extrabold text-emerald-800">💸 Rider Tip: ₱{{ number_format((float) $booking->rating->tip_amount, 2) }}</span>
+                                @endif
                             </div>
                             <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">Review submitted</span>
                         </div>
@@ -206,6 +209,19 @@
                                     <label for="rating-comment" class="block text-sm font-semibold text-slate-700">Share a quick note <span class="font-normal text-slate-400">(optional)</span></label>
                                     <textarea id="rating-comment" name="comment" rows="2" maxlength="500" placeholder="What went well?" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">{{ old('comment') }}</textarea>
                                     <x-input-error :messages="$errors->get('comment')" class="mt-1" />
+                                </div>
+                                <div x-data="{ tip: {{ (int) old('tip_amount', 0) }} }">
+                                    <p class="text-sm font-semibold text-slate-700">Add a tip for {{ Str::before($booking->rider->name, ' ') }} <span class="font-normal text-slate-400">(optional)</span></p>
+                                    <input type="hidden" name="tip_amount" :value="tip">
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        @foreach ([0 => 'No tip', 10 => '+₱10', 20 => '+₱20', 50 => '+₱50'] as $val => $label)
+                                            <button type="button" @click="tip = {{ $val }}"
+                                                :class="tip === {{ $val }} ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-indigo-50'"
+                                                class="rounded-xl border px-3.5 py-1.5 text-xs font-bold transition">
+                                                {{ $label }}
+                                            </button>
+                                        @endforeach
+                                    </div>
                                 </div>
                                 <button type="submit" class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                                     Submit review

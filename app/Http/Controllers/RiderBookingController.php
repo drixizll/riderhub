@@ -83,10 +83,12 @@ class RiderBookingController extends Controller
         $todayEarnings = (float) $rider->riderBookings()
             ->where('status', 'completed')
             ->whereDate('updated_at', today())
-            ->sum('fare');
+            ->sum('fare')
+            + (float) $rider->ratingsReceived()->whereDate('created_at', today())->sum('tip_amount');
         $totalEarnings = (float) $rider->riderBookings()
             ->where('status', 'completed')
-            ->sum('fare');
+            ->sum('fare')
+            + (float) $rider->ratingsReceived()->sum('tip_amount');
 
         return [
             'activeBooking' => $rider->riderBookings()

@@ -449,9 +449,23 @@
                 <p class="lyric-line">“Sa bawat pangarap ko, Merry, palagi kang kasama.”</p>
             </div>
 
+            <div id="music-embed-wrap" style="margin-top:16px;overflow:hidden;border-radius:14px;border:1px solid rgba(255,255,255,0.12);background:#000;display:none;">
+                <iframe
+                    id="yt-player"
+                    width="100%"
+                    height="86"
+                    src=""
+                    title="Mahal Magmahal — Esremborak"
+                    frameborder="0"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    allowfullscreen
+                    style="display:block;filter:grayscale(100%) contrast(1.08);"
+                ></iframe>
+            </div>
+
             <div class="song-actions">
-                <a class="song-link" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=Mahal+Magmahal+Esremborak">
-                    ▶ Play “Mahal Magmahal” on YouTube
+                <a class="song-link" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/watch?v=5mnZcoQldHM">
+                    ▶ Open in YouTube
                 </a>
                 <a class="song-link" target="_blank" rel="noopener noreferrer" href="https://open.spotify.com/search/Mahal%20Magmahal%20Esremborak">
                     ♫ Open on Spotify
@@ -492,12 +506,18 @@
     </main>
 
     <script>
-        // Open envelope
+        // Open envelope & auto-play "Mahal Magmahal" by Esremborak
         const intro = document.getElementById('intro');
         const page = document.getElementById('page');
+        const ytPlayer = document.getElementById('yt-player');
+        const musicWrap = document.getElementById('music-embed-wrap');
         document.getElementById('open-btn').addEventListener('click', () => {
             intro.classList.add('opened');
             page.classList.add('visible');
+            if (ytPlayer && musicWrap) {
+                musicWrap.style.display = 'block';
+                ytPlayer.src = 'https://www.youtube.com/embed/5mnZcoQldHM?autoplay=1&loop=1&playlist=5mnZcoQldHM&playsinline=1&rel=0';
+            }
         });
 
         // Toggle B&W / Color on photo tap

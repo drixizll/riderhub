@@ -14,6 +14,7 @@ class BookingMessage extends Model
         'booking_id',
         'sender_id',
         'body',
+        'image_path',
         'read_at',
     ];
 

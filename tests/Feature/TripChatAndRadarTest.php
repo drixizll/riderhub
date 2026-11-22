@@ -46,6 +46,18 @@ class TripChatAndRadarTest extends TestCase
             ->assertOk()
             ->assertJsonPath('seen_up_to_id', $sentId);
 
+        // Customer sends a photo attachment + emoji
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $photo = \Illuminate\Http\UploadedFile::fake()->image('pickup-landmark.jpg', 400, 300);
+        $photoRes = $this->actingAs($customer)
+            ->post(route('bookings.messages.store', $booking), [
+                'body' => 'Nandito po ako 📍',
+                'image' => $photo,
+            ], ['Accept' => 'application/json'])
+            ->assertCreated();
+
+        $this->assertNotNull($photoRes->json('message.image_url'));
+
         $this->actingAs($rider)
             ->postJson(route('bookings.messages.store', $booking), ['body' => 'Papunta na po!'])
             ->assertCreated();

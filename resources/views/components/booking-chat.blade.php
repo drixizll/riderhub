@@ -64,21 +64,58 @@
         </div>
     </div>
 
-    <form data-chat-form class="flex items-center gap-2 bg-white p-3.5">
+    <!-- Image attachment preview -->
+    <div data-chat-preview-wrap class="hidden items-center justify-between gap-2 border-t border-slate-100 bg-indigo-50/50 px-3.5 py-2">
+        <div class="flex items-center gap-2.5 min-w-0">
+            <img data-chat-preview-img src="" alt="Attachment preview" class="h-10 w-10 rounded-lg border border-indigo-200 object-cover">
+            <span data-chat-preview-name class="truncate text-xs font-semibold text-indigo-900">Photo attached</span>
+        </div>
+        <button type="button" data-chat-preview-clear class="rounded-lg bg-white px-2 py-1 text-xs font-bold text-rose-600 shadow-xs hover:bg-rose-50">✕</button>
+    </div>
+
+    <!-- Emoji Picker Popup -->
+    <div data-emoji-panel class="hidden border-t border-slate-100 bg-slate-50 px-3.5 py-2.5">
+        <div class="flex flex-wrap gap-1">
+            @foreach (['😀', '😂', '😍', '👍', '🙏', '🏍️', '📍', '📦', '✅', '🔥', '❤️', '😅', '🙌', '👋', '🛵', '🏠', '🏢', '⏰', '🌧️', '☀️', '💵', '📲', '🎉', '👌'] as $emoji)
+                <button type="button" data-emoji-item="{{ $emoji }}" class="flex h-8 w-8 items-center justify-center rounded-lg text-lg transition hover:scale-110 hover:bg-white">{{ $emoji }}</button>
+            @endforeach
+        </div>
+    </div>
+
+    <form data-chat-form class="flex items-center gap-1.5 bg-white p-3 sm:gap-2 sm:p-3.5">
+        <input type="file" data-chat-file accept="image/jpeg,image/png,image/webp,image/gif" class="hidden">
+        <button
+            type="button"
+            data-chat-photo-btn
+            title="Send photo"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
+            aria-label="Attach photo"
+        >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75 7.409 10.59a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 19.5h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Z" /></svg>
+        </button>
+        <button
+            type="button"
+            data-emoji-toggle
+            title="Insert emoji"
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-lg transition hover:border-indigo-200 hover:bg-indigo-50"
+            aria-label="Toggle emoji picker"
+        >
+            😊
+        </button>
         <input
             type="text"
             data-chat-input
             maxlength="500"
             autocomplete="off"
             placeholder="Message {{ $partnerName }}…"
-            class="flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+            class="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         >
         <button
             type="submit"
             data-chat-submit
-            class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+            class="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50 sm:px-4"
         >
-            Send
+            <span class="hidden sm:inline">Send</span>
             <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95 28.897 28.897 0 0 0 15.293-7.155.75.75 0 0 0 0-1.114A28.897 28.897 0 0 0 3.105 2.288Z" /></svg>
         </button>
     </form>
@@ -103,6 +140,16 @@
             const statusEl = root.querySelector('[data-chat-status]');
             const presenceEl = root.querySelector('[data-partner-presence]');
             const dotEl = root.querySelector('[data-partner-dot]');
+            const fileInput = root.querySelector('[data-chat-file]');
+            const photoBtn = root.querySelector('[data-chat-photo-btn]');
+            const previewWrap = root.querySelector('[data-chat-preview-wrap]');
+            const previewImg = root.querySelector('[data-chat-preview-img]');
+            const previewName = root.querySelector('[data-chat-preview-name]');
+            const previewClear = root.querySelector('[data-chat-preview-clear]');
+            const emojiToggle = root.querySelector('[data-emoji-toggle]');
+            const emojiPanel = root.querySelector('[data-emoji-panel]');
+
+            let selectedFile = null;
 
             let lastId = 0;
             let lastMyMsgId = 0;
@@ -178,9 +225,28 @@
 
                 const bubble = document.createElement('div');
                 bubble.className = m.is_mine
-                    ? 'rounded-2xl rounded-br-md bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm'
-                    : 'rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 shadow-sm';
-                bubble.textContent = m.body;
+                    ? 'rounded-2xl rounded-br-md bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm space-y-1.5'
+                    : 'rounded-2xl rounded-bl-md border border-slate-200 bg-white px-3.5 py-2 text-sm font-medium text-slate-800 shadow-sm space-y-1.5';
+
+                if (m.image_url) {
+                    const link = document.createElement('a');
+                    link.href = m.image_url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    const img = document.createElement('img');
+                    img.src = m.image_url;
+                    img.alt = 'Chat photo';
+                    img.className = 'max-h-48 w-full max-w-[220px] rounded-xl object-cover';
+                    link.appendChild(img);
+                    bubble.appendChild(link);
+                }
+
+                if (m.body) {
+                    const textNode = document.createElement('p');
+                    textNode.className = 'whitespace-pre-wrap break-words';
+                    textNode.textContent = m.body;
+                    bubble.appendChild(textNode);
+                }
 
                 const meta = document.createElement('div');
                 meta.className = 'mt-1 flex items-center gap-1.5 px-1 text-[10px] font-semibold text-slate-400';
@@ -239,19 +305,56 @@
                 } catch {}
             };
 
+            const clearAttachment = () => {
+                selectedFile = null;
+                if (fileInput) fileInput.value = '';
+                if (previewWrap) {
+                    previewWrap.classList.add('hidden');
+                    previewWrap.classList.remove('flex');
+                }
+            };
+
+            photoBtn?.addEventListener('click', () => fileInput?.click());
+            previewClear?.addEventListener('click', clearAttachment);
+            fileInput?.addEventListener('change', () => {
+                const file = fileInput.files?.[0];
+                if (!file) return;
+                selectedFile = file;
+                if (previewName) previewName.textContent = file.name;
+                if (previewImg) previewImg.src = URL.createObjectURL(file);
+                if (previewWrap) {
+                    previewWrap.classList.remove('hidden');
+                    previewWrap.classList.add('flex');
+                }
+            });
+
+            emojiToggle?.addEventListener('click', () => {
+                emojiPanel?.classList.toggle('hidden');
+            });
+
+            root.querySelectorAll('[data-emoji-item]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    input.value += btn.dataset.emojiItem || '';
+                    input.focus();
+                });
+            });
+
             const sendBody = async (text) => {
                 const body = (text || '').trim();
-                if (!body) return;
+                if (!body && !selectedFile) return;
                 submitBtn.disabled = true;
                 try {
+                    const formData = new FormData();
+                    if (body) formData.append('body', body);
+                    if (selectedFile) formData.append('image', selectedFile);
+
                     const res = await fetch(sendUrl, {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json',
                             'Accept': 'application/json',
                             'X-CSRF-TOKEN': csrf,
                         },
-                        body: JSON.stringify({ body }),
+                        body: formData,
                     });
                     if (res.ok) {
                         const data = await res.json();
@@ -260,6 +363,8 @@
                             updateReceipts();
                         }
                         input.value = '';
+                        clearAttachment();
+                        emojiPanel?.classList.add('hidden');
                     }
                 } finally {
                     submitBtn.disabled = false;

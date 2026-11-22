@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::get('/bookings/{booking}/messages', [BookingMessageController::class, 'index'])->name('bookings.messages.index');
     Route::post('/bookings/{booking}/messages', [BookingMessageController::class, 'store'])->middleware('throttle:60,1')->name('bookings.messages.store');
+    Route::get('/bookings/{booking}/messages/{message}/image', [BookingMessageController::class, 'showImage'])->name('bookings.messages.image');
 });
 
 require __DIR__.'/auth.php';

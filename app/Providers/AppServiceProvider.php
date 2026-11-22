@@ -30,7 +30,7 @@ class AppServiceProvider extends ServiceProvider
         if (! $this->app->runningUnitTests()) {
             // Auto-ensure new columns exist on production SQLite/MySQL without needing manual remote terminal access
             try {
-                if (! Cache::get('riderhub_schema_v6_ready')) {
+                if (! Cache::get('riderhub_schema_v7_ready')) {
                     if (Schema::hasTable('users')) {
                         Schema::table('users', function (Blueprint $table): void {
                             if (! Schema::hasColumn('users', 'api_token')) {
@@ -83,17 +83,23 @@ class AppServiceProvider extends ServiceProvider
                             $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
                             $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
                             $table->text('body');
+                            $table->string('image_path', 255)->nullable();
                             $table->timestamp('read_at')->nullable();
                             $table->timestamps();
                             $table->index(['booking_id', 'id']);
                         });
-                    } elseif (! Schema::hasColumn('booking_messages', 'read_at')) {
+                    } else {
                         Schema::table('booking_messages', function (Blueprint $table): void {
-                            $table->timestamp('read_at')->nullable();
+                            if (! Schema::hasColumn('booking_messages', 'read_at')) {
+                                $table->timestamp('read_at')->nullable();
+                            }
+                            if (! Schema::hasColumn('booking_messages', 'image_path')) {
+                                $table->string('image_path', 255)->nullable();
+                            }
                         });
                     }
 
-                    Cache::put('riderhub_schema_v6_ready', true, now()->addDays(7));
+                    Cache::put('riderhub_schema_v7_ready', true, now()->addDays(7));
                 }
 
                 if (! Cache::get('riderhub_local_accounts_synced_v1') && Schema::hasTable('users')) {

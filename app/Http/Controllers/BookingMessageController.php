@@ -7,7 +7,9 @@ use App\Models\BookingMessage;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookingMessageController extends Controller
 {
@@ -78,12 +80,22 @@ class BookingMessageController extends Controller
         }
 
         $validated = $request->validate([
-            'body' => ['required', 'string', 'max:500'],
+            'body' => ['nullable', 'string', 'max:500'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp,gif', 'max:5120'],
         ]);
 
-        $body = trim($validated['body']);
-        if ($body === '') {
-            return response()->json(['message' => 'Message cannot be empty.'], 422);
+        $body = trim((string) ($validated['body'] ?? ''));
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $stored = $request->file('image')->store('chat-attachments', 'public');
+            if ($stored !== false) {
+                $imagePath = $stored;
+            }
+        }
+
+        if ($body === '' && $imagePath === null) {
+            return response()->json(['message' => 'Please enter a message or attach a photo.'], 422);
         }
 
         User::whereKey($user->id)->update(['last_seen_at' => now()]);
@@ -92,6 +104,7 @@ class BookingMessageController extends Controller
             'booking_id' => $booking->id,
             'sender_id' => $user->id,
             'body' => $body,
+            'image_path' => $imagePath,
         ]);
 
         $msg->load('sender:id,name,role,profile_photo_path,updated_at');
@@ -99,6 +112,24 @@ class BookingMessageController extends Controller
         return response()->json([
             'message' => $this->serializeMessage($msg, $user->id),
         ], 201);
+    }
+
+    public function showImage(Request $request, Booking $booking, BookingMessage $message): StreamedResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if (! $this->canAccess($user->id, $user->role, $booking) || $message->booking_id !== $booking->id) {
+            abort(403);
+        }
+
+        if (! $message->image_path || ! Storage::disk('public')->exists($message->image_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($message->image_path, null, [
+            'Cache-Control' => 'private, max-age=86400',
+        ]);
     }
 
     private function serializeMessage(BookingMessage $msg, int $viewerId): array
@@ -118,6 +149,9 @@ class BookingMessageController extends Controller
             'is_mine' => $msg->sender_id === $viewerId,
             'is_seen' => $msg->read_at !== null,
             'body' => $msg->body,
+            'image_url' => $msg->image_path
+                ? route('bookings.messages.image', ['booking' => $msg->booking_id, 'message' => $msg->id])
+                : null,
             'time' => $msg->created_at?->timezone('Asia/Manila')->format('g:i A') ?? '',
         ];
     }

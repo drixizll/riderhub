@@ -108,19 +108,17 @@ class AppServiceProvider extends ServiceProvider
                     Cache::put('riderhub_local_accounts_synced_v1', true, now()->addDays(7));
                 }
 
-                // Publish decoupled frontend to /app (app.riderhub.online) and API gateway to /api (api.riderhub.online)
-                if (! Cache::get('riderhub_subdomains_published_v3')) {
-                    $frontendDir = base_path('frontend');
+                // Publish full RiderHub app gateway to /app (app.riderhub.online) and API gateway to /api (api.riderhub.online)
+                if (! Cache::get('riderhub_subdomains_published_v4')) {
                     $appDir = base_path('app');
                     $apiDir = base_path('api');
 
-                    if (File::isDirectory($frontendDir) && File::isDirectory($appDir)) {
-                        if (File::exists($appDir.'/index.php')) {
-                            File::delete($appDir.'/index.php');
+                    if (File::isDirectory($appDir)) {
+                        if (File::exists($appDir.'/index.html')) {
+                            File::delete($appDir.'/index.html');
                         }
-                        File::copy($frontendDir.'/index.html', $appDir.'/index.html');
-                        File::ensureDirectoryExists($appDir.'/js');
-                        File::copy($frontendDir.'/js/api.js', $appDir.'/js/api.js');
+                        File::put($appDir.'/.htaccess', "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    Options -Indexes\n    RewriteCond %{HTTP:Authorization} .\n    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]\n    RewriteCond %{REQUEST_URI} !^/index\\.php$\n    RewriteRule ^ index.php [L]\n</IfModule>\n");
+                        File::put($appDir.'/index.php', "<?php\n\$publicDir = realpath(dirname(__DIR__).'/public');\n\$uriPath = parse_url(\$_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';\nif (\$publicDir !== false && \$uriPath !== '/' && \$uriPath !== '/index.php') {\n    \$candidate = realpath(\$publicDir.DIRECTORY_SEPARATOR.ltrim(\$uriPath, '/'));\n    \$ext = strtolower(pathinfo(\$candidate ?: '', PATHINFO_EXTENSION));\n    \$mime = ['css'=>'text/css; charset=utf-8','js'=>'application/javascript; charset=utf-8','mjs'=>'application/javascript; charset=utf-8','svg'=>'image/svg+xml','png'=>'image/png','jpg'=>'image/jpeg','jpeg'=>'image/jpeg','gif'=>'image/gif','webp'=>'image/webp','ico'=>'image/x-icon','woff'=>'font/woff','woff2'=>'font/woff2','ttf'=>'font/ttf','webmanifest'=>'application/manifest+json','json'=>'application/json','txt'=>'text/plain; charset=utf-8','html'=>'text/html; charset=utf-8'];\n    if (\$candidate !== false && is_file(\$candidate) && str_starts_with(\$candidate, \$publicDir.DIRECTORY_SEPARATOR) && isset(\$mime[\$ext])) {\n        header('Content-Type: '.\$mime[\$ext]);\n        header('Cache-Control: public, max-age=86400');\n        readfile(\$candidate);\n        exit;\n    }\n}\n\$_SERVER['SCRIPT_NAME'] = '/index.php';\n\$_SERVER['SCRIPT_FILENAME'] = dirname(__DIR__).'/public/index.php';\nrequire dirname(__DIR__).'/public/index.php';\n");
                     }
 
                     File::ensureDirectoryExists($apiDir);
@@ -130,7 +128,7 @@ class AppServiceProvider extends ServiceProvider
                     File::put($apiDir.'/.htaccess', "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteCond %{HTTP:Authorization} .\n    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]\n    RewriteCond %{REQUEST_FILENAME} !-d\n    RewriteCond %{REQUEST_FILENAME} !-f\n    RewriteRule ^ index.php [L]\n</IfModule>\n");
                     File::put($apiDir.'/index.php', "<?php\n\$uri = \$_SERVER['REQUEST_URI'] ?? '/';\n\$path = parse_url(\$uri, PHP_URL_PATH) ?: '/';\nif (\$path === '/' || \$path === '/index.php') {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/health';\n} elseif (! str_starts_with(\$path, '/api/')) {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/'.ltrim(\$uri, '/');\n}\n\$_SERVER['SCRIPT_NAME'] = '/index.php';\n\$_SERVER['SCRIPT_FILENAME'] = dirname(__DIR__).'/public/index.php';\nrequire dirname(__DIR__).'/public/index.php';\n");
 
-                    Cache::put('riderhub_subdomains_published_v3', true, now()->addHours(12));
+                    Cache::put('riderhub_subdomains_published_v4', true, now()->addHours(12));
                 }
             } catch (\Throwable) {
                 // Non-blocking safeguard

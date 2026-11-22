@@ -36,7 +36,7 @@ class ProfileController extends Controller
                 ],
                 default => [
                     ['label' => 'Account type', 'value' => 'Administrator'],
-                    ['label' => 'Member since', 'value' => $user->created_at->format('M Y')],
+                    ['label' => 'Member since', 'value' => $user->created_at?->format('M Y') ?? '2026'],
                 ],
             },
         ]);

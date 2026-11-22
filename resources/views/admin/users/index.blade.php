@@ -128,7 +128,7 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{{ $user->created_at->format('M j, Y') }}</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{{ $user->created_at?->format('M j, Y') ?? '—' }}</td>
                                     <td class="whitespace-nowrap px-5 py-4 text-right sm:px-6">
                                         @if ($user->id === Auth::id())
                                             <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-400">Protected</span>

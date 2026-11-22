@@ -68,7 +68,7 @@
                             </span>
                             <h2 class="mt-2 truncate text-2xl font-extrabold tracking-tight sm:text-3xl">{{ $user->name }}</h2>
                             <p class="mt-1 truncate text-sm text-indigo-100">{{ $user->email }}</p>
-                            <p class="mt-1 text-xs text-indigo-200/90">RiderHub member since {{ $user->created_at->format('F Y') }}</p>
+                            <p class="mt-1 text-xs text-indigo-200/90">RiderHub member since {{ $user->created_at?->format('F Y') ?? '2026' }}</p>
                         </div>
                     </div>
                     <form method="POST" action="{{ route('profile.photo') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-3">

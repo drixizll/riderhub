@@ -178,6 +178,14 @@
                 } catch {}
             };
 
+            const scrollToBottom = (force = false) => {
+                if (!listEl) return;
+                const nearBottom = (listEl.scrollHeight - listEl.scrollTop - listEl.clientHeight) < 90;
+                if (force || nearBottom) {
+                    listEl.scrollTop = listEl.scrollHeight;
+                }
+            };
+
             const updateReceipts = () => {
                 root.querySelectorAll('[data-receipt-for]').forEach((el) => {
                     const id = Number(el.dataset.receiptFor || 0);
@@ -196,6 +204,7 @@
                         el.innerHTML = `<span class="text-slate-400 font-semibold">Sent ✓</span>`;
                     }
                 });
+                scrollToBottom();
             };
 
             const appendMessage = (m) => {
@@ -237,6 +246,7 @@
                     img.src = m.image_url;
                     img.alt = 'Chat photo';
                     img.className = 'max-h-48 w-full max-w-[220px] rounded-xl object-cover';
+                    img.onload = () => scrollToBottom(true);
                     link.appendChild(img);
                     bubble.appendChild(link);
                 }
@@ -264,7 +274,7 @@
 
                 row.appendChild(wrap);
                 listEl.appendChild(row);
-                listEl.scrollTop = listEl.scrollHeight;
+                scrollToBottom(true);
             };
 
             const poll = async () => {

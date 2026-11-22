@@ -84,6 +84,12 @@
                     <dl class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-100 px-4">
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment method</dt><dd class="font-semibold capitalize text-slate-900">{{ $booking->payment_method }}</dd></div>
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment status</dt><dd class="font-semibold capitalize text-slate-900">{{ str_replace('_', ' ', $booking->payment?->status ?? 'pending') }}</dd></div>
+                        @if ($booking->promo_code && (float) $booking->discount_amount > 0)
+                            <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Promo applied</dt><dd class="font-bold text-emerald-700">{{ $booking->promo_code }} (-₱{{ number_format((float) $booking->discount_amount, 2) }})</dd></div>
+                        @endif
+                        @if ($booking->status === 'cancelled' && $booking->cancellation_reason)
+                            <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Cancel reason</dt><dd class="text-right font-semibold text-rose-700">{{ $booking->cancellation_reason }}</dd></div>
+                        @endif
                         <div class="flex justify-between gap-4 py-3 text-sm">
                             <dt class="text-slate-500">Rider</dt>
                             <dd class="text-right font-semibold text-slate-900">
@@ -432,11 +438,18 @@
                         @endif
                         <form action="{{ route('customer.bookings.cancel', $booking) }}"
                               method="POST"
+                              class="flex flex-wrap items-center gap-2"
                               data-confirm-title="Cancel this booking?"
                               data-confirm-message="Are you sure you want to cancel booking #{{ $booking->id }}? If you started an unpaid online checkout, it will be safely expired."
                               data-confirm-button="Yes, cancel"
                               data-confirm-tone="danger">
                             @csrf
+                            <select name="cancellation_reason" aria-label="Cancellation reason" class="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 focus:border-rose-400 focus:outline-none">
+                                <option value="">Reason (optional)</option>
+                                @foreach (config('riderhub.cancellation_reasons', []) as $reason)
+                                    <option value="{{ $reason }}">{{ $reason }}</option>
+                                @endforeach
+                            </select>
                             <button type="submit" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-rose-600/25 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg active:scale-95">Cancel booking</button>
                         </form>
                     </div>

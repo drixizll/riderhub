@@ -93,6 +93,17 @@
                                 <textarea id="item_description" name="item_description" rows="3" maxlength="255" class="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="What are you sending?">{{ old('item_description') }}</textarea>
                                 <x-input-error :messages="$errors->get('item_description')" class="mt-2" />
                             </div>
+                            <div x-data="{ code: @js(old('promo_code', '')) }">
+                                <label for="promo_code" class="block text-sm font-semibold text-slate-700">Promo / Voucher code <span class="font-normal text-slate-400">(optional)</span></label>
+                                <input id="promo_code" name="promo_code" type="text" x-model="code" maxlength="40" placeholder="e.g. TAGOLOAN20" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm uppercase text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                                <div class="mt-2 flex flex-wrap gap-1.5">
+                                    @foreach (config('riderhub.promos', []) as $promoKey => $promoInfo)
+                                        <button type="button" @click="code = '{{ $promoKey }}'" class="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 transition hover:bg-indigo-100">
+                                            {{ $promoKey }} · {{ $promoInfo['label'] }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </section>
 

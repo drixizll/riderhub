@@ -64,8 +64,16 @@ class CustomerBookingController extends Controller
         BookingNotificationService $notifications,
     ): RedirectResponse {
         $validated = $request->validated();
+        $rawFare = $this->calculateFare(
+            (float) $validated['pickup_lat'],
+            (float) $validated['pickup_lng'],
+            (float) $validated['dropoff_lat'],
+            (float) $validated['dropoff_lng'],
+        );
+        [$appliedPromo, $discountAmount] = $this->resolvePromoDiscount($validated['promo_code'] ?? null, $rawFare);
+        $finalFare = round(max(35.00, $rawFare - $discountAmount), 2);
 
-        $booking = DB::transaction(function () use ($validated): Booking {
+        $booking = DB::transaction(function () use ($validated, $finalFare, $appliedPromo, $discountAmount): Booking {
             $booking = Booking::create([
                 'customer_id' => Auth::id(),
                 'rider_id' => null,
@@ -77,12 +85,9 @@ class CustomerBookingController extends Controller
                 'dropoff_lat' => (float) $validated['dropoff_lat'],
                 'dropoff_lng' => (float) $validated['dropoff_lng'],
                 'item_description' => $validated['item_description'] ?? null,
-                'fare' => $this->calculateFare(
-                    (float) $validated['pickup_lat'],
-                    (float) $validated['pickup_lng'],
-                    (float) $validated['dropoff_lat'],
-                    (float) $validated['dropoff_lng'],
-                ),
+                'fare' => $finalFare,
+                'promo_code' => $appliedPromo,
+                'discount_amount' => $discountAmount,
                 'payment_method' => $validated['payment_method'],
                 'status' => 'pending',
             ]);
@@ -240,10 +245,12 @@ class CustomerBookingController extends Controller
         ]);
     }
 
-    public function cancel(Booking $booking, PayMongoCheckoutService $checkoutService): RedirectResponse
+    public function cancel(Request $request, Booking $booking, PayMongoCheckoutService $checkoutService): RedirectResponse
     {
         $this->authorize('cancel', $booking);
         $booking->loadMissing('payment');
+        $reason = trim((string) $request->input('cancellation_reason', ''));
+        $reason = $reason !== '' ? mb_substr($reason, 0, 120) : null;
 
         if (
             $booking->payment?->method === 'online'
@@ -263,7 +270,7 @@ class CustomerBookingController extends Controller
         }
 
         // Lock the row so a rider accepting at the same moment cannot end up with a cancelled trip.
-        $cancelled = DB::transaction(function () use ($booking): bool {
+        $cancelled = DB::transaction(function () use ($booking, $reason): bool {
             $locked = Booking::query()->lockForUpdate()->with('payment')->findOrFail($booking->id);
 
             if (
@@ -274,7 +281,10 @@ class CustomerBookingController extends Controller
                 return false;
             }
 
-            $locked->update(['status' => 'cancelled']);
+            $locked->update([
+                'status' => 'cancelled',
+                'cancellation_reason' => $reason,
+            ]);
 
             if ($locked->payment?->status === 'pending') {
                 $locked->payment->update(['status' => 'cancelled']);
@@ -337,5 +347,30 @@ class CustomerBookingController extends Controller
             + cos($lat1Rad) * cos($lat2Rad) * sin($deltaLng / 2) * sin($deltaLng / 2);
 
         return $earthRadiusKm * 2 * atan2(sqrt($a), sqrt(1 - $a));
+    }
+
+    /**
+     * @return array{0: ?string, 1: float}
+     */
+    protected function resolvePromoDiscount(?string $inputCode, float $rawFare): array
+    {
+        $code = strtoupper(trim((string) $inputCode));
+        if ($code === '') {
+            return [null, 0.0];
+        }
+
+        $promos = config('riderhub.promos', []);
+        if (! isset($promos[$code])) {
+            return [null, 0.0];
+        }
+
+        $promo = $promos[$code];
+        $discount = $promo['type'] === 'percent'
+            ? min((float) ($promo['max'] ?? 50.0), round($rawFare * ((float) $promo['value'] / 100), 2))
+            : (float) $promo['value'];
+
+        $discount = round(min(max(0.0, $rawFare - 35.00), $discount), 2);
+
+        return [$code, $discount];
     }
 }

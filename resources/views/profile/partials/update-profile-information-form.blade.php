@@ -82,4 +82,31 @@
             @endif
         </div>
     </form>
+
+    @if ($user->role === 'rider')
+        <div class="mt-8 border-t border-slate-200 pt-6">
+            <h3 class="text-base font-bold text-slate-950">Driver's License (KYC Verification)</h3>
+            <p class="mt-1 text-xs leading-5 text-slate-500">Upload a clear photo of your valid Philippine Driver's License. Only you and RiderHub Administrators can view this document.</p>
+
+            @if ($user->license_photo_path)
+                <div class="mt-3 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                    <img src="{{ route('profile.license.show', $user) }}" alt="Driver's license preview" class="h-14 w-20 rounded-lg border border-emerald-200 object-cover">
+                    <div class="text-xs">
+                        <p class="font-bold text-emerald-800">License uploaded ✓</p>
+                        <a href="{{ route('profile.license.show', $user) }}" target="_blank" class="font-semibold text-indigo-700 underline hover:text-indigo-900">View full image</a>
+                    </div>
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('profile.license') }}" enctype="multipart/form-data" class="mt-4 flex flex-wrap items-center gap-3">
+                @csrf
+                <input type="file" name="license_photo" accept="image/jpeg,image/png,image/webp" required class="block text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-xs file:font-bold file:text-indigo-700 hover:file:bg-indigo-100">
+                <x-primary-button>{{ $user->license_photo_path ? 'Replace License' : 'Upload License' }}</x-primary-button>
+                @if (session('status') === 'license-photo-updated')
+                    <span class="text-xs font-bold text-emerald-700">License uploaded!</span>
+                @endif
+                <x-input-error class="w-full" :messages="$errors->get('license_photo')" />
+            </form>
+        </div>
+    @endif
 </section>

@@ -92,6 +92,45 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit')->with('status', 'profile-photo-updated');
     }
 
+    public function showLicense(Request $request, User $user): StreamedResponse
+    {
+        $viewer = $request->user();
+        abort_unless($viewer && ($viewer->id === $user->id || $viewer->isAdmin()), 403);
+
+        if (! $user->license_photo_path || ! Storage::disk('public')->exists($user->license_photo_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($user->license_photo_path, null, [
+            'Cache-Control' => 'private, max-age=3600',
+        ]);
+    }
+
+    public function updateLicense(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user && $user->role === 'rider', 403);
+
+        $validated = $request->validate([
+            'license_photo' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:8192'],
+        ]);
+
+        $previous = $user->license_photo_path;
+        $path = $validated['license_photo']->store('rider-licenses', 'public');
+
+        if ($path === false) {
+            throw new \RuntimeException('The driver license photo could not be saved.');
+        }
+
+        $user->update(['license_photo_path' => $path]);
+
+        if ($previous && Storage::disk('public')->exists($previous)) {
+            Storage::disk('public')->delete($previous);
+        }
+
+        return Redirect::route('profile.edit')->with('status', 'license-photo-updated');
+    }
+
     /**
      * Delete the user's account.
      */

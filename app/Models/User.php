@@ -32,6 +32,7 @@ class User extends Authenticatable
         'rider_status',
         'vehicle_model',
         'plate_number',
+        'license_photo_path',
     ];
 
     /**

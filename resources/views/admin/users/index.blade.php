@@ -117,8 +117,15 @@
                                                 </span>
                                             @endif
                                         </div>
-                                        @if ($user->role === 'rider' && ($user->vehicle_model || $user->plate_number))
-                                            <p class="mt-1 text-[11px] text-slate-500">{{ $user->vehicle_model }} {{ $user->plate_number ? "({$user->plate_number})" : '' }}</p>
+                                        @if ($user->role === 'rider' && ($user->vehicle_model || $user->plate_number || $user->license_photo_path))
+                                            <div class="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+                                                @if ($user->vehicle_model || $user->plate_number)
+                                                    <span>{{ $user->vehicle_model }} {{ $user->plate_number ? "({$user->plate_number})" : '' }}</span>
+                                                @endif
+                                                @if ($user->license_photo_path)
+                                                    <a href="{{ route('profile.license.show', $user) }}" target="_blank" class="inline-flex items-center rounded-md bg-indigo-50 px-1.5 py-0.5 font-bold text-indigo-700 hover:bg-indigo-100">📄 View License</a>
+                                                @endif
+                                            </div>
                                         @endif
                                     </td>
                                     <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{{ $user->created_at->format('M j, Y') }}</td>

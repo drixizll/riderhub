@@ -24,6 +24,9 @@ class Booking extends Model
         'dropoff_lng',
         'item_description',
         'fare',
+        'promo_code',
+        'discount_amount',
+        'cancellation_reason',
         'payment_method',
         'status',
     ];
@@ -34,6 +37,7 @@ class Booking extends Model
         'dropoff_lat' => 'float',
         'dropoff_lng' => 'float',
         'fare' => 'float',
+        'discount_amount' => 'float',
     ];
 
     public function customer(): BelongsTo

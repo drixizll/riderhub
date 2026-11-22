@@ -23,4 +23,17 @@ return [
     'payment_statuses' => ['pending', 'paid', 'failed', 'cancelled'],
     'payment_methods' => ['cash', 'online'],
     'active_booking_statuses' => ['accepted', 'picked_up'],
+    'promos' => [
+        'TAGOLOAN20' => ['type' => 'fixed', 'value' => 20.00, 'label' => '₱20 off Tagoloan ride'],
+        'FIRSTTRIP' => ['type' => 'fixed', 'value' => 25.00, 'label' => '₱25 off welcome promo'],
+        'MISOR15' => ['type' => 'percent', 'value' => 15, 'max' => 40.00, 'label' => '15% off (up to ₱40)'],
+    ],
+    'cancellation_reasons' => [
+        'Wrong pickup or drop-off location',
+        'Changed my mind',
+        'Booked by mistake',
+        'Waiting time too long',
+        'Found another ride',
+        'Other',
+    ],
 ];

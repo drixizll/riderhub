@@ -179,4 +179,37 @@ class TripChatAndRadarTest extends TestCase
             ->assertRedirect(route('rider.dashboard'))
             ->assertSessionHas('error');
     }
+
+    public function test_promo_code_discount_and_cancellation_reason_work(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.store'), [
+                'type' => 'ride',
+                'pickup_address' => 'Poblacion, Tagoloan',
+                'pickup_lat' => 8.5378,
+                'pickup_lng' => 124.7536,
+                'dropoff_address' => 'Cagayan de Oro City',
+                'dropoff_lat' => 8.4810,
+                'dropoff_lng' => 124.6498,
+                'payment_method' => 'cash',
+                'promo_code' => 'TAGOLOAN20',
+            ])
+            ->assertRedirect(route('customer.bookings.index'));
+
+        $booking = Booking::query()->latest('id')->firstOrFail();
+        $this->assertSame('TAGOLOAN20', $booking->promo_code);
+        $this->assertEquals(20.0, (float) $booking->discount_amount);
+
+        // Cancel with a reason
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.cancel', $booking), [
+                'cancellation_reason' => 'Changed my mind',
+            ])
+            ->assertRedirect(route('customer.bookings.index'));
+
+        $this->assertSame('cancelled', $booking->fresh()->status);
+        $this->assertSame('Changed my mind', $booking->fresh()->cancellation_reason);
+    }
 }

@@ -31,6 +31,7 @@ class StoreBookingRequest extends FormRequest
             'dropoff_lng' => ['required', 'numeric', 'between:-180,180'],
             'item_description' => ['nullable', 'required_if:type,delivery', 'string', 'max:255'],
             'payment_method' => ['required', 'in:cash,online'],
+            'promo_code' => ['nullable', 'string', 'max:40'],
         ];
     }
 

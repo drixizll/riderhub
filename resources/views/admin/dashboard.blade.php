@@ -12,6 +12,17 @@
                     Export PDF
                 </a>
                 <a href="{{ route('admin.bookings.index') }}" class="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/25 transition hover:-translate-y-0.5">Manage bookings</a>
+                <form method="POST"
+                      action="{{ route('admin.reset-test-data') }}"
+                      data-confirm-title="Reset all test bookings?"
+                      data-confirm-message="This clears all bookings, payments, chats, ratings, and notifications so the next booking starts fresh at #1. All user accounts (Admin, Rider, Customer) stay safe."
+                      data-confirm-button="Yes, reset to #1"
+                      data-confirm-tone="danger">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center justify-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-sm font-bold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100">
+                        Reset Test Data
+                    </button>
+                </form>
             </div>
         </div>
     </x-slot>

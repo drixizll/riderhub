@@ -276,5 +276,15 @@ class TripChatAndRadarTest extends TestCase
         $this->actingAs($customer)
             ->get(route('bookings.proof.show', $booking))
             ->assertOk();
+
+        // Admin can reset test data back to #1 while keeping all users intact
+        $userCountBefore = User::count();
+        $this->actingAs($admin)
+            ->post(route('admin.reset-test-data'))
+            ->assertRedirect(route('admin.dashboard'))
+            ->assertSessionHas('success');
+
+        $this->assertSame(0, Booking::count());
+        $this->assertSame($userCountBefore, User::count());
     }
 }

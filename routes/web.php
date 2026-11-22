@@ -70,6 +70,7 @@ Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('ri
 Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::get('/fleet/live', [AdminDashboardController::class, 'liveFleet'])->name('fleet.live');
+    Route::post('/reset-test-data', [AdminDashboardController::class, 'resetTestData'])->name('reset-test-data');
     Route::get('/bookings', [AdminDashboardController::class, 'bookings'])->name('bookings.index');
     Route::get('/bookings/export/pdf', [ReportController::class, 'adminPdf'])->name('bookings.export.pdf');
     Route::get('/bookings/export/csv', [ReportController::class, 'adminCsv'])->name('bookings.export.csv');

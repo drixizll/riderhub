@@ -121,6 +121,45 @@ class AdminDashboardController extends Controller
         ]);
     }
 
+    public function resetTestData(): \Illuminate\Http\RedirectResponse
+    {
+        $tables = [
+            'booking_messages',
+            'booking_ratings',
+            'rider_locations',
+            'payments',
+            'bookings',
+            'notifications',
+        ];
+
+        $driver = \Illuminate\Support\Facades\DB::getDriverName();
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
+
+        try {
+            foreach ($tables as $table) {
+                if (! \Illuminate\Support\Facades\Schema::hasTable($table)) {
+                    continue;
+                }
+
+                if ($driver === 'sqlite') {
+                    \Illuminate\Support\Facades\DB::table($table)->delete();
+                    try {
+                        \Illuminate\Support\Facades\DB::statement('DELETE FROM sqlite_sequence WHERE name = ?', [$table]);
+                    } catch (\Throwable) {
+                        // sqlite_sequence may not exist if table had no autoincrement rows yet
+                    }
+                } else {
+                    \Illuminate\Support\Facades\DB::table($table)->truncate();
+                }
+            }
+        } finally {
+            \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
+        }
+
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'All test bookings, payments, chats, and notifications cleared! Next booking starts fresh at #1.');
+    }
+
     public function assignRider(Request $request, Booking $booking): \Illuminate\Http\RedirectResponse
     {
         $validated = $request->validate([

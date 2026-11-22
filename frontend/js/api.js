@@ -111,4 +111,16 @@ export class RiderHubApi {
             body: JSON.stringify(data),
         });
     }
+
+    cancelBooking(bookingId) {
+        return this.request(`/bookings/${encodeURIComponent(bookingId)}/cancel`, {
+            method: 'POST',
+        });
+    }
+
+    acceptBooking(bookingId) {
+        return this.request(`/bookings/${encodeURIComponent(bookingId)}/accept`, {
+            method: 'POST',
+        });
+    }
 }

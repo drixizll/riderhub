@@ -32,7 +32,12 @@ class BookingApiController extends Controller
             'status' => $b->status,
             'pickup_address' => $b->pickup_address,
             'dropoff_address' => $b->dropoff_address,
-            'distance_km' => (float) $b->distance_km,
+            'distance_km' => $this->calculateDistanceKm(
+                (float) $b->pickup_lat,
+                (float) $b->pickup_lng,
+                (float) $b->dropoff_lat,
+                (float) $b->dropoff_lng,
+            ),
             'fare' => (float) $b->fare,
             'formatted_fare' => '₱'.number_format((float) $b->fare, 2),
             'payment_method' => $b->payment_method,
@@ -83,14 +88,12 @@ class BookingApiController extends Controller
             'item_description' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $lat1 = deg2rad((float) $validated['pickup_lat']);
-        $lng1 = deg2rad((float) $validated['pickup_lng']);
-        $lat2 = deg2rad((float) $validated['dropoff_lat']);
-        $lng2 = deg2rad((float) $validated['dropoff_lng']);
-        $dLat = $lat2 - $lat1;
-        $dLng = $lng2 - $lng1;
-        $a = sin($dLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($dLng / 2) ** 2;
-        $distanceKm = round(6371 * 2 * atan2(sqrt($a), sqrt(1 - $a)), 2);
+        $distanceKm = $this->calculateDistanceKm(
+            (float) $validated['pickup_lat'],
+            (float) $validated['pickup_lng'],
+            (float) $validated['dropoff_lat'],
+            (float) $validated['dropoff_lng'],
+        );
 
         if ($distanceKm < 0.05) {
             return response()->json(['message' => 'Pickup and drop-off must be at least 50 meters apart.'], 422);
@@ -108,7 +111,6 @@ class BookingApiController extends Controller
             'dropoff_address' => $validated['dropoff_address'],
             'dropoff_lat' => $validated['dropoff_lat'],
             'dropoff_lng' => $validated['dropoff_lng'],
-            'distance_km' => $distanceKm,
             'fare' => $fare,
             'payment_method' => $validated['payment_method'],
             'item_description' => $validated['type'] === 'delivery' ? ($validated['item_description'] ?? null) : null,
@@ -130,7 +132,7 @@ class BookingApiController extends Controller
                 'status' => $booking->status,
                 'pickup_address' => $booking->pickup_address,
                 'dropoff_address' => $booking->dropoff_address,
-                'distance_km' => (float) $booking->distance_km,
+                'distance_km' => $distanceKm,
                 'fare' => (float) $booking->fare,
                 'formatted_fare' => '₱'.number_format((float) $booking->fare, 2),
                 'payment_method' => $booking->payment_method,
@@ -205,5 +207,18 @@ class BookingApiController extends Controller
         });
 
         return response()->json($payload, $statusCode);
+    }
+
+    private function calculateDistanceKm(float $pickupLat, float $pickupLng, float $dropoffLat, float $dropoffLng): float
+    {
+        $lat1 = deg2rad($pickupLat);
+        $lng1 = deg2rad($pickupLng);
+        $lat2 = deg2rad($dropoffLat);
+        $lng2 = deg2rad($dropoffLng);
+        $dLat = $lat2 - $lat1;
+        $dLng = $lng2 - $lng1;
+        $a = sin($dLat / 2) ** 2 + cos($lat1) * cos($lat2) * sin($dLng / 2) ** 2;
+
+        return round(6371 * 2 * atan2(sqrt($a), sqrt(1 - $a)), 2);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\User;
+use App\Notifications\RiderHubNotification;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -105,6 +106,22 @@ class AdminDashboardController extends Controller
         if (! $assigned) {
             return back()->with('error', 'Could not assign rider — the booking was already taken or the rider is currently on an active trip.');
         }
+
+        $booking->refresh()->load(['customer', 'rider']);
+
+        $booking->customer?->notify(new RiderHubNotification(
+            'Rider dispatched',
+            "{$riderName} has been assigned to your booking and is preparing for pickup.",
+            route('customer.bookings.show', $booking, absolute: false),
+            'booking',
+        ));
+
+        $booking->rider?->notify(new RiderHubNotification(
+            'New trip dispatched',
+            "Admin assigned Booking #{$booking->id} ({$booking->pickup_address} → {$booking->dropoff_address}) to you.",
+            route('rider.dashboard', absolute: false),
+            'booking',
+        ));
 
         return back()->with('success', "Booking #{$booking->id} has been dispatched to {$riderName}.");
     }

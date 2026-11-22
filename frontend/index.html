@@ -76,7 +76,10 @@
     <div class="wrap">
         <header class="top">
             <div class="brand">Rider<span>Hub</span> <small style="font-size:12px;color:#94a3b8;font-weight:600;">Decoupled Frontend (API v1)</small></div>
-            <div id="api-status" class="pill"><span class="dot"></span>Connecting to Backend API…</div>
+            <div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+                <div id="live-clock" class="pill" style="background:rgba(139,92,246,0.14);border-color:rgba(167,139,250,0.35);color:#ddd6fe;">🕒 Loading PHT…</div>
+                <div id="api-status" class="pill"><span class="dot"></span>Connecting to Backend API…</div>
+            </div>
         </header>
 
         <section class="grid">
@@ -158,6 +161,20 @@
         };
 
         const statusEl = document.getElementById('api-status');
+        const clockEl = document.getElementById('live-clock');
+        const updateClock = () => {
+            if (!clockEl) return;
+            const now = new Date();
+            try {
+                const d = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', weekday: 'short', month: 'short', day: 'numeric' }).format(now);
+                const t = new Intl.DateTimeFormat('en-PH', { timeZone: 'Asia/Manila', hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true }).format(now);
+                clockEl.textContent = `🕒 ${d} · ${t}`;
+            } catch {
+                clockEl.textContent = `🕒 ${now.toLocaleTimeString('en-US', { hour12: true })}`;
+            }
+        };
+        updateClock();
+        setInterval(updateClock, 1000);
         const weatherEl = document.getElementById('weather-out');
         const fareEl = document.getElementById('fare-out');
         const aiEl = document.getElementById('ai-out');
@@ -181,8 +198,41 @@
                 meOut.innerHTML = `<strong>${user.name}</strong> (${user.role})<br><span style="color:#94a3b8;">${user.email} · ${stats.bookings_count} booking(s)</span>`;
                 const { bookings } = await api.listBookings();
                 bookingsEl.innerHTML = bookings.length
-                    ? bookings.slice(0, 4).map((b) => `<div class="booking-item"><strong>#${b.id} · ${b.type.toUpperCase()}</strong> (${b.status})<br>${b.pickup_address} → ${b.dropoff_address}<br><span style="color:#c4b5fd;font-weight:700;">${b.formatted_fare}</span></div>`).join('')
+                    ? bookings.slice(0, 4).map((b) => {
+                        const actionBtn = b.status === 'pending' && user.role === 'customer'
+                            ? `<button type="button" data-cancel-id="${b.id}" style="margin-top:6px;padding:5px 10px;border:1px solid rgba(251,113,133,0.45);background:rgba(225,29,72,0.18);color:#fda4af;font-size:11px;font-weight:700;cursor:pointer;border-radius:8px;">Cancel Booking</button>`
+                            : (b.status === 'pending' && user.role === 'rider' && !b.rider
+                                ? `<button type="button" data-accept-id="${b.id}" style="margin-top:6px;padding:5px 10px;border:1px solid rgba(52,211,153,0.45);background:rgba(16,185,129,0.2);color:#6ee7b7;font-size:11px;font-weight:700;cursor:pointer;border-radius:8px;">Accept Trip</button>`
+                                : '');
+                        return `<div class="booking-item"><strong>#${b.id} · ${b.type.toUpperCase()}</strong> (${b.status}) · <span style="color:#94a3b8;">${b.distance_km} km</span><br>${b.pickup_address} → ${b.dropoff_address}<br><span style="color:#c4b5fd;font-weight:700;">${b.formatted_fare}</span>${actionBtn ? `<div>${actionBtn}</div>` : ''}</div>`;
+                    }).join('')
                     : 'No bookings yet. Tap "Book Now via API" above to create one!';
+
+                bookingsEl.querySelectorAll('[data-cancel-id]').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        btn.disabled = true;
+                        try {
+                            await api.cancelBooking(btn.dataset.cancelId);
+                            await refreshSession();
+                        } catch (e) {
+                            alert(e.message);
+                            btn.disabled = false;
+                        }
+                    });
+                });
+
+                bookingsEl.querySelectorAll('[data-accept-id]').forEach((btn) => {
+                    btn.addEventListener('click', async () => {
+                        btn.disabled = true;
+                        try {
+                            await api.acceptBooking(btn.dataset.acceptId);
+                            await refreshSession();
+                        } catch (e) {
+                            alert(e.message);
+                            btn.disabled = false;
+                        }
+                    });
+                });
             } catch {
                 api.setToken('');
                 authOut.classList.remove('hidden');

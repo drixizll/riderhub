@@ -109,7 +109,7 @@ class AppServiceProvider extends ServiceProvider
                 }
 
                 // Publish decoupled frontend to /app (app.riderhub.online) and API gateway to /api (api.riderhub.online)
-                if (! Cache::get('riderhub_subdomains_published_v2')) {
+                if (! Cache::get('riderhub_subdomains_published_v3')) {
                     $frontendDir = base_path('frontend');
                     $appDir = base_path('app');
                     $apiDir = base_path('api');
@@ -130,7 +130,7 @@ class AppServiceProvider extends ServiceProvider
                     File::put($apiDir.'/.htaccess', "<IfModule mod_rewrite.c>\n    RewriteEngine On\n    RewriteCond %{HTTP:Authorization} .\n    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]\n    RewriteCond %{REQUEST_FILENAME} !-d\n    RewriteCond %{REQUEST_FILENAME} !-f\n    RewriteRule ^ index.php [L]\n</IfModule>\n");
                     File::put($apiDir.'/index.php', "<?php\n\$uri = \$_SERVER['REQUEST_URI'] ?? '/';\n\$path = parse_url(\$uri, PHP_URL_PATH) ?: '/';\nif (\$path === '/' || \$path === '/index.php') {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/health';\n} elseif (! str_starts_with(\$path, '/api/')) {\n    \$_SERVER['REQUEST_URI'] = '/api/v1/'.ltrim(\$uri, '/');\n}\n\$_SERVER['SCRIPT_NAME'] = '/index.php';\n\$_SERVER['SCRIPT_FILENAME'] = dirname(__DIR__).'/public/index.php';\nrequire dirname(__DIR__).'/public/index.php';\n");
 
-                    Cache::put('riderhub_subdomains_published_v2', true, now()->addHours(12));
+                    Cache::put('riderhub_subdomains_published_v3', true, now()->addHours(12));
                 }
             } catch (\Throwable) {
                 // Non-blocking safeguard

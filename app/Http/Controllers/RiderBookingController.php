@@ -170,7 +170,7 @@ class RiderBookingController extends Controller
 
         $booking->refresh()->customer->notify(new RiderHubNotification(
             'Rider matched',
-            'A rider accepted your booking request and is preparing for pickup.',
+            'A rider accepted your booking request and is heading to pickup. Your Trip Verification PIN is '.$booking->tripPin().'.',
             route('customer.bookings.show', $booking, absolute: false),
             'booking',
         ));

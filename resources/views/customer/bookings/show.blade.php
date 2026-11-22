@@ -84,6 +84,14 @@
                     <dl class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-100 px-4">
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment method</dt><dd class="font-semibold capitalize text-slate-900">{{ $booking->payment_method }}</dd></div>
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment status</dt><dd class="font-semibold capitalize text-slate-900">{{ str_replace('_', ' ', $booking->payment?->status ?? 'pending') }}</dd></div>
+                        @if (in_array($booking->status, ['pending', 'accepted', 'picked_up'], true))
+                            <div class="flex items-center justify-between gap-4 py-3 text-sm">
+                                <dt class="text-slate-500">Trip Verification PIN</dt>
+                                <dd class="flex items-center gap-2">
+                                    <span class="rounded-lg bg-indigo-100 px-2.5 py-1 font-mono text-base font-black tracking-[0.2em] text-indigo-800">{{ $booking->tripPin() }}</span>
+                                </dd>
+                            </div>
+                        @endif
                         @if ($booking->promo_code && (float) $booking->discount_amount > 0)
                             <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Promo applied</dt><dd class="font-bold text-emerald-700">{{ $booking->promo_code }} (-₱{{ number_format((float) $booking->discount_amount, 2) }})</dd></div>
                         @endif

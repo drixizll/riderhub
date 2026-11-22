@@ -396,6 +396,132 @@
             0% { transform: translateY(0) scale(0.8); opacity: 1; }
             100% { transform: translateY(-140px) scale(1.3); opacity: 0; }
         }
+
+        /* Our Moments Monochrome Gallery */
+        .gallery-head {
+            margin-top: 28px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .gallery-head h3 {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 28px;
+            font-style: italic;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .gallery-head span {
+            font-size: 11px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.48);
+        }
+        .gallery-grid {
+            margin-top: 14px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .mem-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: #111;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .mem-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .mem-card.wide {
+            grid-column: span 2;
+            aspect-ratio: 16 / 10;
+        }
+        .mem-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scale(1.14);
+            filter: grayscale(100%) contrast(1.12);
+            transition: filter 0.55s ease, transform 0.55s ease;
+        }
+        .mem-card:hover img {
+            filter: grayscale(0%) contrast(1.04);
+            transform: scale(1.18);
+        }
+        .mem-card.wide img {
+            transform: scale(1.02);
+        }
+        .mem-card.wide:hover img {
+            transform: scale(1.06);
+        }
+        .mem-cap {
+            position: absolute;
+            inset-x: 0;
+            bottom: 0;
+            padding: 26px 12px 10px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 16px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 80;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+        }
+        .lightbox.show { display: flex; }
+        .lightbox-inner {
+            position: relative;
+            max-width: 480px;
+            width: 100%;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #0d0d11;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+        }
+        .lightbox-inner img {
+            width: 100%;
+            max-height: 70vh;
+            object-fit: cover;
+            display: block;
+        }
+        .lightbox-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+        }
+        .lightbox-bar p {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 20px;
+            font-style: italic;
+            color: #fff;
+        }
+        .lightbox-close {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -499,6 +625,53 @@
             <div class="signature">— Always yours, Drexell 🤍</div>
         </article>
 
+        <!-- Our Moments Gallery -->
+        <div class="gallery-head">
+            <h3>Our Moments</h3>
+            <span>Tap photo to view ✨</span>
+        </div>
+        <section class="gallery-grid" aria-label="Our memories">
+            <div class="mem-card wide" data-mem-src="{{ asset('images/merry/m7.jpg') }}" data-mem-cap="Close to you is my favorite place.">
+                <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you">
+                <div class="mem-cap">Close to you is my favorite place.</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m2.jpg') }}" data-mem-cap="That cute wink 🤍">
+                <img src="{{ asset('images/merry/m2.jpg') }}" alt="Cute wink">
+                <div class="mem-cap">That cute wink 🤍</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m5.jpg') }}" data-mem-cap="Always by your side">
+                <img src="{{ asset('images/merry/m5.jpg') }}" alt="By your side">
+                <div class="mem-cap">Always by your side</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m1.jpg') }}" data-mem-cap="School days with you">
+                <img src="{{ asset('images/merry/m1.jpg') }}" alt="School days">
+                <div class="mem-cap">School days with you</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m4.jpg') }}" data-mem-cap="My favorite smile">
+                <img src="{{ asset('images/merry/m4.jpg') }}" alt="Favorite smile">
+                <div class="mem-cap">My favorite smile</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m6.jpg') }}" data-mem-cap="Every ride with you 🏍️">
+                <img src="{{ asset('images/merry/m6.jpg') }}" alt="Ride together">
+                <div class="mem-cap">Every ride with you 🏍️</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m3.jpg') }}" data-mem-cap="Sunsets & good memories">
+                <img src="{{ asset('images/merry/m3.jpg') }}" alt="Sunset memories">
+                <div class="mem-cap">Sunsets &amp; good memories</div>
+            </div>
+        </section>
+
+        <!-- Lightbox Modal -->
+        <div id="lightbox" class="lightbox" aria-hidden="true">
+            <div class="lightbox-inner" onclick="event.stopPropagation()">
+                <img id="lb-img" src="" alt="Memory">
+                <div class="lightbox-bar">
+                    <p id="lb-cap"></p>
+                    <button id="lb-close" type="button" class="lightbox-close">Close ✕</button>
+                </div>
+            </div>
+        </div>
+
         <div class="hug-wrap">
             <button id="hug-btn" type="button" class="hug-btn">Send a Hug Back 🤍</button>
             <p id="hug-msg" class="hug-msg"></p>
@@ -527,6 +700,21 @@
             frame.classList.toggle('color-mode');
             pill.textContent = frame.classList.contains('color-mode') ? 'Back to B&W 🖤' : 'Tap for color ✨';
         });
+
+        // Memory gallery lightbox
+        const lb = document.getElementById('lightbox');
+        const lbImg = document.getElementById('lb-img');
+        const lbCap = document.getElementById('lb-cap');
+        document.querySelectorAll('[data-mem-src]').forEach((card) => {
+            card.addEventListener('click', () => {
+                lbImg.src = card.dataset.memSrc;
+                lbCap.textContent = card.dataset.memCap || '';
+                lb.classList.add('show');
+            });
+        });
+        const closeLb = () => lb.classList.remove('show');
+        lb?.addEventListener('click', closeLb);
+        document.getElementById('lb-close')?.addEventListener('click', closeLb);
 
         // Cycle highlighted romantic lyric lines
         const lines = Array.from(document.querySelectorAll('.lyric-line'));

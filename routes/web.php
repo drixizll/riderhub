@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AssistantController;
+use App\Http\Controllers\BookingMessageController;
 use App\Http\Controllers\BookingRatingController;
 use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerDashboardController;
@@ -59,6 +60,7 @@ Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('ri
     Route::get('/dashboard', [RiderBookingController::class, 'dashboard'])->name('dashboard');
     Route::get('/earnings/export/pdf', [ReportController::class, 'riderPdf'])->name('earnings.export.pdf');
     Route::get('/bookings', [RiderBookingController::class, 'index'])->name('bookings.index');
+    Route::get('/requests/poll', [RiderBookingController::class, 'pollRequests'])->name('requests.poll');
     Route::post('/bookings/{booking}/accept', [RiderBookingController::class, 'accept'])->name('bookings.accept');
     Route::post('/bookings/{booking}/status', [RiderBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/locations', [RiderLocationController::class, 'store'])->name('locations.store');
@@ -83,6 +85,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    Route::get('/bookings/{booking}/messages', [BookingMessageController::class, 'index'])->name('bookings.messages.index');
+    Route::post('/bookings/{booking}/messages', [BookingMessageController::class, 'store'])->middleware('throttle:60,1')->name('bookings.messages.store');
 });
 
 require __DIR__.'/auth.php';

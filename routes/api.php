@@ -32,5 +32,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('/logout', [AuthApiController::class, 'logout'])->name('logout');
         Route::get('/bookings', [BookingApiController::class, 'index'])->name('bookings.index');
         Route::post('/bookings', [BookingApiController::class, 'store'])->name('bookings.store');
+        Route::post('/bookings/{booking}/cancel', [BookingApiController::class, 'cancel'])->name('bookings.cancel');
+        Route::post('/bookings/{booking}/accept', [BookingApiController::class, 'accept'])->name('bookings.accept');
     });
 });

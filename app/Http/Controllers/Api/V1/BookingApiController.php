@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class BookingApiController extends Controller
 {
@@ -51,6 +52,17 @@ class BookingApiController extends Controller
 
         if ($user->role !== 'customer') {
             return response()->json(['message' => 'Only customer accounts can create bookings.'], 403);
+        }
+
+        $hasActiveBooking = Booking::query()
+            ->where('customer_id', $user->id)
+            ->whereIn('status', ['pending', 'accepted', 'picked_up'])
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return response()->json([
+                'message' => 'You already have an active booking. Please complete or cancel it first.',
+            ], 422);
         }
 
         $bounds = config('riderhub.map.bounds', []);
@@ -124,5 +136,74 @@ class BookingApiController extends Controller
                 'payment_method' => $booking->payment_method,
             ],
         ], 201);
+    }
+
+    public function cancel(Request $request, Booking $booking): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->role !== 'customer' || $booking->customer_id !== $user->id) {
+            return response()->json(['message' => 'You can only cancel your own booking.'], 403);
+        }
+
+        if ($booking->status !== 'pending') {
+            return response()->json(['message' => 'Only pending bookings can be cancelled.'], 422);
+        }
+
+        $booking->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'message' => 'Booking cancelled successfully.',
+            'booking' => ['id' => $booking->id, 'status' => $booking->status],
+        ]);
+    }
+
+    public function accept(Request $request, Booking $booking): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+
+        if ($user->role !== 'rider') {
+            return response()->json(['message' => 'Only rider accounts can accept bookings.'], 403);
+        }
+
+        $statusCode = 200;
+        $payload = [];
+
+        DB::transaction(function () use ($user, $booking, &$statusCode, &$payload): void {
+            $lockedRider = User::query()->lockForUpdate()->findOrFail($user->id);
+            $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
+
+            if ($lockedRider->hasActiveBooking()) {
+                $statusCode = 403;
+                $payload = ['message' => 'Complete your active booking before accepting another.'];
+
+                return;
+            }
+
+            if ($lockedBooking->status !== 'pending' || $lockedBooking->rider_id !== null) {
+                $statusCode = 409;
+                $payload = ['message' => 'This booking was already accepted by another rider.'];
+
+                return;
+            }
+
+            $lockedBooking->update([
+                'rider_id' => $lockedRider->id,
+                'status' => 'accepted',
+            ]);
+
+            $payload = [
+                'message' => 'Booking accepted successfully.',
+                'booking' => [
+                    'id' => $lockedBooking->id,
+                    'status' => $lockedBooking->status,
+                    'rider_id' => $lockedRider->id,
+                ],
+            ];
+        });
+
+        return response()->json($payload, $statusCode);
     }
 }

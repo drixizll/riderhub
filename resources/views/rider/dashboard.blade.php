@@ -148,13 +148,110 @@
 
                     <ol data-nav-steps class="hidden max-h-52 divide-y divide-slate-100 overflow-y-auto border-t border-slate-100 bg-white px-4 py-2 text-xs text-slate-700"></ol>
                 </div>
+
+                <!-- Live Customer ↔ Rider In-App Chat -->
+                <div class="p-5 pt-0 sm:p-6 sm:pt-0">
+                    <x-booking-chat :booking="$activeBooking" />
+                </div>
             </section>
         @else
-            <section class="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-white p-6 sm:p-8">
-                <p class="text-sm font-bold uppercase tracking-wider text-indigo-700">You’re available</p>
-                <h2 class="mt-2 text-xl font-extrabold text-slate-950">Choose a booking request to get started</h2>
-                <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Accept one pending request at a time. Once it’s accepted, update the trip status and share your live location with the customer.</p>
+            <section
+                id="rider-live-radar"
+                data-poll-url="{{ route('rider.requests.poll') }}"
+                data-initial-count="{{ $availableCount }}"
+                data-initial-latest="{{ $bookings->first()?->id ?? 0 }}"
+                class="rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-white p-6 sm:p-8"
+            >
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="relative flex h-2.5 w-2.5">
+                                <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                                <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                            </span>
+                            <p class="text-sm font-bold uppercase tracking-wider text-indigo-700">You’re available · Live Radar Active</p>
+                        </div>
+                        <h2 class="mt-2 text-xl font-extrabold text-slate-950">Choose a booking request to get started</h2>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Accept one pending request at a time. New bookings automatically trigger a sound alert so you never miss a passenger.</p>
+                    </div>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <button type="button" data-radar-sound-toggle class="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-white px-3.5 py-2 text-xs font-bold text-indigo-700 shadow-sm transition hover:bg-indigo-50">
+                            <span data-radar-sound-label>🔔 Alert Sound: ON</span>
+                        </button>
+                    </div>
+                </div>
+                <div data-radar-toast class="mt-4 hidden items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                    <div>
+                        <p class="font-extrabold">New booking request arrived!</p>
+                        <p data-radar-toast-text class="text-xs text-emerald-800"></p>
+                    </div>
+                    <button type="button" onclick="window.location.reload()" class="shrink-0 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-emerald-700">Refresh Now</button>
+                </div>
             </section>
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    const radar = document.getElementById('rider-live-radar');
+                    if (!radar) return;
+                    const pollUrl = radar.dataset.pollUrl;
+                    let latestId = Number(radar.dataset.initialLatest || 0);
+                    let soundEnabled = localStorage.getItem('riderhub_radar_sound') !== 'off';
+                    const toggleBtn = radar.querySelector('[data-radar-sound-toggle]');
+                    const toggleLabel = radar.querySelector('[data-radar-sound-label]');
+                    const toast = radar.querySelector('[data-radar-toast]');
+                    const toastText = radar.querySelector('[data-radar-toast-text]');
+
+                    const syncLabel = () => {
+                        if (toggleLabel) toggleLabel.textContent = soundEnabled ? '🔔 Alert Sound: ON' : '🔕 Alert Sound: OFF';
+                    };
+                    syncLabel();
+
+                    toggleBtn?.addEventListener('click', () => {
+                        soundEnabled = !soundEnabled;
+                        localStorage.setItem('riderhub_radar_sound', soundEnabled ? 'on' : 'off');
+                        syncLabel();
+                    });
+
+                    const playDing = () => {
+                        if (!soundEnabled) return;
+                        try {
+                            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                            if (!AudioCtx) return;
+                            const ctx = new AudioCtx();
+                            [784, 1046.5].forEach((freq, i) => {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.type = 'triangle';
+                                osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.14);
+                                gain.gain.setValueAtTime(0.14, ctx.currentTime + i * 0.14);
+                                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.14 + 0.3);
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                osc.start(ctx.currentTime + i * 0.14);
+                                osc.stop(ctx.currentTime + i * 0.14 + 0.32);
+                            });
+                        } catch {}
+                    };
+
+                    const checkRadar = async () => {
+                        try {
+                            const res = await fetch(pollUrl, { headers: { 'Accept': 'application/json' } });
+                            if (!res.ok) return;
+                            const data = await res.json();
+                            if (data.latest_id && data.latest_id > latestId) {
+                                latestId = data.latest_id;
+                                playDing();
+                                if (toast && toastText && data.latest) {
+                                    toastText.textContent = `${data.latest.type} · ${data.latest.pickup_address} → ${data.latest.dropoff_address} (${data.latest.fare})`;
+                                    toast.classList.remove('hidden');
+                                    toast.classList.add('flex');
+                                }
+                            }
+                        } catch {}
+                    };
+
+                    setInterval(checkRadar, 8000);
+                });
+            </script>
         @endif
 
         <div class="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">

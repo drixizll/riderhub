@@ -25,6 +25,7 @@
         </div>
 
         <div class="flex shrink-0 items-center gap-2 sm:gap-3">
+            <x-live-clock />
             <x-weather-widget variant="compact" />
             <x-theme-toggle />
             <x-notification-menu />

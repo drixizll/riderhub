@@ -61,6 +61,11 @@ class Booking extends Model
         return $this->hasOne(BookingRating::class);
     }
 
+    public function messages(): HasMany
+    {
+        return $this->hasMany(BookingMessage::class);
+    }
+
     public function latestLocation(): ?RiderLocation
     {
         return $this->riderLocations()->latest('updated_at')->first();

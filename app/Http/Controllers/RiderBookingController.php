@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\User;
 use App\Notifications\RiderHubNotification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,34 @@ class RiderBookingController extends Controller
     public function dashboard(): View
     {
         return view('rider.dashboard', $this->viewData(false));
+    }
+
+    public function pollRequests(): JsonResponse
+    {
+        $query = Booking::query()
+            ->with('customer:id,name')
+            ->whereNull('rider_id')
+            ->where('status', 'pending')
+            ->where(function ($q): void {
+                $q->where('payment_method', 'cash')
+                    ->orWhereHas('payment', fn ($p) => $p->where('status', 'paid'));
+            });
+
+        $count = (clone $query)->count();
+        $latest = (clone $query)->latest('id')->first();
+
+        return response()->json([
+            'count' => $count,
+            'latest_id' => $latest?->id ?? 0,
+            'latest' => $latest ? [
+                'id' => $latest->id,
+                'type' => ucfirst($latest->type),
+                'pickup_address' => $latest->pickup_address,
+                'dropoff_address' => $latest->dropoff_address,
+                'fare' => '₱'.number_format((float) $latest->fare, 2),
+                'customer' => $latest->customer?->name ?? 'Customer',
+            ] : null,
+        ]);
     }
 
     private function viewData(bool $paginate): array

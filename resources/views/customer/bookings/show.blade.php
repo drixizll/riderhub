@@ -215,11 +215,38 @@
 
                         <div class="flex flex-col justify-between gap-4">
                             <x-weather-widget title="Route Weather" :lat="$booking->pickup_lat" :lng="$booking->pickup_lng" />
+
+                            <div class="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-4 text-xs leading-5 text-rose-900">
+                                <div class="flex items-center justify-between gap-2">
+                                    <p class="font-extrabold uppercase tracking-wider text-rose-700">Safety &amp; SOS</p>
+                                    <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700">Active Trip</span>
+                                </div>
+                                <p class="mt-1.5 text-rose-800/90">Need urgent assistance? Call emergency services or copy your live trip details for family.</p>
+                                <div class="mt-3 flex flex-wrap gap-2">
+                                    <a href="tel:911" class="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-rose-600 px-3 py-2 text-xs font-extrabold text-white shadow-sm transition hover:bg-rose-700">
+                                        Emergency 911
+                                    </a>
+                                    <button type="button"
+                                            x-data="{ copied: false }"
+                                            @click="
+                                                const info = `SOS RiderHub Trip #{{ $booking->id }} | Rider: {{ addslashes($booking->rider->name) }} ({{ addslashes($booking->rider->phone ?? 'N/A') }}) | From: {{ addslashes($booking->pickup_address) }} → To: {{ addslashes($booking->dropoff_address) }}`;
+                                                if (navigator.clipboard) { navigator.clipboard.writeText(info); copied = true; setTimeout(() => copied = false, 2500); }
+                                            "
+                                            class="inline-flex flex-1 items-center justify-center gap-1 rounded-xl border border-rose-200 bg-white px-3 py-2 text-xs font-bold text-rose-700 transition hover:bg-rose-100">
+                                        <span x-text="copied ? 'Copied ✓' : 'Copy SOS Info'">Copy SOS Info</span>
+                                    </button>
+                                </div>
+                            </div>
+
                             <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs leading-5 text-slate-600">
                                 <p class="font-bold text-slate-900">Real-time updates</p>
                                 <p class="mt-1">Map coordinates, distance, ETA, and trip status refresh automatically every 5 seconds while this page stays open.</p>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <x-booking-chat :booking="$booking" />
                     </div>
                 </div>
                 <script>

@@ -673,6 +673,10 @@
                 <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you" style="transform:scale(1.02);">
                 <div class="mem-cap">Close to you is my favorite place. 🤍</div>
             </div>
+            <div class="mem-card wide" style="aspect-ratio: 16 / 10;" data-mem-src="{{ asset('images/merry/goofy.jpg') }}" data-mem-cap="My favorite goofy human 😜🤍">
+                <img src="{{ asset('images/merry/goofy.jpg') }}" alt="Goofy Merry" style="transform:scale(1.01);object-position:center 40%;">
+                <div class="mem-cap">My favorite goofy human 😜🤍</div>
+            </div>
             <div class="mem-card wide" style="aspect-ratio: 16 / 9;" data-mem-src="{{ asset('images/merry/collage.jpg') }}" data-mem-cap="Every memory with you is my favorite chapter. 🖤✨">
                 <img src="{{ asset('images/merry/collage.jpg') }}" alt="Our collage memories" style="object-fit: cover;">
                 <div class="mem-cap">Every memory with you is my favorite chapter. 🖤✨</div>

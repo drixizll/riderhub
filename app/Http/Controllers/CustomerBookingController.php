@@ -35,15 +35,86 @@ class CustomerBookingController extends Controller
             $outlier->payment?->update(['amount' => $recalculated]);
         });
 
-        $bookings = Auth::user()->bookings()
+        $showingBin = $request->boolean('bin');
+        $trashedCount = Auth::user()->bookings()->onlyTrashed()->count();
+
+        $query = $showingBin
+            ? Auth::user()->bookings()->onlyTrashed()
+            : Auth::user()->bookings();
+
+        $bookings = $query
             ->with(['rider', 'payment'])
             ->when($validated['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
             ->when($validated['type'] ?? null, fn ($query, $type) => $query->where('type', $type))
-            ->latest()
+            ->latest($showingBin ? 'deleted_at' : 'created_at')
             ->paginate(10)
             ->withQueryString();
 
-        return view('customer.bookings.index', compact('bookings'));
+        return view('customer.bookings.index', compact('bookings', 'showingBin', 'trashedCount'));
+    }
+
+    public function clearHistory(): RedirectResponse
+    {
+        $moved = Auth::user()->bookings()
+            ->whereIn('status', ['completed', 'cancelled'])
+            ->delete();
+
+        if ($moved === 0) {
+            return redirect()->route('customer.bookings.index')
+                ->with('success', 'No completed or cancelled bookings to clear.');
+        }
+
+        return redirect()->route('customer.bookings.index')
+            ->with('success', "{$moved} ".($moved === 1 ? 'booking' : 'bookings').' moved to Recycle Bin (auto-deletes after 30 days).');
+    }
+
+    public function trash(Booking $booking): RedirectResponse
+    {
+        abort_unless($booking->customer_id === Auth::id(), 403);
+
+        if (! in_array($booking->status, ['completed', 'cancelled'], true)) {
+            return redirect()->route('customer.bookings.index')
+                ->with('error', 'Only completed or cancelled bookings can be moved to the Recycle Bin.');
+        }
+
+        $booking->delete();
+
+        return redirect()->route('customer.bookings.index')
+            ->with('success', "Booking #{$booking->id} moved to Recycle Bin (auto-deletes after 30 days).");
+    }
+
+    public function restore(int $bookingId): RedirectResponse
+    {
+        $booking = Auth::user()->bookings()->onlyTrashed()->findOrFail($bookingId);
+        $booking->restore();
+
+        return redirect()->route('customer.bookings.index', ['bin' => 1])
+            ->with('success', "Booking #{$booking->id} has been restored to your history.");
+    }
+
+    public function restoreAll(): RedirectResponse
+    {
+        $restored = Auth::user()->bookings()->onlyTrashed()->restore();
+
+        return redirect()->route('customer.bookings.index')
+            ->with('success', $restored > 0 ? "Restored {$restored} booking(s) back to your history." : 'Recycle Bin is already empty.');
+    }
+
+    public function forceDelete(int $bookingId): RedirectResponse
+    {
+        $booking = Auth::user()->bookings()->onlyTrashed()->findOrFail($bookingId);
+        $booking->forceDelete();
+
+        return redirect()->route('customer.bookings.index', ['bin' => 1])
+            ->with('success', "Booking #{$bookingId} permanently deleted.");
+    }
+
+    public function emptyBin(): RedirectResponse
+    {
+        $deleted = Auth::user()->bookings()->onlyTrashed()->forceDelete();
+
+        return redirect()->route('customer.bookings.index', ['bin' => 1])
+            ->with('success', $deleted > 0 ? "Permanently deleted {$deleted} item(s) from Recycle Bin." : 'Recycle Bin is already empty.');
     }
 
     public function create(): View

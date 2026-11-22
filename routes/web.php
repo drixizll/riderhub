@@ -44,6 +44,9 @@ Route::get('/dashboard', function () use ($dashboardRouteForRole) {
 Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->name('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/bookings', [CustomerBookingController::class, 'index'])->name('bookings.index');
+    Route::post('/bookings/clear-history', [CustomerBookingController::class, 'clearHistory'])->name('bookings.clear-history');
+    Route::post('/bookings/bin/restore-all', [CustomerBookingController::class, 'restoreAll'])->name('bookings.restore-all');
+    Route::delete('/bookings/bin/empty', [CustomerBookingController::class, 'emptyBin'])->name('bookings.empty-bin');
     Route::get('/bookings/export/pdf', [ReportController::class, 'customerPdf'])->name('bookings.export.pdf');
     Route::get('/bookings/create', [CustomerBookingController::class, 'create'])->name('bookings.create');
     Route::post('/bookings', [CustomerBookingController::class, 'store'])->name('bookings.store');
@@ -52,6 +55,9 @@ Route::middleware(['auth', 'verified', 'role:customer'])->prefix('customer')->na
     Route::patch('/bookings/{booking}', [CustomerBookingController::class, 'update'])->name('bookings.update');
     Route::get('/bookings/{booking}/receipt', [ReportController::class, 'customerReceipt'])->name('bookings.receipt');
     Route::post('/bookings/{booking}/cancel', [CustomerBookingController::class, 'cancel'])->name('bookings.cancel');
+    Route::delete('/bookings/{booking}/trash', [CustomerBookingController::class, 'trash'])->name('bookings.trash');
+    Route::post('/bookings/{bookingId}/restore', [CustomerBookingController::class, 'restore'])->name('bookings.restore');
+    Route::delete('/bookings/{bookingId}/force', [CustomerBookingController::class, 'forceDelete'])->name('bookings.force-delete');
     Route::get('/bookings/{booking}/location', [CustomerBookingController::class, 'location'])->name('bookings.location');
     Route::post('/bookings/{booking}/rating', [BookingRatingController::class, 'store'])->name('bookings.rating');
 });

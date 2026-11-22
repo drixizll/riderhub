@@ -287,4 +287,27 @@ class TripChatAndRadarTest extends TestCase
         $this->assertSame(0, Booking::count());
         $this->assertSame($userCountBefore, User::count());
     }
+
+    public function test_customer_clear_history_recycle_bin_and_restore_work(): void
+    {
+        $customer = User::factory()->create(['role' => 'customer']);
+
+        $completed = Booking::factory()->create(['customer_id' => $customer->id, 'status' => 'completed']);
+        $active = Booking::factory()->create(['customer_id' => $customer->id, 'status' => 'pending']);
+
+        // Clear history moves only completed/cancelled to Recycle Bin (active stays untouched)
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.clear-history'))
+            ->assertRedirect(route('customer.bookings.index'));
+
+        $this->assertSoftDeleted('bookings', ['id' => $completed->id]);
+        $this->assertDatabaseHas('bookings', ['id' => $active->id, 'deleted_at' => null]);
+
+        // Restore brings it back to history
+        $this->actingAs($customer)
+            ->post(route('customer.bookings.restore', $completed->id))
+            ->assertRedirect(route('customer.bookings.index', ['bin' => 1]));
+
+        $this->assertDatabaseHas('bookings', ['id' => $completed->id, 'deleted_at' => null]);
+    }
 }

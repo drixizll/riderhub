@@ -631,8 +631,12 @@
             <span>Tap photo to view in HD ✨</span>
         </div>
         <section class="gallery-grid" aria-label="Our memories">
-            <div class="mem-card wide" data-mem-src="{{ asset('images/merry/m7.jpg') }}" data-mem-cap="Close to you is my favorite place. 🤍">
-                <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you">
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/cute.jpg') }}" data-mem-cap="Cutest face in the world. 🤍">
+                <img src="{{ asset('images/merry/cute.jpg') }}" alt="Merry" style="transform:scale(1.02);">
+                <div class="mem-cap">Cutest face in the world. 🤍</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/m7.jpg') }}" data-mem-cap="Close to you is my favorite place. 🤍">
+                <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you" style="transform:scale(1.02);">
                 <div class="mem-cap">Close to you is my favorite place. 🤍</div>
             </div>
             <div class="mem-card wide" style="aspect-ratio: 16 / 9;" data-mem-src="{{ asset('images/merry/collage.jpg') }}" data-mem-cap="Every memory with you is my favorite chapter. 🖤✨">

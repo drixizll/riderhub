@@ -628,36 +628,16 @@
         <!-- Our Moments Gallery -->
         <div class="gallery-head">
             <h3>Our Moments</h3>
-            <span>Tap photo to view ✨</span>
+            <span>Tap photo to view in HD ✨</span>
         </div>
         <section class="gallery-grid" aria-label="Our memories">
-            <div class="mem-card wide" data-mem-src="{{ asset('images/merry/m7.jpg') }}" data-mem-cap="Close to you is my favorite place.">
+            <div class="mem-card wide" data-mem-src="{{ asset('images/merry/m7.jpg') }}" data-mem-cap="Close to you is my favorite place. 🤍">
                 <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you">
-                <div class="mem-cap">Close to you is my favorite place.</div>
+                <div class="mem-cap">Close to you is my favorite place. 🤍</div>
             </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m2.jpg') }}" data-mem-cap="That cute wink 🤍">
-                <img src="{{ asset('images/merry/m2.jpg') }}" alt="Cute wink">
-                <div class="mem-cap">That cute wink 🤍</div>
-            </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m5.jpg') }}" data-mem-cap="Always by your side">
-                <img src="{{ asset('images/merry/m5.jpg') }}" alt="By your side">
-                <div class="mem-cap">Always by your side</div>
-            </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m1.jpg') }}" data-mem-cap="School days with you">
-                <img src="{{ asset('images/merry/m1.jpg') }}" alt="School days">
-                <div class="mem-cap">School days with you</div>
-            </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m4.jpg') }}" data-mem-cap="My favorite smile">
-                <img src="{{ asset('images/merry/m4.jpg') }}" alt="Favorite smile">
-                <div class="mem-cap">My favorite smile</div>
-            </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m6.jpg') }}" data-mem-cap="Every ride with you 🏍️">
-                <img src="{{ asset('images/merry/m6.jpg') }}" alt="Ride together">
-                <div class="mem-cap">Every ride with you 🏍️</div>
-            </div>
-            <div class="mem-card" data-mem-src="{{ asset('images/merry/m3.jpg') }}" data-mem-cap="Sunsets & good memories">
-                <img src="{{ asset('images/merry/m3.jpg') }}" alt="Sunset memories">
-                <div class="mem-cap">Sunsets &amp; good memories</div>
+            <div class="mem-card wide" style="aspect-ratio: 16 / 9;" data-mem-src="{{ asset('images/merry/collage.jpg') }}" data-mem-cap="Every memory with you is my favorite chapter. 🖤✨">
+                <img src="{{ asset('images/merry/collage.jpg') }}" alt="Our collage memories" style="object-fit: cover;">
+                <div class="mem-cap">Every memory with you is my favorite chapter. 🖤✨</div>
             </div>
         </section>
 

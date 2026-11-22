@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "online.riderhub.twa",
+        "sha256_cert_fingerprints": ["5C:8C:D3:AB:79:77:A5:CA:93:CB:4D:B6:DA:93:21:52:32:68:58:2D:09:12:93:4B:36:18:0B:27:CE:77:5A:2E"]
+      }
+    }]

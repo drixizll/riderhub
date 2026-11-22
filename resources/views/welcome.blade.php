@@ -560,6 +560,9 @@
                     <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Ready to make your next move?</h2>
                     <p class="mx-auto mt-4 max-w-2xl text-lg leading-7 text-indigo-100">Create your RiderHub account and book your first trip or delivery today.</p>
                     <a href="{{ route('register') }}" class="mt-8 inline-flex items-center justify-center rounded-xl bg-white px-6 py-3.5 text-base font-bold text-indigo-700 shadow-sm transition hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-700">Get started</a>
+                    <a href="{{ asset('downloads/RiderHub.apk') }}" download="RiderHub.apk" class="mt-3 inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 bg-white/10 px-6 py-3.5 text-base font-bold text-white backdrop-blur-sm transition hover:bg-white/20 sm:ml-3 sm:mt-8">
+                        📱 Download Android App (APK)
+                    </a>
                 </div>
             </section>
         </main>
@@ -602,6 +605,7 @@
                             <li><a href="#services" class="text-slate-300 transition hover:text-violet-300">Ride &amp; Delivery Services</a></li>
                             <li><a href="#how-it-works" class="text-slate-300 transition hover:text-violet-300">How It Works</a></li>
                             <li><a href="#faq" class="text-slate-300 transition hover:text-violet-300">Common Questions &amp; FAQ</a></li>
+                            <li><a href="{{ asset('downloads/RiderHub.apk') }}" download="RiderHub.apk" class="font-semibold text-emerald-400 transition hover:text-emerald-300">📱 Download Android App (APK)</a></li>
                         </ul>
                     </div>
                 </div>

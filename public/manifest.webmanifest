@@ -1,20 +1,74 @@
 {
     "id": "/",
-    "name": "RiderHub — Rides & Delivery",
+    "name": "RiderHub — Misamis Oriental Rides & Delivery",
     "short_name": "RiderHub",
-    "description": "Book rides, send deliveries, and follow your trip with RiderHub.",
+    "description": "Book motorcycle rides, send packages, track riders live, and chat in real time across Tagoloan and Misamis Oriental.",
+    "lang": "en",
+    "dir": "ltr",
     "start_url": "/",
     "scope": "/",
     "display": "standalone",
+    "display_override": ["standalone", "minimal-ui"],
     "orientation": "portrait-primary",
-    "background_color": "#f8fafc",
+    "background_color": "#0b0a17",
     "theme_color": "#7c3aed",
+    "categories": ["travel", "navigation", "lifestyle"],
+    "launch_handler": {
+        "client_mode": ["focus-existing", "auto"]
+    },
+    "shortcuts": [
+        {
+            "name": "Book a Ride",
+            "short_name": "Book",
+            "description": "Create a new ride or parcel delivery booking",
+            "url": "/customer/bookings/create",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+        },
+        {
+            "name": "My Bookings",
+            "short_name": "Bookings",
+            "description": "View your active trips and booking history",
+            "url": "/customer/bookings",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+        },
+        {
+            "name": "Rider Dashboard",
+            "short_name": "Rider",
+            "description": "Manage active trips and open booking requests",
+            "url": "/rider/dashboard",
+            "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+        }
+    ],
     "icons": [
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
         {
             "src": "/icons/riderhub.svg",
             "sizes": "any",
             "type": "image/svg+xml",
-            "purpose": "any maskable"
+            "purpose": "any"
         }
     ]
 }

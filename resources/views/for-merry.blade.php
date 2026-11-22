@@ -791,9 +791,17 @@
                 <img src="{{ asset('images/merry/beret.jpg') }}" alt="Cute beret" style="transform:scale(1.02);">
                 <div class="mem-cap">Cutest little gentleman 🥸🤍</div>
             </div>
-            <div class="mem-card wide" style="aspect-ratio: 16 / 10;" data-mem-src="{{ asset('images/merry/goofy.jpg') }}" data-mem-cap="My favorite goofy human 😜🤍">
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/goofy.jpg') }}" data-mem-cap="My favorite goofy human 😜🤍">
                 <img src="{{ asset('images/merry/goofy.jpg') }}" alt="Goofy Merry" style="transform:scale(1.01);object-position:center 40%;">
                 <div class="mem-cap">My favorite goofy human 😜🤍</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/foodie.jpg') }}" data-mem-cap="Food trip energy 😂🍗🤍">
+                <img src="{{ asset('images/merry/foodie.jpg') }}" alt="Foodie Merry" style="transform:scale(1.02);">
+                <div class="mem-cap">Food trip energy 😂🍗🤍</div>
+            </div>
+            <div class="mem-card wide" style="aspect-ratio: 4 / 3;" data-mem-src="{{ asset('images/merry/studio4.jpg') }}" data-mem-cap="Prettiest girl in every frame. 🖤✨">
+                <img src="{{ asset('images/merry/studio4.jpg') }}" alt="Merry 4-panel portrait" style="transform:scale(1.02);">
+                <div class="mem-cap">Prettiest girl in every frame. 🖤✨</div>
             </div>
             <div class="mem-card wide" style="aspect-ratio: 16 / 9;" data-mem-src="{{ asset('images/merry/collage.jpg') }}" data-mem-cap="Every memory with you is my favorite chapter. 🖤✨">
                 <img src="{{ asset('images/merry/collage.jpg') }}" alt="Our collage memories" style="object-fit: cover;">
@@ -840,6 +848,8 @@
             @json(asset('images/merry/beret.jpg')),
             @json(asset('images/merry/m7.jpg')),
             @json(asset('images/merry/goofy.jpg')),
+            @json(asset('images/merry/foodie.jpg')),
+            @json(asset('images/merry/studio4.jpg')),
         ];
         let rainEnabled = true;
         let rainTimer = null;

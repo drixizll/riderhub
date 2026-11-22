@@ -33,6 +33,7 @@ class User extends Authenticatable
         'vehicle_model',
         'plate_number',
         'license_photo_path',
+        'last_seen_at',
     ];
 
     /**
@@ -57,6 +58,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_online' => 'boolean',
+            'last_seen_at' => 'datetime',
         ];
     }
 

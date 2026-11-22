@@ -24,18 +24,27 @@ class TripChatAndRadarTest extends TestCase
         ]);
 
         // Customer sends message
-        $this->actingAs($customer)
+        $sentId = $this->actingAs($customer)
             ->postJson(route('bookings.messages.store', $booking), ['body' => 'Nasa pickup na po ako'])
             ->assertCreated()
             ->assertJsonPath('message.body', 'Nasa pickup na po ako')
-            ->assertJsonPath('message.is_mine', true);
+            ->assertJsonPath('message.is_mine', true)
+            ->json('message.id');
 
-        // Rider fetches and replies
+        // Rider fetches (marks customer's message as seen!) and replies
         $this->actingAs($rider)
             ->getJson(route('bookings.messages.index', $booking))
             ->assertOk()
             ->assertJsonCount(1, 'messages')
-            ->assertJsonPath('messages.0.is_mine', false);
+            ->assertJsonPath('messages.0.is_mine', false)
+            ->assertJsonPath('partner.is_online', true)
+            ->assertJsonPath('partner.status_text', 'Active now');
+
+        // Customer polls and sees Messenger "Seen" receipt up to their sent message ID
+        $this->actingAs($customer)
+            ->getJson(route('bookings.messages.index', $booking))
+            ->assertOk()
+            ->assertJsonPath('seen_up_to_id', $sentId);
 
         $this->actingAs($rider)
             ->postJson(route('bookings.messages.store', $booking), ['body' => 'Papunta na po!'])

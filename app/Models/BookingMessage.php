@@ -14,6 +14,11 @@ class BookingMessage extends Model
         'booking_id',
         'sender_id',
         'body',
+        'read_at',
+    ];
+
+    protected $casts = [
+        'read_at' => 'datetime',
     ];
 
     public function booking(): BelongsTo

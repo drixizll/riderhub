@@ -20,11 +20,28 @@
                         <span class="hidden text-slate-300 sm:block" aria-hidden="true">→</span>
                         <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Drop-off</p><p class="mt-1 font-semibold text-slate-900">{{ $booking->dropoff_address }}</p></div>
                     </div>
-                    <p class="mt-3 text-sm text-slate-500">Customer: <span class="font-semibold text-slate-700">{{ $booking->customer->name }}</span>
+                    @php
+                        $c = $booking->customer;
+                        $cInitials = \Illuminate\Support\Str::of($c->name)->explode(' ')->filter()->take(2)->map(fn ($p) => mb_substr($p, 0, 1))->implode('') ?: 'C';
+                        $cOnline = $c->last_seen_at && $c->last_seen_at->greaterThanOrEqualTo(now()->subMinutes(2));
+                    @endphp
+                    <div class="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-slate-500">
+                        <div class="relative h-7 w-7 shrink-0">
+                            @if ($c->profile_photo_path)
+                                <img src="{{ route('profile.photo.show', ['user' => $c->id, 'v' => $c->updated_at?->timestamp]) }}" alt="{{ $c->name }}" class="h-7 w-7 rounded-full object-cover ring-1 ring-slate-200">
+                            @else
+                                <span class="flex h-7 w-7 items-center justify-center rounded-full bg-indigo-100 text-[10px] font-extrabold text-indigo-700">{{ $cInitials }}</span>
+                            @endif
+                            <span class="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white {{ $cOnline ? 'bg-emerald-500' : 'bg-slate-400' }}"></span>
+                        </div>
+                        <span>Customer: <span class="font-semibold text-slate-700">{{ $c->name }}</span></span>
+                        <span class="text-xs font-medium {{ $cOnline ? 'text-emerald-600' : 'text-slate-400' }}">
+                            {{ $cOnline ? '· Active now' : ($c->last_seen_at ? '· Offline '.$c->last_seen_at->diffForHumans() : '') }}
+                        </span>
                         @if ($booking->type === 'delivery' && $booking->item_description)
-                            <span class="mx-1 text-slate-300">·</span>Package: {{ $booking->item_description }}
+                            <span class="text-slate-300">·</span><span>Package: {{ $booking->item_description }}</span>
                         @endif
-                    </p>
+                    </div>
                 </div>
                 <div class="flex items-center justify-between gap-4 border-t border-slate-100 pt-4 lg:border-0 lg:pt-0">
                     <div><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Fare</p><p class="mt-1 text-xl font-extrabold text-slate-950">₱{{ number_format($booking->fare, 2) }}</p></div>

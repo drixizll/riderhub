@@ -79,12 +79,33 @@
         @if ($activeBooking)
             <section id="active-booking" class="scroll-mt-24 overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
                 <div class="flex flex-col gap-4 border-b border-slate-100 bg-gradient-to-r from-indigo-50 to-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                    <div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <p class="text-sm font-bold uppercase tracking-wider text-indigo-700">Your active booking</p>
-                            <span class="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold capitalize text-indigo-700">{{ str_replace('_', ' ', $activeBooking->status) }}</span>
+                    <div class="flex items-center gap-3.5">
+                        @php
+                            $cust = $activeBooking->customer;
+                            $custInitials = \Illuminate\Support\Str::of($cust->name)->explode(' ')->filter()->take(2)->map(fn ($p) => mb_substr($p, 0, 1))->implode('') ?: 'C';
+                            $custOnline = $cust->last_seen_at && $cust->last_seen_at->greaterThanOrEqualTo(now()->subMinutes(2));
+                        @endphp
+                        <div class="relative h-12 w-12 shrink-0">
+                            @if ($cust->profile_photo_path)
+                                <img src="{{ route('profile.photo.show', ['user' => $cust->id, 'v' => $cust->updated_at?->timestamp]) }}" alt="{{ $cust->name }}" class="h-12 w-12 rounded-full border-2 border-indigo-200 object-cover shadow-sm">
+                            @else
+                                <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-extrabold text-white shadow-sm">{{ $custInitials }}</span>
+                            @endif
+                            <span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white {{ $custOnline ? 'bg-emerald-500' : 'bg-slate-400' }}" title="{{ $custOnline ? 'Active now' : ($cust->last_seen_at ? 'Offline '.$cust->last_seen_at->diffForHumans() : 'Offline') }}"></span>
                         </div>
-                        <h2 class="mt-2 text-xl font-extrabold text-slate-950">{{ ucfirst($activeBooking->type) }} · {{ $activeBooking->customer->name }}</h2>
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <p class="text-sm font-bold uppercase tracking-wider text-indigo-700">Your active booking</p>
+                                <span class="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold capitalize text-indigo-700">{{ str_replace('_', ' ', $activeBooking->status) }}</span>
+                                @if (in_array($cust->gender, ['male', 'female'], true))
+                                    <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold capitalize text-slate-600">{{ $cust->gender }}</span>
+                                @endif
+                            </div>
+                            <h2 class="mt-1 text-xl font-extrabold text-slate-950">{{ ucfirst($activeBooking->type) }} · {{ $cust->name }}</h2>
+                            <p class="text-xs font-medium {{ $custOnline ? 'text-emerald-600' : 'text-slate-400' }}">
+                                {{ $custOnline ? '● Active now' : ($cust->last_seen_at ? 'Offline '.$cust->last_seen_at->diffForHumans() : 'Offline') }}
+                            </p>
+                        </div>
                     </div>
                     <span class="text-xl font-extrabold text-slate-950">₱{{ number_format($activeBooking->fare, 2) }}</span>
                 </div>

@@ -45,6 +45,8 @@
                     <a href="#services" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">Services</a>
                     <a href="#about-us" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">About us</a>
                     <a href="#how-it-works" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">How it works</a>
+                    <a href="#faq" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">FAQ</a>
+                    <x-live-clock />
                     <x-weather-widget variant="compact" />
                     <x-theme-toggle />
                     <x-install-app-button />
@@ -393,7 +395,167 @@
                 </div>
             </section>
 
-            <section class="reveal-on-scroll mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+            <!-- RiderHub in Action — Real Tagoloan & Misamis Oriental Photo Gallery -->
+            <section id="gallery" class="reveal-on-scroll border-t border-indigo-900/30 bg-[#0d0b1a] py-16 text-white sm:py-20">
+                @php
+                    $galleryPhotos = [
+                        [
+                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Tagaloan_Plaza_drone_1_%28Antonio_Cosin_Highway%2C_Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_Plaza_drone_1_%28Antonio_Cosin_Highway%2C_Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
+                            'fallback' => asset('images/about/city-commute.jpg'),
+                            'title' => 'Tagoloan Plaza & Highway',
+                            'subtitle' => 'Poblacion, Tagoloan, Misamis Oriental',
+                        ],
+                        [
+                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg',
+                            'fallback' => asset('images/about/rider-service.jpg'),
+                            'title' => 'Tagoloan Town Center',
+                            'subtitle' => 'Balay Lungsod · Core Pickup Hub',
+                        ],
+                        [
+                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
+                            'fallback' => asset('images/about/package-delivery.jpg'),
+                            'title' => 'Tagoloan Bridge Corridor',
+                            'subtitle' => 'Tagoloan ↔ Cagayan de Oro Route',
+                        ],
+                        [
+                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Motorcycle_taxis_in_the_Philippines_04.jpg/1280px-Motorcycle_taxis_in_the_Philippines_04.jpg',
+                            'fallback' => asset('images/about/live-tracking.jpg'),
+                            'title' => 'Verified Partner Riders',
+                            'subtitle' => 'Daily Rides & Express Delivery',
+                        ],
+                    ];
+                @endphp
+
+                <div x-data="{ activePhoto: null }" class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-widest text-violet-400">Tagoloan &amp; Misamis Oriental</p>
+                            <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">RiderHub in Action</h2>
+                        </div>
+                        <p class="text-xs font-semibold text-violet-300/80">Click photo to enlarge</p>
+                    </div>
+
+                    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                        @foreach ($galleryPhotos as $photo)
+                            <button
+                                type="button"
+                                @click="activePhoto = @js($photo)"
+                                class="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:border-violet-400/50 hover:shadow-violet-950/50 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                            >
+                                <img
+                                    src="{{ $photo['src'] }}"
+                                    alt="{{ $photo['title'] }}"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer"
+                                    onerror="this.onerror=null;this.src='{{ $photo['fallback'] }}';"
+                                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                >
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"></div>
+                                <div class="absolute inset-x-0 bottom-0 p-4">
+                                    <p class="text-sm font-extrabold text-white">{{ $photo['title'] }}</p>
+                                    <p class="mt-0.5 text-xs text-slate-300">{{ $photo['subtitle'] }}</p>
+                                </div>
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Lightbox Modal -->
+                    <div
+                        x-show="activePhoto !== null"
+                        x-cloak
+                        x-transition.opacity
+                        @click="activePhoto = null"
+                        @keydown.escape.window="activePhoto = null"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+                    >
+                        <div @click.stop class="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-white/15 bg-slate-900 shadow-2xl">
+                            <button
+                                type="button"
+                                @click="activePhoto = null"
+                                class="absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/70 text-white backdrop-blur-md transition hover:bg-violet-600"
+                                aria-label="Close enlarged photo"
+                            >
+                                ✕
+                            </button>
+                            <template x-if="activePhoto">
+                                <div>
+                                    <img
+                                        :src="activePhoto.src"
+                                        :alt="activePhoto.title"
+                                        referrerpolicy="no-referrer"
+                                        class="max-h-[75vh] w-full bg-black object-contain"
+                                    >
+                                    <div class="border-t border-white/10 px-6 py-4">
+                                        <p class="text-base font-extrabold text-white" x-text="activePhoto.title"></p>
+                                        <p class="mt-0.5 text-xs text-slate-400" x-text="activePhoto.subtitle"></p>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Common Questions & FAQs -->
+            <section id="faq" class="reveal-on-scroll mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 lg:py-20">
+                <div class="mx-auto max-w-2xl text-center">
+                    <p class="text-sm font-bold uppercase tracking-widest text-indigo-600">Common Questions</p>
+                    <h2 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-950 sm:text-4xl">Frequently Asked Questions</h2>
+                    <p class="mt-3 text-base leading-7 text-slate-600">Everything you need to know about booking rides, sending parcels, and riding with RiderHub across Misamis Oriental.</p>
+                </div>
+
+                @php
+                    $faqs = [
+                        [
+                            'q' => 'How are RiderHub fares calculated?',
+                            'a' => 'Fares are transparent and calculated upfront before you book: ₱55.00 base fare plus ₱18.50 per kilometer based on your pickup and drop-off pins. No hidden charges.',
+                        ],
+                        [
+                            'q' => 'What payment methods are accepted?',
+                            'a' => 'You can pay with Cash directly to your rider upon arrival, or pay online securely via PayMongo using GCash, Maya, or eligible Visa/Mastercard.',
+                        ],
+                        [
+                            'q' => 'Which areas in Misamis Oriental are covered?',
+                            'a' => 'RiderHub serves Tagoloan (Poblacion, Baluarte, Sta. Ana, Natumolan), Cagayan de Oro, Villanueva, Jasaan, Opol, El Salvador, and surrounding Misamis Oriental municipalities.',
+                        ],
+                        [
+                            'q' => 'Can I track my rider and message them during a trip?',
+                            'a' => 'Yes! Once a verified rider accepts your booking, you get live GPS tracking with ETA, live route weather, verified rider vehicle/plate details, an in-app Trip Chat, and a one-tap Safety & SOS bar.',
+                        ],
+                        [
+                            'q' => 'How do I become a verified RiderHub partner rider?',
+                            'a' => 'Create an account and choose the Rider role, complete your profile with your motorcycle model and plate number, and wait for Admin KYC verification. Once verified, toggle Online to start accepting bookings.',
+                        ],
+                        [
+                            'q' => 'Can I cancel a booking or book again quickly?',
+                            'a' => 'You can edit or cancel any pending booking before a rider accepts it. For completed trips, you can download a PDF receipt or tap "Book Again" to repeat the same route in one click.',
+                        ],
+                    ];
+                @endphp
+
+                <div x-data="{ open: 0 }" class="mt-10 space-y-3">
+                    @foreach ($faqs as $idx => $faq)
+                        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:border-indigo-200">
+                            <button
+                                type="button"
+                                @click="open = open === {{ $idx }} ? null : {{ $idx }}"
+                                :aria-expanded="(open === {{ $idx }}).toString()"
+                                class="flex w-full items-center justify-between gap-4 px-5 py-4 text-left sm:px-6"
+                            >
+                                <span class="text-sm font-bold text-slate-900 sm:text-base">{{ $faq['q'] }}</span>
+                                <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 transition-transform duration-200" :class="open === {{ $idx }} ? 'rotate-180 bg-indigo-600 text-white' : ''">
+                                    <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.168l3.71-3.938a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" /></svg>
+                                </span>
+                            </button>
+                            <div x-show="open === {{ $idx }}" x-cloak x-transition class="border-t border-slate-100 px-5 py-4 text-sm leading-6 text-slate-600 sm:px-6">
+                                {{ $faq['a'] }}
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
+
+            <section class="reveal-on-scroll mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8 lg:pb-20">
                 <div class="overflow-hidden rounded-3xl bg-indigo-700 px-6 py-12 text-center shadow-xl shadow-indigo-900/10 sm:px-12 sm:py-14">
                     <h2 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Ready to make your next move?</h2>
                     <p class="mx-auto mt-4 max-w-2xl text-lg leading-7 text-indigo-100">Create your RiderHub account and book your first trip or delivery today.</p>
@@ -402,13 +564,51 @@
             </section>
         </main>
 
-        <footer class="border-t border-slate-200 bg-white">
-            <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-                <a href="{{ url('/') }}" class="transition hover:opacity-90">
-                    <x-brand-logo size="sm" />
-                </a>
-                <p>&copy; {{ date('Y') }} RiderHub. All rights reserved.</p>
-                <a href="{{ route('login') }}" class="font-semibold text-slate-600 transition hover:text-indigo-600">Already have an account? Log in</a>
+        <footer class="relative z-10 border-t border-indigo-900/50 bg-[#0b0a17] text-slate-300">
+            <div class="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-14">
+                <div class="grid gap-10 md:grid-cols-3 md:gap-8">
+                    <!-- Column 1: Brand -->
+                    <div>
+                        <a href="{{ url('/') }}" class="inline-flex items-center gap-3 transition hover:opacity-90">
+                            <img src="{{ asset('icons/riderhub.svg') }}" alt="RiderHub Logo" class="h-10 w-10 rounded-xl shadow-md shadow-indigo-500/20">
+                            <div>
+                                <p class="text-base font-extrabold tracking-tight text-white">RiderHub</p>
+                                <p class="text-xs font-semibold text-violet-400">Misamis Oriental Ride &amp; Delivery</p>
+                            </div>
+                        </a>
+                        <p class="mt-4 max-w-sm text-sm leading-6 text-slate-400">
+                            Committed to fast, safe, and transparent motorcycle rides and parcel deliveries across Tagoloan, Cagayan de Oro, and Misamis Oriental.
+                        </p>
+                    </div>
+
+                    <!-- Column 2: Operations & Hub -->
+                    <div>
+                        <h3 class="text-xs font-extrabold uppercase tracking-widest text-violet-400">Operations &amp; Coverage</h3>
+                        <p class="mt-4 text-sm font-bold text-white">Tagoloan Dispatch Hub</p>
+                        <p class="mt-1.5 text-sm text-slate-400">Poblacion &amp; Baluarte, Tagoloan, Misamis Oriental</p>
+                        <p class="mt-1.5 text-sm text-slate-400">Monday – Sunday · 24/7 Live Booking</p>
+                        <p class="mt-1.5 text-sm text-slate-400">
+                            <a href="mailto:riderhub.misor@gmail.com" class="transition hover:text-violet-300">riderhub.misor@gmail.com</a>
+                        </p>
+                    </div>
+
+                    <!-- Column 3: Quick Links -->
+                    <div>
+                        <h3 class="text-xs font-extrabold uppercase tracking-widest text-violet-400">Quick Links</h3>
+                        <ul class="mt-4 space-y-2.5 text-sm">
+                            <li><a href="{{ route('login') }}" class="text-slate-300 transition hover:text-violet-300">Sign In to Portal</a></li>
+                            <li><a href="{{ route('register') }}" class="text-slate-300 transition hover:text-violet-300">Create Account</a></li>
+                            <li><a href="#about-us" class="text-slate-300 transition hover:text-violet-300">About RiderHub</a></li>
+                            <li><a href="#services" class="text-slate-300 transition hover:text-violet-300">Ride &amp; Delivery Services</a></li>
+                            <li><a href="#how-it-works" class="text-slate-300 transition hover:text-violet-300">How It Works</a></li>
+                            <li><a href="#faq" class="text-slate-300 transition hover:text-violet-300">Common Questions &amp; FAQ</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="mt-10 border-t border-slate-800/90 pt-6 text-center text-xs text-slate-500">
+                    &copy; {{ date('Y') }} RiderHub Misamis Oriental. Smart Ride-Hailing &amp; Delivery Management System. All rights reserved.
+                </div>
             </div>
         </footer>
         <x-ai-assistant />

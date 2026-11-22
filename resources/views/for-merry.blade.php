@@ -80,6 +80,39 @@
             flex-direction: column;
             align-items: center;
         }
+        .intro-collage {
+            position: relative;
+            z-index: 2;
+            margin-top: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .intro-mini {
+            width: 56px;
+            padding: 3px 3px 9px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.92);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+            animation: gentleBob 3.6s ease-in-out infinite;
+        }
+        .intro-mini:nth-child(1) { transform: rotate(-10deg); animation-delay: 0s; }
+        .intro-mini:nth-child(2) { transform: rotate(5deg) translateY(-6px); animation-delay: 0.4s; }
+        .intro-mini:nth-child(3) { transform: rotate(-4deg) translateY(4px); animation-delay: 0.8s; }
+        .intro-mini:nth-child(4) { transform: rotate(9deg); animation-delay: 1.2s; }
+        .intro-mini img {
+            width: 100%;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 3px;
+            display: block;
+            filter: grayscale(100%) contrast(1.1);
+        }
+        @keyframes gentleBob {
+            0%, 100% { margin-top: 0; }
+            50% { margin-top: -8px; }
+        }
         .intro-eyebrow {
             font-size: 11px;
             letter-spacing: 0.35em;
@@ -421,6 +454,77 @@
             100% { transform: translateY(-140px) scale(1.3); opacity: 0; }
         }
 
+        /* Falling Polaroid Memory Rain */
+        .falling-polaroid {
+            position: fixed;
+            top: -110px;
+            z-index: 3;
+            width: 58px;
+            padding: 4px 4px 12px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+            pointer-events: auto;
+            cursor: pointer;
+            opacity: 0;
+            animation: polaroidFall var(--dur, 11s) linear forwards;
+        }
+        .falling-polaroid img {
+            width: 100%;
+            height: 52px;
+            object-fit: cover;
+            border-radius: 3px;
+            display: block;
+            filter: grayscale(100%) contrast(1.1);
+            transition: filter 0.3s ease;
+        }
+        .falling-polaroid:hover img {
+            filter: grayscale(0%);
+        }
+        @keyframes polaroidFall {
+            0% {
+                transform: translate3d(0, 0, 0) rotate(var(--r0, -10deg)) scale(0.85);
+                opacity: 0;
+            }
+            10% { opacity: 0.72; }
+            50% {
+                transform: translate3d(var(--sway, 28px), 52vh, 0) rotate(var(--r1, 12deg)) scale(0.95);
+                opacity: 0.65;
+            }
+            88% { opacity: 0.5; }
+            100% {
+                transform: translate3d(calc(var(--sway, 28px) * -0.6), 115vh, 0) rotate(var(--r2, -14deg)) scale(0.88);
+                opacity: 0;
+            }
+        }
+
+        /* Floating Music & Rain Control Pill */
+        .rain-toggle {
+            position: fixed;
+            right: 16px;
+            bottom: 18px;
+            z-index: 40;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            background: rgba(12, 12, 16, 0.82);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 11.5px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            backdrop-filter: blur(12px);
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .rain-toggle:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.14);
+        }
+
         /* Our Moments Monochrome Gallery */
         .gallery-head {
             margin-top: 28px;
@@ -562,6 +666,12 @@
             <p class="intro-eyebrow">Coded with love · For you only</p>
             <h1 class="intro-title">Hi, Merry 🖤</h1>
             <p class="intro-sub">Gumawa ako ng maliit na sulat gamit ang code — para lang sa'yo.</p>
+            <div class="intro-collage" aria-hidden="true">
+                <div class="intro-mini"><img src="{{ asset('images/merry/sunset.jpg') }}" alt=""></div>
+                <div class="intro-mini"><img src="{{ asset('images/merry/cute.jpg') }}" alt=""></div>
+                <div class="intro-mini"><img src="{{ asset('images/merry/smile.jpg') }}" alt=""></div>
+                <div class="intro-mini"><img src="{{ asset('images/merry/beret.jpg') }}" alt=""></div>
+            </div>
             <button id="open-btn" type="button" class="open-btn">
                 <span>✉</span>
                 <span>Tap to Open</span>
@@ -673,6 +783,14 @@
                 <img src="{{ asset('images/merry/m7.jpg') }}" alt="Close to you" style="transform:scale(1.02);">
                 <div class="mem-cap">Close to you is my favorite place. 🤍</div>
             </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/smile.jpg') }}" data-mem-cap="That smile always wins my heart. 🖤">
+                <img src="{{ asset('images/merry/smile.jpg') }}" alt="Merry smiling" style="transform:scale(1.02);">
+                <div class="mem-cap">That smile always wins my heart. 🖤</div>
+            </div>
+            <div class="mem-card" data-mem-src="{{ asset('images/merry/beret.jpg') }}" data-mem-cap="Cutest little gentleman 🥸🤍">
+                <img src="{{ asset('images/merry/beret.jpg') }}" alt="Cute beret" style="transform:scale(1.02);">
+                <div class="mem-cap">Cutest little gentleman 🥸🤍</div>
+            </div>
             <div class="mem-card wide" style="aspect-ratio: 16 / 10;" data-mem-src="{{ asset('images/merry/goofy.jpg') }}" data-mem-cap="My favorite goofy human 😜🤍">
                 <img src="{{ asset('images/merry/goofy.jpg') }}" alt="Goofy Merry" style="transform:scale(1.01);object-position:center 40%;">
                 <div class="mem-cap">My favorite goofy human 😜🤍</div>
@@ -700,6 +818,11 @@
         </div>
     </main>
 
+    <button id="rain-toggle" type="button" class="rain-toggle" style="display:none;">
+        <span>✨</span>
+        <span id="rain-label">Memory Rain: ON</span>
+    </button>
+
     <script>
         // Open envelope & auto-play "Mahal Magmahal" by Esremborak
         const intro = document.getElementById('intro');
@@ -707,9 +830,77 @@
         const ytPlayer = document.getElementById('yt-player');
         const musicWrap = document.getElementById('music-embed-wrap');
         const introVideo = document.getElementById('intro-video');
+        const rainToggle = document.getElementById('rain-toggle');
+        const rainLabel = document.getElementById('rain-label');
+        const rainPhotos = [
+            @json(asset('images/merry-moment.jpg')),
+            @json(asset('images/merry/sunset.jpg')),
+            @json(asset('images/merry/cute.jpg')),
+            @json(asset('images/merry/smile.jpg')),
+            @json(asset('images/merry/beret.jpg')),
+            @json(asset('images/merry/m7.jpg')),
+            @json(asset('images/merry/goofy.jpg')),
+        ];
+        let rainEnabled = true;
+        let rainTimer = null;
+
+        const spawnPolaroid = () => {
+            if (!rainEnabled) return;
+            const el = document.createElement('div');
+            el.className = 'falling-polaroid';
+            const src = rainPhotos[Math.floor(Math.random() * rainPhotos.length)];
+            el.innerHTML = `<img src="${src}" alt="">`;
+            const leftPct = 4 + Math.random() * 86;
+            const dur = 9 + Math.random() * 6;
+            const sway = (Math.random() > 0.5 ? 1 : -1) * (18 + Math.random() * 34);
+            const r0 = (Math.random() * 24 - 12).toFixed(1) + 'deg';
+            const r1 = (Math.random() * 28 - 14).toFixed(1) + 'deg';
+            const r2 = (Math.random() * 26 - 13).toFixed(1) + 'deg';
+            el.style.left = `${leftPct}vw`;
+            el.style.setProperty('--dur', `${dur}s`);
+            el.style.setProperty('--sway', `${sway}px`);
+            el.style.setProperty('--r0', r0);
+            el.style.setProperty('--r1', r1);
+            el.style.setProperty('--r2', r2);
+
+            // Tap a falling Polaroid to pop hearts!
+            el.addEventListener('click', (ev) => {
+                for (let i = 0; i < 5; i++) {
+                    const h = document.createElement('span');
+                    h.className = 'floating-heart';
+                    h.textContent = i % 2 === 0 ? '🤍' : '✨';
+                    h.style.left = `${ev.clientX + (Math.random() * 60 - 30)}px`;
+                    h.style.top = `${ev.clientY}px`;
+                    document.body.appendChild(h);
+                    setTimeout(() => h.remove(), 2000);
+                }
+                el.remove();
+            });
+
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), (dur + 0.5) * 1000);
+        };
+
+        const startMemoryRain = () => {
+            if (rainTimer) return;
+            // Initial gentle burst of 3 polaroids
+            for (let i = 0; i < 3; i++) {
+                setTimeout(spawnPolaroid, i * 650);
+            }
+            rainTimer = setInterval(spawnPolaroid, 2200);
+        };
+
+        rainToggle?.addEventListener('click', () => {
+            rainEnabled = !rainEnabled;
+            if (rainLabel) rainLabel.textContent = rainEnabled ? 'Memory Rain: ON' : 'Memory Rain: OFF';
+            if (rainEnabled) spawnPolaroid();
+        });
+
         document.getElementById('open-btn').addEventListener('click', () => {
             intro.classList.add('opened');
             page.classList.add('visible');
+            if (rainToggle) rainToggle.style.display = 'inline-flex';
+            startMemoryRain();
             if (introVideo) {
                 setTimeout(() => introVideo.pause(), 900);
             }

@@ -84,7 +84,26 @@
                     <dl class="mt-4 divide-y divide-slate-100 rounded-xl border border-slate-100 px-4">
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment method</dt><dd class="font-semibold capitalize text-slate-900">{{ $booking->payment_method }}</dd></div>
                         <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Payment status</dt><dd class="font-semibold capitalize text-slate-900">{{ str_replace('_', ' ', $booking->payment?->status ?? 'pending') }}</dd></div>
-                        <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Rider</dt><dd class="text-right font-semibold text-slate-900">{{ $booking->rider?->name ?? 'Finding a rider' }}</dd></div>
+                        <div class="flex justify-between gap-4 py-3 text-sm">
+                            <dt class="text-slate-500">Rider</dt>
+                            <dd class="text-right font-semibold text-slate-900">
+                                {{ $booking->rider?->name ?? 'Finding a rider' }}
+                                @if ($booking->rider && ($booking->rider->rider_status ?? 'verified') === 'verified')
+                                    <span class="ml-1 inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700">✓ Verified</span>
+                                @endif
+                            </dd>
+                        </div>
+                        @if ($booking->rider && ($booking->rider->vehicle_model || $booking->rider->plate_number))
+                            <div class="flex justify-between gap-4 py-3 text-sm">
+                                <dt class="text-slate-500">Vehicle / Plate</dt>
+                                <dd class="text-right font-semibold text-slate-900">
+                                    {{ $booking->rider->vehicle_model ?: 'Motorcycle' }}
+                                    @if ($booking->rider->plate_number)
+                                        <span class="ml-1 rounded-md bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-800">{{ $booking->rider->plate_number }}</span>
+                                    @endif
+                                </dd>
+                            </div>
+                        @endif
                         @if ($booking->rider && $riderRatingCount > 0)
                             <div class="flex justify-between gap-4 py-3 text-sm"><dt class="text-slate-500">Rider rating</dt><dd class="font-bold text-amber-600">★ {{ $riderRatingAverage }} <span class="font-medium text-slate-400">({{ $riderRatingCount }})</span></dd></div>
                         @endif

@@ -82,6 +82,9 @@
                                         'email' => $user->email,
                                         'phone' => $user->phone ?? '',
                                         'role' => $user->role,
+                                        'rider_status' => $user->rider_status ?? 'verified',
+                                        'vehicle_model' => $user->vehicle_model ?? '',
+                                        'plate_number' => $user->plate_number ?? '',
                                         'updateUrl' => route('admin.users.update', $user),
                                     ];
                                 @endphp
@@ -101,7 +104,23 @@
                                         <p class="text-slate-800">{{ $user->email }}</p>
                                         <p class="mt-1 text-xs text-slate-500">{{ $user->phone ?: 'No phone provided' }}</p>
                                     </td>
-                                    <td class="px-5 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-bold capitalize {{ $user->role === 'admin' ? 'bg-violet-50 text-violet-700' : ($user->role === 'rider' ? 'bg-amber-50 text-amber-700' : 'bg-indigo-50 text-indigo-700') }}">{{ $user->role }}</span></td>
+                                    <td class="px-5 py-4">
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <span class="rounded-full px-2.5 py-1 text-xs font-bold capitalize {{ $user->role === 'admin' ? 'bg-violet-50 text-violet-700' : ($user->role === 'rider' ? 'bg-amber-50 text-amber-700' : 'bg-indigo-50 text-indigo-700') }}">{{ $user->role }}</span>
+                                            @if ($user->role === 'rider')
+                                                @php $rStatus = $user->rider_status ?? 'verified'; @endphp
+                                                <span class="rounded-full px-2 py-0.5 text-[10px] font-bold {{ $rStatus === 'verified' ? 'bg-emerald-50 text-emerald-700' : ($rStatus === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-700') }}">
+                                                    {{ $rStatus === 'verified' ? '✓ Verified' : ucfirst($rStatus) }}
+                                                </span>
+                                                <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold {{ ($user->is_online ?? true) ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
+                                                    {{ ($user->is_online ?? true) ? '● Online' : '○ Offline' }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                        @if ($user->role === 'rider' && ($user->vehicle_model || $user->plate_number))
+                                            <p class="mt-1 text-[11px] text-slate-500">{{ $user->vehicle_model }} {{ $user->plate_number ? "({$user->plate_number})" : '' }}</p>
+                                        @endif
+                                    </td>
                                     <td class="whitespace-nowrap px-5 py-4 text-sm text-slate-500">{{ $user->created_at->format('M j, Y') }}</td>
                                     <td class="whitespace-nowrap px-5 py-4 text-right sm:px-6">
                                         @if ($user->id === Auth::id())
@@ -194,6 +213,27 @@
                                 <option value="rider">Rider</option>
                                 <option value="admin">Admin</option>
                             </select>
+                        </div>
+
+                        <div x-show="editing.role === 'rider'" class="space-y-3 rounded-2xl border border-indigo-100 bg-indigo-50/40 p-3.5">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-indigo-700">Rider KYC Verification</label>
+                                <select name="rider_status" x-model="editing.rider_status" class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none">
+                                    <option value="verified">Verified (Can Accept Trips)</option>
+                                    <option value="pending">Pending Review (Blocked)</option>
+                                    <option value="suspended">Suspended (Blocked)</option>
+                                </select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2.5">
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Vehicle Model</label>
+                                    <input type="text" name="vehicle_model" x-model="editing.vehicle_model" placeholder="Honda Click 125" class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs text-slate-900">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-500">Plate Number</label>
+                                    <input type="text" name="plate_number" x-model="editing.plate_number" placeholder="123 ABC" class="mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs uppercase text-slate-900">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-2">

@@ -1,12 +1,35 @@
 <x-app-layout>
     <x-slot name="header">
+        @php
+            $riderIsOnline = (bool) (Auth::user()->is_online ?? true);
+            $riderStatus = Auth::user()->rider_status ?? 'verified';
+        @endphp
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-                <p class="text-sm font-semibold text-indigo-600">Rider workspace</p>
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="text-sm font-semibold text-indigo-600">Rider workspace</p>
+                    <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $riderStatus === 'verified' ? 'bg-emerald-100 text-emerald-800' : ($riderStatus === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800') }}">
+                        {{ $riderStatus === 'verified' ? '✓ Verified Rider' : ($riderStatus === 'pending' ? '⏳ Pending KYC' : '⚠ Suspended') }}
+                    </span>
+                    @if (Auth::user()->vehicle_model || Auth::user()->plate_number)
+                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                            🏍 {{ Auth::user()->vehicle_model ?: 'Motorcycle' }}{{ Auth::user()->plate_number ? ' · '.Auth::user()->plate_number : '' }}
+                        </span>
+                    @endif
+                </div>
                 <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Ready for your next trip, {{ Str::before(Auth::user()->name, ' ') }}?</h1>
                 <p class="mt-1 text-sm text-slate-500">Manage your active booking and pick up a new request.</p>
             </div>
-            <a href="{{ route('rider.bookings.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Browse requests</a>
+            <div class="flex flex-wrap items-center gap-2">
+                <form method="POST" action="{{ route('rider.availability.toggle') }}">
+                    @csrf
+                    <button type="submit" class="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-sm transition {{ $riderIsOnline ? 'bg-emerald-600 text-white hover:bg-emerald-700' : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50' }}">
+                        <span class="h-2.5 w-2.5 rounded-full {{ $riderIsOnline ? 'bg-emerald-200 animate-pulse' : 'bg-slate-400' }}"></span>
+                        {{ $riderIsOnline ? 'Online · Taking Trips' : 'Offline · Tap to Go Online' }}
+                    </button>
+                </form>
+                <a href="{{ route('rider.bookings.index') }}" class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">Browse requests</a>
+            </div>
         </div>
     </x-slot>
 

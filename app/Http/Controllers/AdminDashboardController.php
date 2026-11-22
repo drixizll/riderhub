@@ -53,9 +53,11 @@ class AdminDashboardController extends Controller
             ->get();
 
         $availableRiders = User::where('role', 'rider')
+            ->where('is_online', true)
+            ->where('rider_status', 'verified')
             ->whereDoesntHave('riderBookings', fn ($q) => $q->whereIn('status', ['accepted', 'picked_up']))
             ->orderBy('name')
-            ->get(['id', 'name', 'phone']);
+            ->get(['id', 'name', 'phone', 'vehicle_model', 'plate_number']);
 
         return view('admin.dashboard', [
             'totalBookings' => Booking::count(),
@@ -190,7 +192,14 @@ class AdminDashboardController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique(User::class)->ignore($user->id)],
             'phone' => ['nullable', 'string', 'max:25'],
             'role' => ['required', 'in:customer,rider,admin'],
+            'rider_status' => ['nullable', 'in:verified,pending,suspended'],
+            'vehicle_model' => ['nullable', 'string', 'max:80'],
+            'plate_number' => ['nullable', 'string', 'max:30'],
         ]);
+
+        if (! isset($validated['rider_status']) || $validated['rider_status'] === null) {
+            unset($validated['rider_status']);
+        }
 
         $user->update($validated);
 

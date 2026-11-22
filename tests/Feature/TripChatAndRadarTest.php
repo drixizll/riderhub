@@ -125,4 +125,58 @@ class TripChatAndRadarTest extends TestCase
             ->assertOk()
             ->assertJsonPath('booking.status', 'cancelled');
     }
+
+    public function test_rider_availability_toggle_and_kyc_verification_guard(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $customer = User::factory()->create(['role' => 'customer']);
+        $rider = User::factory()->create(['role' => 'rider', 'is_online' => true, 'rider_status' => 'verified']);
+
+        $booking = Booking::factory()->create([
+            'customer_id' => $customer->id,
+            'rider_id' => null,
+            'status' => 'pending',
+            'payment_method' => 'cash',
+        ]);
+
+        // Rider toggles offline
+        $this->actingAs($rider)
+            ->post(route('rider.availability.toggle'))
+            ->assertRedirect();
+
+        $this->assertFalse($rider->fresh()->is_online);
+
+        // Offline rider cannot accept booking
+        $this->actingAs($rider)
+            ->post(route('rider.bookings.accept', $booking))
+            ->assertRedirect(route('rider.dashboard'))
+            ->assertSessionHas('error');
+
+        $this->assertNull($booking->fresh()->rider_id);
+
+        // Rider toggles back online, then Admin sets rider to pending KYC + vehicle details
+        $this->actingAs($rider)->post(route('rider.availability.toggle'))->assertRedirect();
+        $this->assertTrue($rider->fresh()->is_online);
+
+        $this->actingAs($admin)
+            ->patch(route('admin.users.update', $rider), [
+                'name' => $rider->name,
+                'email' => $rider->email,
+                'phone' => $rider->phone,
+                'role' => 'rider',
+                'rider_status' => 'pending',
+                'vehicle_model' => 'Honda Click 125i',
+                'plate_number' => 'ABC 1234',
+            ])
+            ->assertRedirect(route('admin.users.index'));
+
+        $this->assertSame('pending', $rider->fresh()->rider_status);
+        $this->assertSame('Honda Click 125i', $rider->fresh()->vehicle_model);
+
+        // Pending KYC rider cannot accept booking
+        $this->actingAs($rider)
+            ->post(route('rider.bookings.accept', $booking))
+            ->assertRedirect(route('rider.dashboard'))
+            ->assertSessionHas('error');
+    }
 }

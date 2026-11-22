@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified', 'role:rider'])->prefix('rider')->name('ri
     Route::get('/earnings/export/pdf', [ReportController::class, 'riderPdf'])->name('earnings.export.pdf');
     Route::get('/bookings', [RiderBookingController::class, 'index'])->name('bookings.index');
     Route::get('/requests/poll', [RiderBookingController::class, 'pollRequests'])->name('requests.poll');
+    Route::post('/availability', [RiderBookingController::class, 'toggleAvailability'])->name('availability.toggle');
     Route::post('/bookings/{booking}/accept', [RiderBookingController::class, 'accept'])->name('bookings.accept');
     Route::post('/bookings/{booking}/status', [RiderBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/locations', [RiderLocationController::class, 'store'])->name('locations.store');

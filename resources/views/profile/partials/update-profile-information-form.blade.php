@@ -53,6 +53,21 @@
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
         </div>
 
+        @if ($user->role === 'rider')
+            <div class="grid gap-4 rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4 sm:grid-cols-2">
+                <div>
+                    <x-input-label for="vehicle_model" :value="__('Motorcycle / Vehicle Model')" />
+                    <x-text-input id="vehicle_model" name="vehicle_model" type="text" placeholder="e.g. Honda Click 125i" class="mt-2 block w-full px-4 py-3 text-sm" :value="old('vehicle_model', $user->vehicle_model)" />
+                    <x-input-error class="mt-2" :messages="$errors->get('vehicle_model')" />
+                </div>
+                <div>
+                    <x-input-label for="plate_number" :value="__('Plate Number')" />
+                    <x-text-input id="plate_number" name="plate_number" type="text" placeholder="e.g. 123 ABC" class="mt-2 block w-full px-4 py-3 text-sm uppercase" :value="old('plate_number', $user->plate_number)" />
+                    <x-input-error class="mt-2" :messages="$errors->get('plate_number')" />
+                </div>
+            </div>
+        @endif
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

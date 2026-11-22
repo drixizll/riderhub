@@ -28,6 +28,10 @@ class User extends Authenticatable
         'gender',
         'municipality',
         'profile_photo_path',
+        'is_online',
+        'rider_status',
+        'vehicle_model',
+        'plate_number',
     ];
 
     /**
@@ -51,6 +55,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_online' => 'boolean',
         ];
     }
 

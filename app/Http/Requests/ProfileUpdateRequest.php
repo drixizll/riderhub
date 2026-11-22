@@ -28,6 +28,8 @@ class ProfileUpdateRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'gender' => ['nullable', Rule::in(['male', 'female', 'other'])],
             'municipality' => ['nullable', 'string', 'max:80'],
+            'vehicle_model' => ['nullable', 'string', 'max:80'],
+            'plate_number' => ['nullable', 'string', 'max:30'],
             'email' => [
                 'required',
                 'string',

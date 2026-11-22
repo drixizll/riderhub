@@ -106,13 +106,42 @@ class RiderBookingController extends Controller
         ];
     }
 
+    public function toggleAvailability(Request $request): RedirectResponse
+    {
+        /** @var User $rider */
+        $rider = $request->user();
+
+        if ($rider->is_online && $rider->hasActiveBooking()) {
+            return back()->with('error', 'Complete your active booking before going offline.');
+        }
+
+        $nextOnline = ! (bool) ($rider->is_online ?? true);
+        $rider->update(['is_online' => $nextOnline]);
+
+        return back()->with('success', $nextOnline
+            ? 'You are now ONLINE and ready to receive trip requests.'
+            : 'You are now OFFLINE. Toggle back online anytime to accept bookings.');
+    }
+
     public function accept(Booking $booking): RedirectResponse
     {
-        $alreadyTaken = false;
+        $errorMessage = null;
 
-        DB::transaction(function () use ($booking, &$alreadyTaken): void {
+        DB::transaction(function () use ($booking, &$errorMessage): void {
             $lockedRider = User::query()->lockForUpdate()->findOrFail(Auth::id());
             $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
+
+            if (($lockedRider->rider_status ?? 'verified') !== 'verified') {
+                $errorMessage = 'Your rider account is not verified yet. Please wait for admin approval before accepting trips.';
+
+                return;
+            }
+
+            if (! (bool) ($lockedRider->is_online ?? true)) {
+                $errorMessage = 'You are currently Offline. Switch to Online mode first to accept bookings.';
+
+                return;
+            }
 
             if ($lockedRider->hasActiveBooking()) {
                 abort(403, 'Complete your active booking before accepting another.');
@@ -120,7 +149,7 @@ class RiderBookingController extends Controller
 
             // First-accept ("paunahan") atomic race guard: if another rider accepted a split-second earlier, do not overwrite
             if ($lockedBooking->status !== 'pending' || $lockedBooking->rider_id !== null) {
-                $alreadyTaken = true;
+                $errorMessage = 'Naunahan ka na! This booking was just accepted by another rider.';
 
                 return;
             }
@@ -133,9 +162,8 @@ class RiderBookingController extends Controller
             ]);
         });
 
-        if ($alreadyTaken) {
-            return redirect()->route('rider.dashboard')
-                ->with('error', 'Naunahan ka na! This booking was just accepted by another rider.');
+        if ($errorMessage !== null) {
+            return redirect()->route('rider.dashboard')->with('error', $errorMessage);
         }
 
         $booking->refresh()->customer->notify(new RiderHubNotification(

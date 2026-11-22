@@ -15,7 +15,19 @@
         ],
         'rider' => [
             ['label' => 'Overview', 'route' => 'rider.dashboard', 'active' => 'rider.dashboard', 'icon' => 'home'],
-            ['label' => 'Booking requests', 'route' => 'rider.bookings.index', 'active' => 'rider.bookings.*', 'icon' => 'clipboard', 'badge' => \App\Models\Booking::whereNull('rider_id')->where('status', 'pending')->count()],
+            [
+                'label' => 'Booking requests',
+                'route' => 'rider.bookings.index',
+                'active' => 'rider.bookings.*',
+                'icon' => 'clipboard',
+                'badge' => \App\Models\Booking::whereNull('rider_id')
+                    ->where('status', 'pending')
+                    ->where(function ($query): void {
+                        $query->where('payment_method', 'cash')
+                            ->orWhereHas('payment', fn ($paymentQuery) => $paymentQuery->where('status', 'paid'));
+                    })
+                    ->count(),
+            ],
         ],
         'admin' => [
             ['label' => 'Overview', 'route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'icon' => 'home'],

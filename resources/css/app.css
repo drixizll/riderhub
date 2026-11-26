@@ -416,6 +416,35 @@ html[data-theme="dark"] .rgb-input-wrap {
     --tw-ring-shadow: 0 0 #0000 !important;
 }
 
+/* Subtle 2px Flowing Aurora LED Strip on Navbar Bottom Edge */
+@keyframes riderhub-nav-led {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+}
+
+.nav-aurora-led {
+    position: relative;
+}
+
+.nav-aurora-led::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 2px;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, #7c3aed, #ec4899, #fbbf24, #06b6d4, #7c3aed, transparent);
+    background-size: 200% 100%;
+    opacity: 0.75;
+    animation: riderhub-nav-led 6s linear infinite;
+}
+
+html[data-theme="dark"] .nav-aurora-led::after {
+    opacity: 0.95;
+    box-shadow: 0 0 12px rgb(168 85 247 / 0.55);
+}
+
 .auth-form-enter {
     animation: riderhub-enter 760ms cubic-bezier(0.22, 1, 0.36, 1) 90ms both;
 }

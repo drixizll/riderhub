@@ -37,36 +37,44 @@
         @endif
 
         <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Rider summary">
-            <a href="{{ route('rider.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm active:scale-[0.98]">
+            <a href="{{ route('rider.bookings.index') }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm active:scale-[0.98]">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></span>
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-slate-500">Available requests</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
                     <span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
                 </div>
-                <p class="mt-2 text-3xl font-extrabold text-slate-950">{{ $availableCount }}</p>
+                <p class="mt-3 text-sm font-medium text-slate-500">Available requests</p>
+                <p class="mt-1 text-3xl font-extrabold text-slate-950">{{ $availableCount }}</p>
                 <p class="mt-1 text-xs text-slate-500">Waiting for a rider</p>
             </a>
-            <a href="{{ $activeBooking ? '#active-booking' : route('rider.bookings.index') }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm active:scale-[0.98]">
+            <a href="{{ $activeBooking ? '#active-booking' : route('rider.bookings.index') }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm active:scale-[0.98]">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500"></span>
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-indigo-700">Assigned to you</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/15 text-indigo-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /></svg></span>
                     <span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
                 </div>
-                <p class="mt-2 text-3xl font-extrabold text-indigo-950">{{ $assignedCount }}</p>
+                <p class="mt-3 text-sm font-medium text-indigo-700">Assigned to you</p>
+                <p class="mt-1 text-3xl font-extrabold text-indigo-950">{{ $assignedCount }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">All-time bookings</p>
             </a>
-            <a href="#rider-earnings" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm active:scale-[0.98]">
+            <a href="#rider-earnings" class="card-interactive group relative block overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm active:scale-[0.98]">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></span>
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-emerald-700">Completed</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg></span>
                     <span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
                 </div>
-                <p class="mt-2 text-3xl font-extrabold text-emerald-950">{{ $completedCount }}</p>
+                <p class="mt-3 text-sm font-medium text-emerald-700">Completed</p>
+                <p class="mt-1 text-3xl font-extrabold text-emerald-950">{{ $completedCount }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">Successfully delivered</p>
             </a>
-            <a href="{{ route('profile.edit') }}" class="card-interactive group block rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm active:scale-[0.98]">
+            <a href="{{ route('profile.edit') }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm active:scale-[0.98]">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500"></span>
                 <div class="flex items-center justify-between">
-                    <p class="text-sm font-medium text-amber-800">Rider rating</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700"><svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="m10 1.8 2.45 4.97 5.48.8-3.97 3.87.94 5.46L10 14.32l-4.9 2.58.94-5.46L2.07 7.57l5.48-.8L10 1.8Z" /></svg></span>
                     <span class="text-xs font-bold text-amber-800 transition group-hover:translate-x-0.5" aria-hidden="true">→</span>
                 </div>
-                <p class="mt-2 text-3xl font-extrabold text-amber-950">{{ $ratingAverage ?? 'New' }}@if ($ratingAverage)<span class="text-lg">/5</span>@endif</p>
+                <p class="mt-3 text-sm font-medium text-amber-800">Rider rating</p>
+                <p class="mt-1 text-3xl font-extrabold text-amber-950">{{ $ratingAverage ?? 'New' }}@if ($ratingAverage)<span class="text-lg">/5</span>@endif</p>
                 <p class="mt-1 text-xs text-amber-800/80">{{ $ratingCount }} {{ \Illuminate\Support\Str::plural('review', $ratingCount) }} from customers</p>
             </a>
         </section>
@@ -123,6 +131,27 @@
                         </div>
                         <div class="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-600">
                             Customer contact: <span class="font-semibold text-slate-900">{{ $activeBooking->customer->phone ?: $activeBooking->customer->email }}</span>
+                        </div>
+                        @php
+                            $targetLat = $activeBooking->status === 'accepted' ? $activeBooking->pickup_lat : $activeBooking->dropoff_lat;
+                            $targetLng = $activeBooking->status === 'accepted' ? $activeBooking->pickup_lng : $activeBooking->dropoff_lng;
+                            $targetLabel = $activeBooking->status === 'accepted' ? 'Pickup' : 'Drop-off';
+                            $targetAddr = $activeBooking->status === 'accepted' ? $activeBooking->pickup_address : $activeBooking->dropoff_address;
+                            $gmapsQuery = ($targetLat && $targetLng) ? "{$targetLat},{$targetLng}" : urlencode($targetAddr);
+                            $gmapsUrl = "https://www.google.com/maps/dir/?api=1&destination={$gmapsQuery}&travelmode=driving";
+                            $wazeUrl = ($targetLat && $targetLng)
+                                ? "https://waze.com/ul?ll={$targetLat},{$targetLng}&navigate=yes"
+                                : 'https://waze.com/ul?q='.urlencode($targetAddr).'&navigate=yes';
+                        @endphp
+                        <div class="flex flex-wrap items-center gap-2">
+                            <a href="{{ $gmapsUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-3.5 py-2 text-xs font-extrabold text-white shadow-sm shadow-indigo-600/25 transition hover:-translate-y-0.5 hover:brightness-110 active:scale-95">
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                                Navigate to {{ $targetLabel }} (Google Maps)
+                            </a>
+                            <a href="{{ $wazeUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-xl border border-sky-200 bg-sky-50 px-3.5 py-2 text-xs font-extrabold text-sky-800 transition hover:-translate-y-0.5 hover:bg-sky-100 active:scale-95">
+                                <span>🧭</span>
+                                Open in Waze
+                            </a>
                         </div>
                     </div>
 

@@ -1,7 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <x-realtime-greeting :name="Auth::user()->name" role="admin" />
+            <x-realtime-greeting :name="Auth::user()->name" role="admin">
+                <span class="rounded-full bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700">Operations overview</span>
+            </x-realtime-greeting>
             <div class="flex flex-wrap items-center gap-2">
                 <a href="{{ route('admin.bookings.export.pdf') }}" target="_blank" class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700">
                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6v-8Z" /></svg>
@@ -32,24 +34,44 @@
         @endif
 
         <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform metrics">
-            <a href="{{ route('admin.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-slate-500">Total bookings</p><span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold text-slate-950">{{ number_format($totalBookings) }}</p>
+            <a href="{{ route('admin.bookings.index') }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /></svg></span>
+                    <span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-slate-500">Total bookings</p>
+                <p class="mt-1 text-3xl font-extrabold text-slate-950">{{ number_format($totalBookings) }}</p>
                 <p class="mt-1 text-xs text-slate-500">All ride and delivery requests</p>
             </a>
-            <a href="{{ route('admin.bookings.index', ['status' => 'pending']) }}" class="card-interactive group block rounded-2xl border border-amber-100 bg-amber-50/70 p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-amber-700">Awaiting a rider</p><span class="text-xs font-bold text-amber-700 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold text-amber-950">{{ number_format($pendingBookings) }}</p>
+            <a href="{{ route('admin.bookings.index', ['status' => 'pending']) }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-amber-100 bg-amber-50/70 p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-orange-500"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500/15 text-amber-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2m6-2a10 10 0 1 1-20 0 10 10 0 0 1 20 0Z" /></svg></span>
+                    <span class="text-xs font-bold text-amber-700 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-amber-700">Awaiting a rider</p>
+                <p class="mt-1 text-3xl font-extrabold text-amber-950">{{ number_format($pendingBookings) }}</p>
                 <p class="mt-1 text-xs text-amber-700/80">Pending assignments</p>
             </a>
-            <a href="{{ route('admin.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-indigo-700">Active trips</p><span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold text-indigo-950">{{ number_format($activeBookings) }}</p>
+            <a href="{{ route('admin.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/15 text-indigo-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
+                    <span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-indigo-700">Active trips</p>
+                <p class="mt-1 text-3xl font-extrabold text-indigo-950">{{ number_format($activeBookings) }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">Accepted or picked up</p>
             </a>
-            <a href="{{ route('admin.bookings.index', ['status' => 'completed']) }}" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-emerald-700">Completed fare volume</p><span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold text-emerald-950">₱{{ number_format($completedRevenue, 2) }}</p>
+            <a href="{{ route('admin.bookings.index', ['status' => 'completed']) }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg></span>
+                    <span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-emerald-700">Completed fare volume</p>
+                <p class="mt-1 text-3xl font-extrabold text-emerald-950">₱{{ number_format($completedRevenue, 2) }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">{{ number_format($completedBookings) }} completed bookings</p>
             </a>
         </section>

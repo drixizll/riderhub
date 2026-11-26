@@ -209,6 +209,8 @@
                 </div>
             </section>
 
+            <x-fare-estimator-section />
+
             <section id="about-us" class="reveal-on-scroll relative overflow-hidden bg-white/70 py-16 backdrop-blur-[2px] sm:py-24">
                 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div

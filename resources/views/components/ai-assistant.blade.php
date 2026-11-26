@@ -229,7 +229,7 @@
                         type="text"
                         maxlength="500"
                         placeholder="Ask RiderHub AI about fares, rides, promos…"
-                        class="w-full border-0 bg-transparent px-2.5 py-1.5 text-sm text-white placeholder:text-violet-300/45 focus:outline-none focus:ring-0"
+                        class="ai-no-dark-override w-full border-0 bg-transparent px-2.5 py-1.5 text-sm text-white placeholder:text-violet-300/45 focus:outline-none focus:ring-0"
                     >
                     <button
                         type="submit"

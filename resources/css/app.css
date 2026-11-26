@@ -848,7 +848,7 @@ html[data-theme="dark"] select {
     color-scheme: dark;
 }
 
-html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="file"]),
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="file"]):not([type="range"]):not(.ai-no-dark-override),
 html[data-theme="dark"] textarea,
 html[data-theme="dark"] select {
     background-color: #0f172a !important;
@@ -905,4 +905,32 @@ html[data-theme="dark"] .rating-choice {
 
 html[data-theme="dark"] .rating-choice.is-selected {
     color: #fbbf24;
+}
+
+/* Executive Dark Mode Polish for Mobile Bottom Dock & Smooth Low-Lag Performance */
+html[data-theme="dark"] nav[aria-label="Mobile quick navigation"] {
+    background-color: rgb(11 7 24 / 0.94) !important;
+    border-top-color: rgb(139 92 246 / 0.28) !important;
+    box-shadow: 0 -10px 30px -10px rgb(0 0 0 / 0.65) !important;
+}
+
+html[data-theme="dark"] nav[aria-label="Mobile quick navigation"] .ring-white {
+    --tw-ring-color: #0b0718 !important;
+}
+
+@media (max-width: 768px) {
+    .aurora-blob,
+    .auth-glow {
+        filter: blur(72px);
+        opacity: 0.06;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

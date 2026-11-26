@@ -15,19 +15,34 @@
         @endif
 
         <section class="reveal-stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-5" aria-label="Booking summary">
-            <a href="{{ route('customer.bookings.index') }}" class="card-interactive group block rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-slate-500">All bookings</p><span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950">{{ $totalBookings }}</p>
+            <a href="{{ route('customer.bookings.index') }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2" /></svg></span>
+                    <span class="text-xs font-bold text-indigo-600 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-slate-500">All bookings</p>
+                <p class="mt-1 text-3xl font-extrabold tracking-tight text-slate-950">{{ $totalBookings }}</p>
                 <p class="mt-1 text-xs text-slate-500">Your RiderHub activity</p>
             </a>
-            <a href="{{ route('customer.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group block rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-indigo-700">In progress</p><span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold tracking-tight text-indigo-950">{{ $activeBookings }}</p>
+            <a href="{{ route('customer.bookings.index', ['status' => 'accepted']) }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-indigo-100 bg-indigo-50/70 p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 to-fuchsia-500"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600/15 text-indigo-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-4.5 7-11a7 7 0 1 0-14 0c0 6.5 7 11 7 11Z" /><circle cx="12" cy="10" r="2.5" /></svg></span>
+                    <span class="text-xs font-bold text-indigo-700 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-indigo-700">In progress</p>
+                <p class="mt-1 text-3xl font-extrabold tracking-tight text-indigo-950">{{ $activeBookings }}</p>
                 <p class="mt-1 text-xs text-indigo-700/80">Accepted or on the way</p>
             </a>
-            <a href="{{ route('customer.bookings.index', ['status' => 'completed']) }}" class="card-interactive group block rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
-                <div class="flex items-center justify-between"><p class="text-sm font-medium text-emerald-700">Completed</p><span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span></div>
-                <p class="mt-2 text-3xl font-extrabold tracking-tight text-emerald-950">{{ $completedBookings }}</p>
+            <a href="{{ route('customer.bookings.index', ['status' => 'completed']) }}" class="card-interactive group relative block overflow-hidden rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5 shadow-sm">
+                <span class="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-400"></span>
+                <div class="flex items-center justify-between">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600/15 text-emerald-700"><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg></span>
+                    <span class="text-xs font-bold text-emerald-700 transition group-hover:translate-x-0.5">→</span>
+                </div>
+                <p class="mt-3 text-sm font-medium text-emerald-700">Completed</p>
+                <p class="mt-1 text-3xl font-extrabold tracking-tight text-emerald-950">{{ $completedBookings }}</p>
                 <p class="mt-1 text-xs text-emerald-700/80">Trips and deliveries completed</p>
             </a>
             <a href="{{ route('customer.bookings.create') }}" class="card-interactive group flex min-h-36 flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-700 to-violet-700 p-5 text-white shadow-sm">

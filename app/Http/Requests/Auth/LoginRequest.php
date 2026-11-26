@@ -49,7 +49,25 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $email = strtolower(trim((string) $this->input('email')));
+        $password = (string) $this->input('password');
+        $remember = $this->boolean('remember');
+
+        $authenticated = Auth::attempt(['email' => $email, 'password' => $password], $remember);
+
+        // Fallback for case-sensitive DB drivers (e.g. SQLite) if stored email had uppercase characters
+        if (! $authenticated) {
+            $user = \App\Models\User::query()
+                ->whereRaw('LOWER(email) = ?', [$email])
+                ->first();
+
+            if ($user && \Illuminate\Support\Facades\Hash::check($password, (string) $user->password)) {
+                Auth::login($user, $remember);
+                $authenticated = true;
+            }
+        }
+
+        if (! $authenticated) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([

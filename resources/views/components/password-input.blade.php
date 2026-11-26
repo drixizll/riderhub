@@ -14,6 +14,9 @@
             name="{{ $name }}"
             :type="visible ? 'text' : 'password'"
             autocomplete="{{ $autocomplete }}"
+            autocapitalize="none"
+            autocorrect="off"
+            spellcheck="false"
             @required($required)
             {{ $attributes->merge(['class' => 'block w-full rounded-xl border-0 bg-white py-3 pl-4 pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0']) }}
         >

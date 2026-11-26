@@ -23,7 +23,7 @@
             <div>
                 <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
                 <div class="rgb-input-wrap mt-2">
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"
                            placeholder="you@example.com"
                            class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
                 </div>
@@ -62,6 +62,11 @@
     </div>
 
     <script>
+        window.addEventListener('pageshow', (event) => {
+            if (event.persisted) {
+                window.location.reload();
+            }
+        });
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('login-form');
             const emailInput = document.getElementById('email');

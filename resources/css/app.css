@@ -335,6 +335,7 @@ html[data-theme="dark"] .hero-map-grid {
     width: 180%;
     aspect-ratio: 1;
     z-index: -1;
+    pointer-events: none;
     background: conic-gradient(
         from 0deg,
         transparent 0deg 55deg,
@@ -376,6 +377,7 @@ html[data-theme="dark"] .rgb-input-wrap {
     width: 175%;
     aspect-ratio: 1;
     z-index: -1;
+    pointer-events: none;
     opacity: 0;
     background: conic-gradient(
         from 0deg,

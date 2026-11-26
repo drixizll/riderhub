@@ -72,7 +72,7 @@
                             @foreach ($bookings as $booking)
                                 <tr class="align-top">
                                     <td class="max-w-sm px-5 py-4 sm:px-6">
-                                        <p class="text-xs font-semibold text-slate-400">#{{ $booking->id }} · {{ $booking->created_at->format('M j, Y g:i A') }}</p>
+                                        <p class="text-xs font-semibold text-slate-400">#{{ $booking->id }} · {{ $booking->created_at?->timezone('Asia/Manila')->format('M j, Y g:i A') ?? '—' }}</p>
                                         <p class="mt-1 text-sm font-bold capitalize text-slate-900">{{ $booking->type }}</p>
                                         <p class="mt-1 truncate text-xs text-slate-500">{{ $booking->pickup_address }} → {{ $booking->dropoff_address }}</p>
                                     </td>

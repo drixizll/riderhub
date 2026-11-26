@@ -33,7 +33,7 @@
                             <span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">📅 Scheduled · {{ $booking->scheduled_at->timezone('Asia/Manila')->format('M j, g:i A') }}</span>
                         @endif
                     </div>
-                    <p class="mt-3 text-sm text-slate-500">Created {{ $booking->created_at->format('M j, Y · g:i A') }}</p>
+                    <p class="mt-3 text-sm text-slate-500">Created {{ $booking->created_at?->timezone('Asia/Manila')->format('M j, Y · g:i A') ?? '—' }} PHT</p>
                 </div>
                 <div class="flex flex-wrap items-center justify-between gap-3 sm:flex-col sm:items-end">
                     <div class="sm:text-right"><p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Total fare</p><p class="mt-1 text-3xl font-extrabold text-slate-950">₱{{ number_format($booking->fare, 2) }}</p></div>

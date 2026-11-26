@@ -45,7 +45,7 @@ class ReportController extends Controller
             foreach ($bookings as $booking) {
                 fputcsv($handle, [
                     $booking->id,
-                    $booking->created_at->format('Y-m-d H:i'),
+                    $booking->created_at?->timezone('Asia/Manila')->format('Y-m-d g:i A') ?? '—',
                     $booking->customer?->name ?? 'N/A',
                     $booking->rider?->name ?? 'Unassigned',
                     ucfirst($booking->type),

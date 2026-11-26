@@ -113,7 +113,7 @@
                                         <span class="rounded-full px-2.5 py-1 text-xs font-bold {{ match ($booking->status) { 'completed' => 'bg-emerald-50 text-emerald-700', 'cancelled' => 'bg-rose-50 text-rose-700', 'accepted', 'picked_up' => 'bg-indigo-50 text-indigo-700', default => 'bg-amber-50 text-amber-700' } }}">{{ str_replace('_', ' ', ucfirst($booking->status)) }}</span>
                                     </div>
                                     <p class="mt-1 truncate text-sm text-slate-600">{{ $booking->pickup_address }} <span class="text-slate-400">→</span> {{ $booking->dropoff_address }}</p>
-                                    <p class="mt-1 text-xs text-slate-400">{{ $booking->created_at->format('M j, Y · g:i A') }}</p>
+                                    <p class="mt-1 text-xs text-slate-400">{{ $booking->created_at?->timezone('Asia/Manila')->format('M j, Y · g:i A') ?? '—' }}</p>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between gap-4 sm:justify-end">

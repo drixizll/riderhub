@@ -401,7 +401,7 @@
                                     @endphp
                                     <tr>
                                         <td><strong style="color:#6d28d9;">#{{ $booking->id }}</strong></td>
-                                        <td style="white-space:nowrap;">{{ $booking->created_at->format('M j, Y') }}<br><span style="color:#94a3b8; font-size:11px;">{{ $booking->created_at->format('g:i A') }}</span></td>
+                                        <td style="white-space:nowrap;">{{ $booking->created_at?->timezone('Asia/Manila')->format('M j, Y') ?? '—' }}<br><span style="color:#94a3b8; font-size:11px;">{{ $booking->created_at?->timezone('Asia/Manila')->format('g:i A') ?? '' }} PHT</span></td>
                                         @if ($showCustomer)<td><strong style="color:#0f172a;">{{ $booking->customer?->name ?? 'N/A' }}</strong></td>@endif
                                         @if ($showRider)<td>{{ $booking->rider?->name ?? 'Unassigned' }}</td>@endif
                                         <td>

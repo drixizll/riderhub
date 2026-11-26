@@ -96,7 +96,7 @@
                 <span style="font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,0.16); border:1px solid rgba(255,255,255,0.25);">#RIDERHUB-{{ $booking->id }}</span>
             </div>
             <div class="hero-amount">₱{{ number_format((float) $booking->fare, 2) }}</div>
-            <div class="hero-meta">{{ ucfirst($booking->type) }} · {{ ucfirst(str_replace('_', ' ', $booking->status)) }} · {{ $booking->created_at->format('M j, Y · g:i A') }}</div>
+            <div class="hero-meta">{{ ucfirst($booking->type) }} · {{ ucfirst(str_replace('_', ' ', $booking->status)) }} · {{ $booking->created_at?->timezone('Asia/Manila')->format('M j, Y · g:i A') ?? '—' }} PHT</div>
         </header>
 
         <div class="tear"></div>

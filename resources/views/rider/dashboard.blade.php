@@ -106,6 +106,10 @@
                     <span class="text-xl font-extrabold text-slate-950">₱{{ number_format($activeBooking->fare, 2) }}</span>
                 </div>
 
+                <div class="border-b border-slate-100 px-5 py-4 sm:px-6">
+                    <x-trip-stepper :booking="$activeBooking" />
+                </div>
+
                 <div class="grid gap-6 p-5 sm:p-6 lg:grid-cols-[1fr_auto]">
                     <div class="space-y-4">
                         <div class="flex gap-3">

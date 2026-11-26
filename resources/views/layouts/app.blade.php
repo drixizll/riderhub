@@ -50,11 +50,13 @@
                     </header>
                 @endisset
 
-                <main class="app-page-enter">
+                <main class="app-page-enter pb-24 lg:pb-0">
                     {{ $slot }}
                 </main>
             </div>
         </div>
+
+        <x-mobile-bottom-nav />
 
         @if (session('success'))
             <div

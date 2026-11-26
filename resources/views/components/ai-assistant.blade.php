@@ -15,7 +15,7 @@
 <div
     x-data="riderHubAssistant(@js(route('assistant.chat')), @js(csrf_token()), @js($quickTopics))"
     x-init="init()"
-    class="fixed bottom-4 right-4 z-50 sm:bottom-5 sm:right-5"
+    class="fixed right-4 z-50 sm:right-5 @auth bottom-20 lg:bottom-5 @else bottom-4 sm:bottom-5 @endauth"
 >
     <!-- Ultra-Luxury Luminous Gradient Frame with Silky Spring Transition -->
     <div

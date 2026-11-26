@@ -58,33 +58,38 @@
             </header>
 
             <main class="mx-auto grid min-h-[calc(100vh-9rem)] max-w-7xl items-center gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8 lg:py-14">
-                <aside class="auth-story-enter relative hidden min-h-[600px] overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-700 via-violet-700 to-indigo-950 p-10 text-white shadow-2xl shadow-indigo-950/25 lg:flex lg:flex-col lg:justify-between">
+                <aside class="auth-story-enter relative hidden min-h-[600px] overflow-hidden rounded-3xl bg-gradient-to-br from-[#13092b] via-[#271158] to-[#0c061c] p-10 text-white shadow-2xl shadow-indigo-950/35 ring-1 ring-white/15 lg:flex lg:flex-col lg:justify-between">
                     <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg"
+                        src="{{ asset('images/gallery/tagoloan-christmas.jpg') }}"
                         alt=""
-                        referrerpolicy="no-referrer"
-                        class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20 mix-blend-luminosity"
+                        class="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-35"
                         aria-hidden="true"
                     >
-                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-indigo-950/90 via-indigo-900/50 to-violet-700/40" aria-hidden="true"></div>
-                    <div class="auth-orb-float absolute -right-20 -top-16 h-72 w-72 rounded-full bg-fuchsia-400/20 blur-3xl" aria-hidden="true"></div>
-                    <div class="auth-orb-float-delayed absolute -bottom-28 -left-16 h-80 w-80 rounded-full bg-violet-300/20 blur-3xl" aria-hidden="true"></div>
+                    <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0b0618]/95 via-[#1b0c3b]/70 to-[#2e1065]/55" aria-hidden="true"></div>
+                    <div class="auth-orb-float absolute -right-20 -top-16 h-72 w-72 rounded-full bg-fuchsia-500/25 blur-3xl" aria-hidden="true"></div>
+                    <div class="auth-orb-float-delayed absolute -bottom-28 -left-16 h-80 w-80 rounded-full bg-amber-400/15 blur-3xl" aria-hidden="true"></div>
                     <div class="relative">
-                        <span class="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-50 backdrop-blur-md">
-                            <span class="h-2 w-2 animate-pulse rounded-full bg-emerald-400"></span>
-                            Misamis Oriental · Rides &amp; Delivery
-                        </span>
-                        <h1 class="mt-8 max-w-md text-4xl font-extrabold leading-tight tracking-tight">
-                            Your next move starts with RiderHub.
+                        <x-realtime-greeting variant="hero" />
+                        <h1 class="mt-7 max-w-md text-4xl font-extrabold leading-tight tracking-tight text-white">
+                            Your next move starts with <span class="bg-gradient-to-r from-violet-200 via-fuchsia-200 to-amber-200 bg-clip-text text-transparent">RiderHub.</span>
                         </h1>
-                        <p class="mt-5 max-w-md text-base leading-7 text-indigo-100/95">
-                            Built for locals, commuters, and students across Tagoloan and Misamis Oriental. One account for rides, deliveries, and live tracking.
+                        <p class="mt-5 max-w-md text-base leading-7 text-indigo-100/90">
+                            Built for locals, commuters, and students across Tagoloan and Misamis Oriental. One account for rides, express deliveries, and live GPS tracking.
                         </p>
 
-                        <div class="mt-7 flex flex-wrap gap-2">
-                            <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">Live GPS &amp; Satellite</span>
-                            <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">Weather-Smart Trips</span>
-                            <span class="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold text-white backdrop-blur-sm">GCash, Maya &amp; Cash</span>
+                        <div class="mt-7 grid grid-cols-3 gap-2.5">
+                            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
+                                <p class="text-lg font-black text-amber-300">₱55</p>
+                                <p class="mt-0.5 text-[11px] font-semibold text-indigo-100/80">Base Fare</p>
+                            </div>
+                            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
+                                <p class="text-lg font-black text-emerald-300">Live</p>
+                                <p class="mt-0.5 text-[11px] font-semibold text-indigo-100/80">GPS &amp; Chat</p>
+                            </div>
+                            <div class="rounded-2xl border border-white/15 bg-white/10 p-3 backdrop-blur-md">
+                                <p class="text-lg font-black text-violet-200">24/7</p>
+                                <p class="mt-0.5 text-[11px] font-semibold text-indigo-100/80">GCash &amp; Cash</p>
+                            </div>
                         </div>
                     </div>
 

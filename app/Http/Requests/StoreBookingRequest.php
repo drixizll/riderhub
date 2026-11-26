@@ -57,6 +57,24 @@ class StoreBookingRequest extends FormRequest
                 if ($distanceKm < 0.05) {
                     $validator->errors()->add('dropoff_address', 'Pickup and drop-off must be at least 50 meters apart. Adjust the pins on the map.');
                 }
+
+                $code = strtoupper(trim((string) $this->input('promo_code', '')));
+                if ($code !== '') {
+                    $promos = config('riderhub.promos', []);
+                    if (! isset($promos[$code])) {
+                        $validator->errors()->add('promo_code', "Promo code {$code} is invalid or expired.");
+                    } else {
+                        $alreadyUsed = \App\Models\Booking::withTrashed()
+                            ->where('customer_id', auth()->id())
+                            ->where('promo_code', $code)
+                            ->where('status', '!=', 'cancelled')
+                            ->exists();
+
+                        if ($alreadyUsed) {
+                            $validator->errors()->add('promo_code', "You have already redeemed promo code {$code}. Each promo code can only be used once per account.");
+                        }
+                    }
+                }
             },
         ];
     }

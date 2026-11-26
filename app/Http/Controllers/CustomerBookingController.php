@@ -121,11 +121,21 @@ class CustomerBookingController extends Controller
     {
         $fare = config('riderhub.fare', ['base' => 55.00, 'per_km' => 18.50]);
         $map = config('riderhub.map');
+        $usedPromos = Booking::withTrashed()
+            ->where('customer_id', Auth::id())
+            ->whereNotNull('promo_code')
+            ->where('status', '!=', 'cancelled')
+            ->pluck('promo_code')
+            ->map(fn ($c) => strtoupper((string) $c))
+            ->unique()
+            ->values()
+            ->all();
 
         return view('customer.bookings.create', [
             'fareBase' => $fare['base'],
             'farePerKm' => $fare['per_km'],
             'mapConfig' => $map,
+            'usedPromos' => $usedPromos,
         ]);
     }
 
@@ -433,6 +443,16 @@ class CustomerBookingController extends Controller
 
         $promos = config('riderhub.promos', []);
         if (! isset($promos[$code])) {
+            return [null, 0.0];
+        }
+
+        $alreadyUsed = Booking::withTrashed()
+            ->where('customer_id', Auth::id())
+            ->where('promo_code', $code)
+            ->where('status', '!=', 'cancelled')
+            ->exists();
+
+        if ($alreadyUsed) {
             return [null, 0.0];
         }
 

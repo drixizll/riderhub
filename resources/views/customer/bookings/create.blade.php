@@ -114,13 +114,22 @@
                                 </div>
                             </div>
                             <div x-data="{ code: @js(old('promo_code', '')) }">
-                                <label for="promo_code" class="block text-sm font-semibold text-slate-700">Promo / Voucher code <span class="font-normal text-slate-400">(optional)</span></label>
+                                <label for="promo_code" class="block text-sm font-semibold text-slate-700">Promo / Voucher code <span class="font-normal text-slate-400">(1 use per account)</span></label>
                                 <input id="promo_code" name="promo_code" type="text" x-model="code" maxlength="40" placeholder="e.g. TAGOLOAN20" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm uppercase text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                                <x-input-error :messages="$errors->get('promo_code')" class="mt-2" />
                                 <div class="mt-2 flex flex-wrap gap-1.5">
                                     @foreach (config('riderhub.promos', []) as $promoKey => $promoInfo)
-                                        <button type="button" @click="code = '{{ $promoKey }}'" class="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 transition hover:bg-indigo-100">
-                                            {{ $promoKey }} · {{ $promoInfo['label'] }}
-                                        </button>
+                                        @php $isUsed = in_array(strtoupper($promoKey), $usedPromos ?? [], true); @endphp
+                                        @if ($isUsed)
+                                            <span title="Already redeemed on a previous booking" class="inline-flex cursor-not-allowed items-center gap-1 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-400">
+                                                <span class="line-through">{{ $promoKey }}</span>
+                                                <span class="rounded bg-slate-200 px-1 text-[9px] uppercase text-slate-500">Used ✓</span>
+                                            </span>
+                                        @else
+                                            <button type="button" @click="code = '{{ $promoKey }}'" class="rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-0.5 text-[11px] font-bold text-indigo-700 transition hover:bg-indigo-100">
+                                                {{ $promoKey }} · {{ $promoInfo['label'] }}
+                                            </button>
+                                        @endif
                                     @endforeach
                                 </div>
                             </div>
@@ -317,6 +326,7 @@
             const farePromoMeta = document.getElementById('fare-promo-meta');
             const promoInput = document.getElementById('promo_code');
             const promosConfig = @json(config('riderhub.promos', []));
+            const usedPromos = @json($usedPromos ?? []);
             const baseFare = Number(@json($fareBase));
             const ratePerKm = Number(@json($farePerKm));
 
@@ -354,15 +364,21 @@
 
                 let finalFare = rawFare;
                 let discount = 0;
+                let promoNotice = '';
+                let promoIsError = false;
                 const code = (promoInput?.value || '').trim().toUpperCase();
-                if (code && promosConfig[code]) {
+                if (code && usedPromos.includes(code)) {
+                    promoNotice = `${code} already used (1x per account)`;
+                    promoIsError = true;
+                } else if (code && promosConfig[code]) {
                     const promo = promosConfig[code];
                     if (promo.type === 'percent') {
-                        discount = Math.min(Number(promo.max_discount || 999), rawFare * (Number(promo.value) / 100));
+                        discount = Math.min(Number(promo.max || 50), rawFare * (Number(promo.value) / 100));
                     } else if (promo.type === 'fixed') {
                         discount = Number(promo.value || 0);
                     }
-                    finalFare = Math.max(baseFare, rawFare - discount);
+                    finalFare = Math.max(35, rawFare - discount);
+                    promoNotice = `${code} applied (-₱${discount.toFixed(2)})`;
                 }
 
                 fareOutput.textContent = `₱${finalFare.toFixed(2)}`;
@@ -371,11 +387,13 @@
                     fareDistanceMeta.textContent = `~${distance.toFixed(1)} km · est. ${eta} mins travel`;
                 }
                 if (farePromoMeta) {
-                    if (discount > 0) {
-                        farePromoMeta.textContent = `${code} applied (-₱${discount.toFixed(2)})`;
-                        farePromoMeta.classList.remove('hidden');
+                    if (promoNotice) {
+                        farePromoMeta.textContent = promoNotice;
+                        farePromoMeta.className = promoIsError
+                            ? 'text-[11px] font-bold text-rose-600'
+                            : 'text-[11px] font-bold text-emerald-600';
                     } else {
-                        farePromoMeta.classList.add('hidden');
+                        farePromoMeta.className = 'hidden text-[11px] font-bold text-emerald-600';
                     }
                 }
             }

@@ -14,11 +14,13 @@
         <svg class="h-5 w-5 transition duration-200 group-hover:rotate-[-10deg]" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9Zm-8 12h4" />
         </svg>
-        @if ($unreadNotificationCount > 0)
-            <span class="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-pink-600 px-1 text-[10px] font-extrabold text-white shadow-md shadow-rose-600/35 ring-2 ring-white">
-                {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
-            </span>
-        @endif
+        <span
+            data-notif-badge
+            data-initial-count="{{ $unreadNotificationCount }}"
+            class="{{ $unreadNotificationCount > 0 ? 'flex' : 'hidden' }} absolute -right-1 -top-1 min-h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-r from-rose-500 to-pink-600 px-1 text-[10px] font-extrabold text-white shadow-md shadow-rose-600/35 ring-2 ring-white"
+        >
+            {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+        </span>
     </button>
 
     <div

@@ -130,6 +130,96 @@
                     });
                     window.addEventListener('pagehide', signalOffline);
                     window.addEventListener('beforeunload', signalOffline);
+
+                    // Lightweight Web Audio API Sound Engine (Completed Trip Chime + Live Notification Ding)
+                    let audioCtx = null;
+                    const getCtx = () => {
+                        const Ctx = window.AudioContext || window.webkitAudioContext;
+                        if (!Ctx) return null;
+                        if (!audioCtx) audioCtx = new Ctx();
+                        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+                        return audioCtx;
+                    };
+
+                    const playNotes = (notes) => {
+                        try {
+                            const ctx = getCtx();
+                            if (!ctx) return;
+                            const start = ctx.currentTime;
+                            notes.forEach(([freq, offset, dur, vol = 0.09]) => {
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(freq, start + offset);
+                                gain.gain.setValueAtTime(0.0001, start + offset);
+                                gain.gain.linearRampToValueAtTime(vol, start + offset + 0.015);
+                                gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + dur);
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                osc.start(start + offset);
+                                osc.stop(start + offset + dur + 0.02);
+                            });
+                        } catch {}
+                    };
+
+                    window.riderHubSound = {
+                        playNotification: () => playNotes([[880, 0, 0.16, 0.09], [1318.5, 0.11, 0.28, 0.1]]),
+                        playCompleted: () => playNotes([[523.25, 0, 0.14, 0.08], [659.25, 0.10, 0.16, 0.09], [783.99, 0.20, 0.18, 0.1], [1046.5, 0.31, 0.38, 0.11]]),
+                    };
+
+                    // Unlock Web Audio on first user interaction (required on iOS Safari & Chrome)
+                    ['pointerdown', 'keydown'].forEach((evt) => {
+                        window.addEventListener(evt, () => { getCtx(); }, { once: true, passive: true });
+                    });
+
+                    // Play celebratory ding if a trip was just completed or booking confirmed
+                    const flashMsg = @js((string) session('success', ''));
+                    if (/completed|delivered|paid|confirmed|accepted/i.test(flashMsg)) {
+                        setTimeout(() => window.riderHubSound.playCompleted(), 180);
+                    }
+
+                    // Live Notification Bell Poller (plays ding when a new notification arrives)
+                    const notifUrl = @js(route('notifications.unread-count'));
+                    const badgeEl = document.querySelector('[data-notif-badge]');
+                    let lastCount = Number(badgeEl?.dataset.initialCount || 0);
+                    let lastNotifId = null;
+
+                    const pollNotifications = async () => {
+                        if (document.hidden) return;
+                        try {
+                            const res = await fetch(notifUrl, { headers: { 'Accept': 'application/json' } });
+                            if (!res.ok) return;
+                            const data = await res.json();
+                            const count = Number(data.count || 0);
+                            const isNew = (lastNotifId !== null && data.latest_id && data.latest_id !== lastNotifId && count > 0)
+                                || (count > lastCount);
+
+                            if (badgeEl) {
+                                if (count > 0) {
+                                    badgeEl.textContent = count > 99 ? '99+' : String(count);
+                                    badgeEl.classList.remove('hidden');
+                                    badgeEl.classList.add('flex');
+                                } else {
+                                    badgeEl.classList.add('hidden');
+                                    badgeEl.classList.remove('flex');
+                                }
+                            }
+
+                            if (isNew) {
+                                const text = `${data.latest_title || ''} ${data.latest_message || ''}`;
+                                if (/completed|delivered/i.test(text)) {
+                                    window.riderHubSound.playCompleted();
+                                } else {
+                                    window.riderHubSound.playNotification();
+                                }
+                            }
+
+                            lastCount = count;
+                            if (data.latest_id) lastNotifId = data.latest_id;
+                        } catch {}
+                    };
+
+                    setInterval(pollNotifications, 12000);
                 })();
             </script>
         @endauth

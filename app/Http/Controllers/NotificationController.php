@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -9,6 +10,19 @@ use Illuminate\View\View;
 
 class NotificationController extends Controller
 {
+    public function unreadCount(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $latest = $user->unreadNotifications()->latest()->first();
+
+        return response()->json([
+            'count' => $user->unreadNotifications()->count(),
+            'latest_id' => $latest?->id,
+            'latest_title' => (string) ($latest?->data['title'] ?? ''),
+            'latest_message' => (string) ($latest?->data['message'] ?? ''),
+        ]);
+    }
+
     public function index(Request $request): View
     {
         return view('notifications.index', [

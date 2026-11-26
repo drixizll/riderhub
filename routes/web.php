@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/media/rider-license/{user}', [ProfileController::class, 'showLicense'])->name('profile.license.show');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])->name('notifications.unread-count');
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     Route::get('/bookings/{booking}/messages', [BookingMessageController::class, 'index'])->name('bookings.messages.index');

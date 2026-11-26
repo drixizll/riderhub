@@ -221,6 +221,15 @@
                             timer: null,
                             slides: [
                                 {
+                                    image: @js(asset('images/gallery/tagoloan-christmas.jpg')),
+                                    badge: 'Pasko sa Tagoloan 🎄',
+                                    title: 'Festive night rides across Tagoloan Plaza',
+                                    caption: 'Heading to the Tagoloan Christmas lights, Simbang Gabi, or holiday night market? Book safe, GPS-tracked rides anytime.',
+                                    credit: 'Tagoloan Plaza Christmas Lighting · Misamis Oriental',
+                                    stat: '24/7 Holiday',
+                                    statSub: 'Safe night rides'
+                                },
+                                {
                                     image: @js(asset('images/gallery/tagoloan-casinglot.jpg')),
                                     badge: 'Tagoloan, Misamis Oriental',
                                     title: 'Connecting every barangay across Tagoloan',

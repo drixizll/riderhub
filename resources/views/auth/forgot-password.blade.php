@@ -1,7 +1,8 @@
 <x-guest-layout>
+    <div class="auth-rgb-wrap">
     <section
         x-data="{ tab: @js(session('recovery_tab', $errors->has('phone') ? 'phone' : 'email')) }"
-        class="auth-card rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9"
+        class="auth-card rounded-[calc(1.6rem-2.5px)] bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9"
     >
         <span class="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
             <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -54,20 +55,22 @@
 
                     <div>
                         <label for="code" class="block text-xs font-bold uppercase tracking-wider text-indigo-900">6-Digit Code</label>
-                        <input
-                            id="code"
-                            name="code"
-                            type="text"
-                            inputmode="numeric"
-                            pattern="[0-9]{6}"
-                            maxlength="6"
-                            autocomplete="one-time-code"
-                            value="{{ old('code') }}"
-                            required
-                            autofocus
-                            placeholder="000000"
-                            class="mt-1.5 block w-full rounded-xl border border-indigo-200 bg-white px-4 py-3 text-center text-xl font-extrabold tracking-[0.45em] text-slate-900 shadow-sm placeholder:text-slate-300 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
-                        >
+                        <div class="rgb-input-wrap mt-1.5">
+                            <input
+                                id="code"
+                                name="code"
+                                type="text"
+                                inputmode="numeric"
+                                pattern="[0-9]{6}"
+                                maxlength="6"
+                                autocomplete="one-time-code"
+                                value="{{ old('code') }}"
+                                required
+                                autofocus
+                                placeholder="000000"
+                                class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-center text-xl font-extrabold tracking-[0.45em] text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-0"
+                            >
+                        </div>
                         <x-input-error :messages="$errors->get('code')" class="mt-1.5" />
                     </div>
 
@@ -94,9 +97,11 @@
             @csrf
             <div>
                 <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-                       placeholder="you@example.com"
-                       class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                <div class="rgb-input-wrap mt-2">
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+                           placeholder="you@example.com"
+                           class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                </div>
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 
@@ -109,9 +114,11 @@
             @csrf
             <div>
                 <label for="phone" class="block text-sm font-semibold text-slate-700">{{ __('Registered phone number') }}</label>
-                <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" required autocomplete="tel"
-                       placeholder="0917 123 4567 or +639171234567"
-                       class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                <div class="rgb-input-wrap mt-2">
+                    <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" required autocomplete="tel"
+                           placeholder="0917 123 4567 or +639171234567"
+                           class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                </div>
                 <p class="mt-1.5 text-xs text-slate-500">We will show a masked hint of your email and send a reset link there.</p>
                 <x-input-error :messages="$errors->get('phone')" class="mt-2" />
             </div>
@@ -126,4 +133,5 @@
             <a href="{{ route('login') }}" class="font-bold text-indigo-600 transition hover:text-indigo-800">Back to log in</a>
         </p>
     </section>
+    </div>
 </x-guest-layout>

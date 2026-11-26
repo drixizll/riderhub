@@ -107,12 +107,21 @@
                         </div>
                     </section>
 
-                    <section class="card-interactive rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-                        <div class="flex items-center justify-between">
-                            <div><p class="text-sm font-bold text-slate-950">Estimated fare</p><p class="mt-1 text-xs text-slate-500">Calculated from straight-line distance</p></div>
-                            <p id="fare-estimate" class="text-2xl font-extrabold text-indigo-700">₱—</p>
+                    <section class="card-interactive rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm sm:p-6">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <p class="text-sm font-bold text-slate-950">Estimated fare</p>
+                                    <span class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700">● Auto</span>
+                                </div>
+                                <p id="fare-distance-meta" class="mt-1 text-xs font-medium text-slate-500">Updates automatically as you pick locations</p>
+                            </div>
+                            <div class="text-right">
+                                <p id="fare-estimate" class="text-2xl font-extrabold text-indigo-700 transition-transform duration-200">₱—</p>
+                                <p id="fare-promo-meta" class="hidden text-[11px] font-bold text-emerald-600"></p>
+                            </div>
                         </div>
-                        <p class="mt-4 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">Final fare is calculated from the selected coordinates. Actual road distance may differ.</p>
+                        <p class="mt-4 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">Final fare is calculated automatically from your pinned pickup and drop-off coordinates.</p>
                     </section>
 
                     <x-weather-widget title="Tagoloan Weather Advisory" :lat="old('pickup_lat', $mapConfig['default_pickup']['lat'] ?? 8.5378)" :lng="old('pickup_lng', $mapConfig['default_pickup']['lng'] ?? 124.7536)" />
@@ -130,14 +139,17 @@
                         { icon: '🏢', label: 'Work (SM CDO)', address: 'SM CDO Downtown, Cagayan de Oro, Misamis Oriental', lat: 8.4856, lng: 124.6565 },
                     ],
                     applyPlace(p) {
-                        const addrEl = document.getElementById(this.target + '_address');
-                        const latEl = document.getElementById(this.target + '_lat');
-                        const lngEl = document.getElementById(this.target + '_lng');
-                        if (addrEl) addrEl.value = p.address;
-                        if (latEl) latEl.value = p.lat;
-                        if (lngEl) lngEl.value = p.lng;
-                        const findBtn = document.querySelector(`[data-geocode='${this.target}']`);
-                        if (findBtn) findBtn.click();
+                        window.dispatchEvent(new CustomEvent('riderhub-set-point', {
+                            detail: {
+                                name: this.target,
+                                lat: p.lat,
+                                lng: p.lng,
+                                address: p.address,
+                            },
+                        }));
+                        if (this.target === 'pickup') {
+                            this.target = 'dropoff';
+                        }
                     }
                 }"
                 class="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 shadow-xs"
@@ -281,8 +293,35 @@
             };
             let selectedPoint = 'pickup';
             const fareOutput = document.getElementById('fare-estimate');
+            const fareDistanceMeta = document.getElementById('fare-distance-meta');
+            const farePromoMeta = document.getElementById('fare-promo-meta');
+            const promoInput = document.getElementById('promo_code');
+            const promosConfig = @json(config('riderhub.promos', []));
             const baseFare = Number(@json($fareBase));
             const ratePerKm = Number(@json($farePerKm));
+
+            const knownPlaces = {
+                'poblacion, tagoloan, misamis oriental': { lat: 8.5378, lng: 124.7536 },
+                'baluarte, tagoloan, misamis oriental': { lat: 8.5450, lng: 124.7640 },
+                'casinglot, tagoloan, misamis oriental': { lat: 8.5267, lng: 124.7574 },
+                'sta. ana, tagoloan, misamis oriental': { lat: 8.5553, lng: 124.7706 },
+                'natumolan, tagoloan, misamis oriental': { lat: 8.5515, lng: 124.7615 },
+                'phividec industrial estate, tagoloan, misamis oriental': { lat: 8.5620, lng: 124.7750 },
+                'tagoloan community college, tagoloan, misamis oriental': { lat: 8.5389, lng: 124.7568 },
+                'tagoloan, misamis oriental': { lat: 8.5378, lng: 124.7536 },
+                'cagayan de oro city, misamis oriental': { lat: 8.4810, lng: 124.6498 },
+                'limketkai center, cagayan de oro, misamis oriental': { lat: 8.4806, lng: 124.6562 },
+                'sm cdo downtown, cagayan de oro, misamis oriental': { lat: 8.4856, lng: 124.6565 },
+                'villanueva, misamis oriental': { lat: 8.5844, lng: 124.7775 },
+                'jasaan, misamis oriental': { lat: 8.6544, lng: 124.7535 },
+                'opol, misamis oriental': { lat: 8.5194, lng: 124.5720 },
+                'el salvador city, misamis oriental': { lat: 8.5633, lng: 124.5228 },
+                'claveria, misamis oriental': { lat: 8.6100, lng: 124.8944 },
+                'balingasag, misamis oriental': { lat: 8.7436, lng: 124.7764 },
+                'initao, misamis oriental': { lat: 8.4972, lng: 124.3075 },
+                'laguindingan airport, misamis oriental': { lat: 8.6122, lng: 124.4565 },
+                'gingoog city, misamis oriental': { lat: 8.8211, lng: 125.1003 },
+            };
 
             function updateFare() {
                 const startLat = Number(points.pickup.lat.value) * Math.PI / 180;
@@ -291,8 +330,51 @@
                 const deltaLng = (Number(points.dropoff.lng.value) - Number(points.pickup.lng.value)) * Math.PI / 180;
                 const a = Math.sin(deltaLat / 2) ** 2 + Math.cos(startLat) * Math.cos(endLat) * Math.sin(deltaLng / 2) ** 2;
                 const distance = 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                fareOutput.textContent = `₱${(baseFare + distance * ratePerKm).toFixed(2)}`;
+                const rawFare = baseFare + distance * ratePerKm;
+
+                let finalFare = rawFare;
+                let discount = 0;
+                const code = (promoInput?.value || '').trim().toUpperCase();
+                if (code && promosConfig[code]) {
+                    const promo = promosConfig[code];
+                    if (promo.type === 'percent') {
+                        discount = Math.min(Number(promo.max_discount || 999), rawFare * (Number(promo.value) / 100));
+                    } else if (promo.type === 'fixed') {
+                        discount = Number(promo.value || 0);
+                    }
+                    finalFare = Math.max(baseFare, rawFare - discount);
+                }
+
+                fareOutput.textContent = `₱${finalFare.toFixed(2)}`;
+                if (fareDistanceMeta) {
+                    const eta = Math.max(3, Math.round(distance * 2.2 + 3));
+                    fareDistanceMeta.textContent = `~${distance.toFixed(1)} km · est. ${eta} mins travel`;
+                }
+                if (farePromoMeta) {
+                    if (discount > 0) {
+                        farePromoMeta.textContent = `${code} applied (-₱${discount.toFixed(2)})`;
+                        farePromoMeta.classList.remove('hidden');
+                    } else {
+                        farePromoMeta.classList.add('hidden');
+                    }
+                }
             }
+
+            if (promoInput) {
+                promoInput.addEventListener('input', updateFare);
+                promoInput.addEventListener('change', updateFare);
+            }
+            document.querySelectorAll('[id="promo_code"] ~ div button').forEach((btn) => {
+                btn.addEventListener('click', () => setTimeout(updateFare, 20));
+            });
+
+            window.addEventListener('riderhub-set-point', (event) => {
+                const { name, lat, lng, address } = event.detail || {};
+                if (!points[name]) return;
+                if (address) points[name].address.value = address;
+                setPoint(name, Number(lat), Number(lng));
+                map.setView([Number(lat), Number(lng)], 15);
+            });
 
             let weatherTimer = null;
             function setPoint(name, lat, lng) {
@@ -337,20 +419,34 @@
 
             map.on('click', (event) => setPoint(selectedPoint, event.latlng.lat, event.latlng.lng));
 
-            async function findAddress(name) {
+            async function findAddress(name, silent = false) {
                 const point = points[name];
                 const address = point.address.value.trim();
                 if (!address) {
-                    point.address.focus();
-                    point.address.setCustomValidity('Enter an address to search for it.');
-                    point.address.reportValidity();
-                    point.address.setCustomValidity('');
+                    if (!silent) {
+                        point.address.focus();
+                        point.address.setCustomValidity('Enter an address to search for it.');
+                        point.address.reportValidity();
+                        point.address.setCustomValidity('');
+                    }
+                    return;
+                }
+
+                // 0ms instant lookup for known Tagoloan / Misamis Oriental places
+                const normalized = address.toLowerCase();
+                const instantMatch = knownPlaces[normalized]
+                    || Object.entries(knownPlaces).find(([k]) => normalized.length >= 4 && (k.startsWith(normalized) || normalized.includes(k.split(',')[0])))?.[1];
+                if (instantMatch) {
+                    setPoint(name, instantMatch.lat, instantMatch.lng);
+                    map.setView([instantMatch.lat, instantMatch.lng], 15);
                     return;
                 }
 
                 const button = document.querySelector(`[data-geocode="${name}"]`);
-                button.disabled = true;
-                button.textContent = 'Searching…';
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = '…';
+                }
                 try {
                     const query = /misamis oriental|cagayan de oro/i.test(address) ? address : `${address}, ${mapCfg.region_name}`;
                     const url = new URL('https://nominatim.openstreetmap.org/search');
@@ -366,25 +462,49 @@
                     if (!response.ok) throw new Error('Address search is unavailable.');
                     const results = await response.json();
                     if (!results.length) {
-                        point.address.setCustomValidity(`No location found in ${mapCfg.region_name}. Try a barangay name or tap directly on the map.`);
-                        point.address.reportValidity();
-                        point.address.setCustomValidity('');
+                        if (!silent) {
+                            point.address.setCustomValidity(`No location found in ${mapCfg.region_name}. Try a barangay name or tap directly on the map.`);
+                            point.address.reportValidity();
+                            point.address.setCustomValidity('');
+                        }
                         return;
                     }
                     setPoint(name, Number(results[0].lat), Number(results[0].lon));
                     map.setView([Number(results[0].lat), Number(results[0].lon)], 15);
                 } catch (error) {
-                    point.address.setCustomValidity('Could not search this address right now. You can select the location on the map.');
-                    point.address.reportValidity();
-                    point.address.setCustomValidity('');
+                    if (!silent) {
+                        point.address.setCustomValidity('Could not search this address right now. You can select the location on the map.');
+                        point.address.reportValidity();
+                        point.address.setCustomValidity('');
+                    }
                 } finally {
-                    button.disabled = false;
-                    button.textContent = 'Find';
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = 'Find';
+                    }
                 }
             }
 
             document.querySelectorAll('[data-geocode]').forEach((button) => {
-                button.addEventListener('click', () => findAddress(button.dataset.geocode));
+                button.addEventListener('click', () => findAddress(button.dataset.geocode, false));
+            });
+
+            // Automatic fare & pin update whenever user picks or types a location (no need to tap Find!)
+            const autoTimers = { pickup: null, dropoff: null };
+            ['pickup', 'dropoff'].forEach((name) => {
+                const input = points[name].address;
+                const triggerAuto = (immediate = false) => {
+                    window.clearTimeout(autoTimers[name]);
+                    const val = input.value.trim().toLowerCase();
+                    if (val.length < 3) return;
+                    if (immediate || knownPlaces[val]) {
+                        findAddress(name, true);
+                        return;
+                    }
+                    autoTimers[name] = window.setTimeout(() => findAddress(name, true), 650);
+                };
+                input.addEventListener('input', () => triggerAuto(false));
+                input.addEventListener('change', () => triggerAuto(true));
             });
 
             document.getElementById('type').addEventListener('change', (event) => {

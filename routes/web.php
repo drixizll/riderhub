@@ -27,6 +27,7 @@ Route::post('/webhooks/paymongo', PayMongoWebhookController::class)->name('webho
 Route::get('/media/profile-photo/{user}', [ProfileController::class, 'showPhoto'])->name('profile.photo.show');
 Route::view('/for-merry', 'for-merry')->name('for-merry');
 Route::view('/for-my-love', 'for-merry')->name('for-my-love');
+Route::view('/install-app', 'install-app')->name('install-app');
 Route::get('/api/weather', WeatherController::class)->middleware('throttle:60,1')->name('weather.current');
 Route::get('/api/route', RouteController::class)->middleware('throttle:60,1')->name('route.directions');
 Route::post('/api/assistant/chat', [AssistantController::class, 'chat'])->middleware('throttle:30,1')->name('assistant.chat');

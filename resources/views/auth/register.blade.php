@@ -1,5 +1,6 @@
 <x-guest-layout>
-    <section class="auth-card rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">
+    <div class="auth-rgb-wrap">
+    <section class="auth-card rounded-[calc(1.6rem-2.5px)] bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">
         <div class="mb-7">
             <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 2a5 5 0 0 0-5 5v1H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm3 6H7V7a3 3 0 0 1 6 0v1Z" /></svg>
@@ -129,4 +130,5 @@
             </p>
         </div>
     </section>
+    </div>
 </x-guest-layout>

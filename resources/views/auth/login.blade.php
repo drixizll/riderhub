@@ -1,5 +1,6 @@
 <x-guest-layout>
-    <section class="auth-card rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">
+    <div class="auth-rgb-wrap">
+    <section class="auth-card rounded-[calc(1.6rem-2.5px)] bg-white p-6 shadow-xl shadow-slate-900/5 sm:p-9">
         <div class="mb-8">
             <span class="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-indigo-700">
                 <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5 8V6a5 5 0 0 1 10 0v2h.5A1.5 1.5 0 0 1 17 9.5v7a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 16.5v-7A1.5 1.5 0 0 1 4.5 8H5Zm2 0h6V6a3 3 0 1 0-6 0v2Z" clip-rule="evenodd" /></svg>
@@ -56,6 +57,7 @@
             </p>
         </div>
     </section>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

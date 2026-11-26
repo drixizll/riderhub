@@ -93,6 +93,26 @@
                                 <textarea id="item_description" name="item_description" rows="3" maxlength="255" class="mt-2 block w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20" placeholder="What are you sending?">{{ old('item_description') }}</textarea>
                                 <x-input-error :messages="$errors->get('item_description')" class="mt-2" />
                             </div>
+                            <div x-data="{ mode: '{{ old('scheduled_at') ? 'later' : 'now' }}' }">
+                                <label class="block text-sm font-semibold text-slate-700">When do you need it?</label>
+                                <div class="mt-2 grid grid-cols-2 gap-2">
+                                    <button type="button" @click="mode = 'now'; $refs.schedInput.value = ''" :class="mode === 'now' ? 'border-indigo-500 bg-indigo-50 text-indigo-700 ring-1 ring-indigo-500/30' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'" class="rounded-xl border px-3 py-2 text-xs font-bold transition">⚡ Book Now</button>
+                                    <button type="button" @click="mode = 'later'" :class="mode === 'later' ? 'border-violet-500 bg-violet-50 text-violet-700 ring-1 ring-violet-500/30' : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'" class="rounded-xl border px-3 py-2 text-xs font-bold transition">📅 Schedule Later</button>
+                                </div>
+                                <div x-show="mode === 'later'" x-cloak class="mt-2.5">
+                                    <input
+                                        x-ref="schedInput"
+                                        id="scheduled_at"
+                                        name="scheduled_at"
+                                        type="datetime-local"
+                                        value="{{ old('scheduled_at') }}"
+                                        min="{{ now()->timezone('Asia/Manila')->addMinutes(15)->format('Y-m-d\TH:i') }}"
+                                        class="block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                    >
+                                    <p class="mt-1 text-[11px] text-slate-500">Pick your advance pickup date &amp; time (Philippine Time).</p>
+                                    <x-input-error :messages="$errors->get('scheduled_at')" class="mt-1.5" />
+                                </div>
+                            </div>
                             <div x-data="{ code: @js(old('promo_code', '')) }">
                                 <label for="promo_code" class="block text-sm font-semibold text-slate-700">Promo / Voucher code <span class="font-normal text-slate-400">(optional)</span></label>
                                 <input id="promo_code" name="promo_code" type="text" x-model="code" maxlength="40" placeholder="e.g. TAGOLOAN20" class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm uppercase text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
@@ -372,16 +392,38 @@
                 const { name, lat, lng, address } = event.detail || {};
                 if (!points[name]) return;
                 if (address) points[name].address.value = address;
-                setPoint(name, Number(lat), Number(lng));
-                map.setView([Number(lat), Number(lng)], 15);
+                setPoint(name, Number(lat), Number(lng), true);
             });
 
+            const routeLine = L.polyline([
+                [Number(points.pickup.lat.value), Number(points.pickup.lng.value)],
+                [Number(points.dropoff.lat.value), Number(points.dropoff.lng.value)],
+            ], {
+                color: '#7c3aed',
+                weight: 4,
+                opacity: 0.85,
+                dashArray: '10, 8',
+            }).addTo(map);
+
             let weatherTimer = null;
-            function setPoint(name, lat, lng) {
+            function setPoint(name, lat, lng, fitRoute = false) {
                 const point = points[name];
                 point.lat.value = Number(lat).toFixed(7);
                 point.lng.value = Number(lng).toFixed(7);
                 point.marker.setLatLng([lat, lng]);
+                routeLine.setLatLngs([
+                    [Number(points.pickup.lat.value), Number(points.pickup.lng.value)],
+                    [Number(points.dropoff.lat.value), Number(points.dropoff.lng.value)],
+                ]);
+                if (fitRoute) {
+                    const bounds = L.latLngBounds([
+                        [Number(points.pickup.lat.value), Number(points.pickup.lng.value)],
+                        [Number(points.dropoff.lat.value), Number(points.dropoff.lng.value)],
+                    ]);
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds, { padding: [36, 36], maxZoom: 15 });
+                    }
+                }
                 document.querySelector(`[data-coordinates="${name}"]`).textContent = `${Number(lat).toFixed(5)}, ${Number(lng).toFixed(5)}`;
                 updateFare();
                 if (name === 'pickup') {

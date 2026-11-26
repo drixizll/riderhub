@@ -161,6 +161,7 @@ class CustomerBookingController extends Controller
                 'discount_amount' => $discountAmount,
                 'payment_method' => $validated['payment_method'],
                 'status' => 'pending',
+                'scheduled_at' => $validated['scheduled_at'] ?? null,
             ]);
 
             $booking->payment()->create([

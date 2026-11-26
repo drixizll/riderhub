@@ -50,7 +50,7 @@
                     </header>
                 @endisset
 
-                <main class="app-page-enter pb-24 lg:pb-0">
+                <main class="app-page-enter pb-28 lg:pb-24">
                     {{ $slot }}
                 </main>
             </div>

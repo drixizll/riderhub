@@ -29,6 +29,9 @@
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full {{ $booking->type === 'delivery' ? 'bg-amber-50 text-amber-700' : 'bg-indigo-50 text-indigo-700' }} px-2.5 py-1 text-xs font-bold uppercase">{{ $booking->type }}</span>
                         <span class="rounded-full px-2.5 py-1 text-xs font-bold capitalize {{ match ($booking->status) { 'completed' => 'bg-emerald-50 text-emerald-700', 'cancelled' => 'bg-rose-50 text-rose-700', 'accepted', 'picked_up' => 'bg-indigo-50 text-indigo-700', default => 'bg-amber-50 text-amber-700' } }}">{{ str_replace('_', ' ', $booking->status) }}</span>
+                        @if ($booking->scheduled_at)
+                            <span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">📅 Scheduled · {{ $booking->scheduled_at->timezone('Asia/Manila')->format('M j, g:i A') }}</span>
+                        @endif
                     </div>
                     <p class="mt-3 text-sm text-slate-500">Created {{ $booking->created_at->format('M j, Y · g:i A') }}</p>
                 </div>

@@ -93,6 +93,8 @@
         </section>
 
         <div class="reveal-stagger space-y-6">
+            <x-rider-id-card :user="$user" />
+
             <section class="reveal-on-scroll card-interactive rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" data-revealed="true">
                 <div class="mb-6 flex items-start gap-4 border-b border-slate-100 pb-5">
                     <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-600/20">

@@ -13,6 +13,9 @@
                 <div class="min-w-0 flex-1">
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="rounded-full {{ $booking->type === 'delivery' ? 'bg-amber-50 text-amber-700' : 'bg-indigo-50 text-indigo-700' }} px-2.5 py-1 text-xs font-bold uppercase">{{ $booking->type }}</span>
+                        @if ($booking->scheduled_at)
+                            <span class="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-bold text-violet-800">📅 Scheduled · {{ $booking->scheduled_at->timezone('Asia/Manila')->format('M j, g:i A') }}</span>
+                        @endif
                         <span class="text-xs text-slate-400">Request #{{ $booking->id }} · {{ $booking->created_at->diffForHumans() }}</span>
                     </div>
                     <div class="mt-3 grid gap-3 sm:grid-cols-[1fr_auto_1fr] sm:items-center">

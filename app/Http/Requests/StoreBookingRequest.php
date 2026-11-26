@@ -32,6 +32,7 @@ class StoreBookingRequest extends FormRequest
             'item_description' => ['nullable', 'required_if:type,delivery', 'string', 'max:255'],
             'payment_method' => ['required', 'in:cash,online'],
             'promo_code' => ['nullable', 'string', 'max:40'],
+            'scheduled_at' => ['nullable', 'date', 'after:now'],
         ];
     }
 

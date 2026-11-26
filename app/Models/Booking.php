@@ -31,6 +31,7 @@ class Booking extends Model
         'proof_photo_path',
         'payment_method',
         'status',
+        'scheduled_at',
     ];
 
     protected $casts = [
@@ -40,6 +41,7 @@ class Booking extends Model
         'dropoff_lng' => 'float',
         'fare' => 'float',
         'discount_amount' => 'float',
+        'scheduled_at' => 'datetime',
     ];
 
     public function customer(): BelongsTo

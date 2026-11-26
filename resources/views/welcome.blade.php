@@ -46,7 +46,6 @@
                     <a href="#about-us" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 md:inline-flex">About us</a>
                     <a href="#how-it-works" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">How it works</a>
                     <a href="#faq" class="hidden text-sm font-semibold text-slate-600 transition hover:text-indigo-600 lg:inline-flex">FAQ</a>
-                    <x-live-clock />
                     <x-weather-widget variant="compact" />
                     <x-theme-toggle />
                     <x-install-app-button />

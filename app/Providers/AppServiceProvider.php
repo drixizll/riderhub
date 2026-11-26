@@ -28,6 +28,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (! $this->app->runningUnitTests()) {
+            // Keep signed-in sessions persistent for 30 days across browser & APK/iOS restarts
+            if ((int) config('session.lifetime', 120) < 43200) {
+                config(['session.lifetime' => 43200, 'session.expire_on_close' => false]);
+            }
+
             // Auto-ensure new columns exist on production SQLite/MySQL without needing manual remote terminal access
             try {
                 if (! Cache::get('riderhub_schema_v12_ready')) {

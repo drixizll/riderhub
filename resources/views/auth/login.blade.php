@@ -37,8 +37,8 @@
 
             <div class="flex flex-wrap items-center justify-between gap-3">
                 <label for="remember_me" class="inline-flex cursor-pointer items-center gap-2.5">
-                    <input id="remember_me" type="checkbox" name="remember" class="h-4 w-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
-                    <span class="text-sm font-medium text-slate-600">{{ __('Remember me') }}</span>
+                    <input id="remember_me" type="checkbox" name="remember" value="1" @checked(old('remember', true)) class="h-4 w-4 rounded border-slate-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
+                    <span class="text-sm font-medium text-slate-600">{{ __('Remember me (Auto-login)') }}</span>
                 </label>
                 @if (Route::has('password.request'))
                     <a class="text-sm font-semibold text-indigo-600 transition hover:text-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" href="{{ route('password.request') }}">

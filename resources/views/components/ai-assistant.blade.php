@@ -28,18 +28,18 @@
         x-transition:leave="transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]"
         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
         x-transition:leave-end="opacity-0 translate-y-4 scale-90"
-        class="mb-3 w-[calc(100vw-2rem)] max-w-[410px] origin-bottom-right will-change-transform rounded-[1.85rem] bg-gradient-to-br from-violet-500/70 via-fuchsia-500/40 to-amber-400/60 p-[1.5px] shadow-[0_30px_90px_-15px_rgba(88,28,135,0.75)]"
+        class="mb-2.5 flex w-[calc(100vw-2rem)] max-w-[400px] origin-bottom-right will-change-transform rounded-[1.85rem] bg-gradient-to-br from-violet-500/70 via-fuchsia-500/40 to-amber-400/60 p-[1.5px] shadow-[0_30px_90px_-15px_rgba(88,28,135,0.75)] @auth max-h-[calc(100dvh-10.5rem)] lg:max-h-[calc(100dvh-6.25rem)] @else max-h-[calc(100dvh-6.25rem)] @endauth"
         role="dialog"
         aria-label="RiderHub AI Concierge"
     >
-        <div class="relative flex flex-col overflow-hidden rounded-[calc(1.85rem-1.5px)] bg-[#080514]/95 text-slate-100 backdrop-blur-2xl">
+        <div class="relative flex min-h-0 w-full flex-col overflow-hidden rounded-[calc(1.85rem-1.5px)] bg-[#080514]/95 text-slate-100 backdrop-blur-2xl">
             <!-- Ambient Aurora Orbs -->
             <div class="pointer-events-none absolute -left-16 -top-16 h-44 w-44 rounded-full bg-violet-600/25 blur-3xl" aria-hidden="true"></div>
             <div class="pointer-events-none absolute -right-14 top-10 h-36 w-36 rounded-full bg-fuchsia-500/20 blur-3xl" aria-hidden="true"></div>
             <div class="pointer-events-none absolute bottom-16 left-1/2 h-28 w-44 -translate-x-1/2 rounded-full bg-amber-400/10 blur-3xl" aria-hidden="true"></div>
 
             <!-- Executive Concierge Header -->
-            <div class="relative overflow-hidden border-b border-white/10 bg-gradient-to-r from-[#1c1038]/95 via-[#2a1454]/95 to-[#160b2c]/95 px-4 py-3.5">
+            <div class="relative shrink-0 overflow-hidden border-b border-white/10 bg-gradient-to-r from-[#1c1038]/95 via-[#2a1454]/95 to-[#160b2c]/95 px-4 py-3">
                 <div class="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-violet-400 via-fuchsia-400 to-amber-300 opacity-90" aria-hidden="true"></div>
                 <div class="relative flex items-center justify-between gap-2">
                     <div class="flex items-center gap-3">
@@ -96,7 +96,7 @@
             <!-- Messages Viewport -->
             <div
                 x-ref="messages"
-                class="riderhub-ai-scroll relative h-[350px] space-y-3.5 overflow-y-auto px-4 py-4 text-[13px] leading-relaxed"
+                class="riderhub-ai-scroll relative min-h-[180px] flex-1 max-h-[340px] space-y-3 overflow-y-auto px-4 py-3.5 text-[13px] leading-relaxed"
             >
                 <!-- Interactive Quick-Action Bento Card (visible on fresh chat) -->
                 <div x-show="messages.length <= 1" class="grid grid-cols-2 gap-2">
@@ -177,7 +177,7 @@
             </div>
 
             <!-- Horizontal Scrollable Quick-Question Strip -->
-            <div class="relative border-t border-white/10 bg-[#0d071e]/95 px-3.5 pt-2.5 pb-2">
+            <div class="relative shrink-0 border-t border-white/10 bg-[#0d071e]/95 px-3.5 pt-2.5 pb-2">
                 <div class="mb-2 flex items-center justify-between gap-2">
                     <span class="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-amber-300/95">
                         <span>✨</span>
@@ -222,7 +222,7 @@
             </div>
 
             <!-- Elevated Neon Input Bar -->
-            <form @submit.prevent="send()" class="border-t border-white/10 bg-[#090516] p-3">
+            <form @submit.prevent="send()" class="shrink-0 border-t border-white/10 bg-[#090516] p-3">
                 <div class="flex items-center gap-2 rounded-2xl border border-violet-400/25 bg-[#130b29] p-1.5 shadow-inner transition focus-within:border-amber-300/60 focus-within:ring-2 focus-within:ring-violet-500/30">
                     <input
                         x-model="draft"

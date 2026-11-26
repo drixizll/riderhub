@@ -221,25 +221,25 @@
                             timer: null,
                             slides: [
                                 {
-                                    image: @js(asset('images/gallery/tagoloan-bridge.jpg')),
+                                    image: @js(asset('images/gallery/tagoloan-casinglot.jpg')),
                                     badge: 'Tagoloan, Misamis Oriental',
                                     title: 'Connecting every barangay across Tagoloan',
-                                    caption: 'From Santa Cruz and Tagoloan Bridge to Poblacion, Baluarte, and Casinglot — built by locals for everyday Tagoloan commuters.',
-                                    credit: 'Tagoloan River & Bridge · Misamis Oriental',
+                                    caption: 'From Casinglot and Santa Cruz to Poblacion and Baluarte — built by locals for everyday Tagoloan commuters.',
+                                    credit: 'Tagoloan, Misamis Oriental · Local Coverage',
                                     stat: 'Tagoloan Local',
                                     statSub: 'Misamis Oriental'
                                 },
                                 {
-                                    image: @js(asset('images/gallery/tagoloan-hall.jpg')),
-                                    badge: 'For Locals & Students',
-                                    title: 'Reliable daily rides for students and workers',
-                                    caption: 'Heading to Tagoloan Community College, Poblacion, or work? Book affordable rides and deliveries with upfront fares and live weather alerts.',
-                                    credit: 'Tagoloan Municipal Hall · Poblacion',
+                                    image: @js(asset('images/gallery/ph-delivery.jpg')),
+                                    badge: 'Express Delivery',
+                                    title: 'Fast, door-to-door parcel delivery for locals & students',
+                                    caption: 'Send documents, food, or packages across Tagoloan and CDO with upfront fares, live GPS tracking, and proof of delivery.',
+                                    credit: 'Express Door-to-Door Parcel Delivery',
                                     stat: 'Student-Friendly',
                                     statSub: 'Upfront fares'
                                 },
                                 {
-                                    image: @js(asset('images/gallery/angkas-riders.jpg')),
+                                    image: @js(asset('images/gallery/ph-riders-street.jpg')),
                                     badge: 'Philippine Riders',
                                     title: 'Trusted Filipino riders with real-time GPS tracking',
                                     caption: 'Follow your rider live on the Tagoloan map with real-time ETA, verified ratings, and secure Cash or PayMongo GCash/Maya payments.',

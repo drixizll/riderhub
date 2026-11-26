@@ -221,29 +221,29 @@
                             timer: null,
                             slides: [
                                 {
-                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
+                                    image: @js(asset('images/gallery/tagoloan-bridge.jpg')),
                                     badge: 'Tagoloan, Misamis Oriental',
                                     title: 'Connecting every barangay across Tagoloan',
                                     caption: 'From Santa Cruz and Tagoloan Bridge to Poblacion, Baluarte, and Casinglot — built by locals for everyday Tagoloan commuters.',
-                                    credit: 'Real photo · Tagoloan River & Bridge (Wikimedia Commons, CC BY-SA 4.0)',
+                                    credit: 'Tagoloan River & Bridge · Misamis Oriental',
                                     stat: 'Tagoloan Local',
                                     statSub: 'Misamis Oriental'
                                 },
                                 {
-                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg',
+                                    image: @js(asset('images/gallery/tagoloan-hall.jpg')),
                                     badge: 'For Locals & Students',
                                     title: 'Reliable daily rides for students and workers',
                                     caption: 'Heading to Tagoloan Community College, Poblacion, or work? Book affordable rides and deliveries with upfront fares and live weather alerts.',
-                                    credit: 'Real photo · Tagoloan Municipal Hall (Wikimedia Commons, CC BY-SA 4.0)',
+                                    credit: 'Tagoloan Municipal Hall · Poblacion',
                                     stat: 'Student-Friendly',
                                     statSub: 'Upfront fares'
                                 },
                                 {
-                                    image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/Angkas_riders_in_the_Philippines_03.jpg/1280px-Angkas_riders_in_the_Philippines_03.jpg',
+                                    image: @js(asset('images/gallery/angkas-riders.jpg')),
                                     badge: 'Philippine Riders',
                                     title: 'Trusted Filipino riders with real-time GPS tracking',
                                     caption: 'Follow your rider live on the Tagoloan map with real-time ETA, verified ratings, and secure Cash or PayMongo GCash/Maya payments.',
-                                    credit: 'Real photo · Philippine Riders (Wikimedia Commons, CC BY-SA 4.0)',
+                                    credit: 'Verified Partner Riders · Daily Commute & Delivery',
                                     stat: 'Live GPS + AI',
                                     statSub: 'Safe & tracked'
                                 }
@@ -277,7 +277,7 @@
                         class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-14"
                     >
                         <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-slate-900 shadow-2xl shadow-indigo-950/15">
-                            <div class="relative aspect-[16/10] w-full overflow-hidden">
+                            <div class="relative h-80 w-full overflow-hidden sm:h-96">
                                 <template x-for="(slide, index) in slides" :key="slide.image">
                                     <div
                                         x-show="active === index"
@@ -292,18 +292,17 @@
                                         <img
                                             :src="slide.image"
                                             :alt="slide.title"
-                                            referrerpolicy="no-referrer"
                                             class="photo-kenburns h-full w-full object-cover"
                                         >
-                                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/25 to-transparent"></div>
-                                        <div class="absolute inset-x-0 bottom-0 p-6 sm:p-8">
-                                            <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
+                                        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/40 to-transparent"></div>
+                                        <div class="absolute inset-x-0 bottom-0 p-5 sm:p-8">
+                                            <span class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-white backdrop-blur-md">
                                                 <span class="h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
                                                 <span x-text="slide.badge"></span>
                                             </span>
-                                            <h3 class="mt-3 text-xl font-extrabold text-white sm:text-2xl" x-text="slide.title"></h3>
-                                            <p class="mt-1.5 max-w-lg text-sm leading-6 text-slate-200" x-text="slide.caption"></p>
-                                            <p class="mt-2 text-[11px] font-medium text-slate-300/80" x-text="slide.credit"></p>
+                                            <h3 class="mt-2.5 text-lg font-extrabold leading-snug text-white sm:mt-3 sm:text-2xl" x-text="slide.title"></h3>
+                                            <p class="mt-1.5 max-w-lg text-xs leading-5 text-slate-200 sm:text-sm sm:leading-6" x-text="slide.caption"></p>
+                                            <p class="mt-2 hidden text-[11px] font-medium text-slate-300/80 sm:block" x-text="slide.credit"></p>
                                         </div>
                                     </div>
                                 </template>
@@ -400,26 +399,22 @@
                 @php
                     $galleryPhotos = [
                         [
-                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Tagaloan_Plaza_drone_1_%28Antonio_Cosin_Highway%2C_Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_Plaza_drone_1_%28Antonio_Cosin_Highway%2C_Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
-                            'fallback' => asset('images/about/city-commute.jpg'),
+                            'src' => asset('images/gallery/tagoloan-plaza.jpg'),
                             'title' => 'Tagoloan Plaza & Highway',
                             'subtitle' => 'Poblacion, Tagoloan, Misamis Oriental',
                         ],
                         [
-                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Tagoloan_Municipal_Hall.jpg/1280px-Tagoloan_Municipal_Hall.jpg',
-                            'fallback' => asset('images/about/rider-service.jpg'),
+                            'src' => asset('images/gallery/tagoloan-hall.jpg'),
                             'title' => 'Tagoloan Town Center',
                             'subtitle' => 'Balay Lungsod · Core Pickup Hub',
                         ],
                         [
-                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg/1280px-Tagaloan_River%2C_Tagaloan_Bridge%2C_Santa_Cruz_drone_%28Tagaloan%2C_Misamis_Oriental%3B_03-20-2026%29.jpg',
-                            'fallback' => asset('images/about/package-delivery.jpg'),
+                            'src' => asset('images/gallery/tagoloan-bridge.jpg'),
                             'title' => 'Tagoloan Bridge Corridor',
                             'subtitle' => 'Tagoloan ↔ Cagayan de Oro Route',
                         ],
                         [
-                            'src' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Motorcycle_taxis_in_the_Philippines_04.jpg/1280px-Motorcycle_taxis_in_the_Philippines_04.jpg',
-                            'fallback' => asset('images/about/live-tracking.jpg'),
+                            'src' => asset('images/gallery/angkas-riders.jpg'),
                             'title' => 'Verified Partner Riders',
                             'subtitle' => 'Daily Rides & Express Delivery',
                         ],
@@ -432,30 +427,31 @@
                             <p class="text-xs font-extrabold uppercase tracking-widest text-violet-400">Tagoloan &amp; Misamis Oriental</p>
                             <h2 class="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">RiderHub in Action</h2>
                         </div>
-                        <p class="text-xs font-semibold text-violet-300/80">Click photo to enlarge</p>
+                        <p class="text-xs font-semibold text-violet-300/80">Tap photo to enlarge</p>
                     </div>
 
-                    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                         @foreach ($galleryPhotos as $photo)
-                            <button
-                                type="button"
+                            <div
+                                role="button"
+                                tabindex="0"
                                 @click="activePhoto = @js($photo)"
-                                class="group relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:border-violet-400/50 hover:shadow-violet-950/50 focus:outline-none focus:ring-2 focus:ring-violet-500"
+                                @keydown.enter.prevent="activePhoto = @js($photo)"
+                                @keydown.space.prevent="activePhoto = @js($photo)"
+                                class="group relative block h-56 w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-slate-900 text-left shadow-lg transition duration-300 hover:-translate-y-1 hover:border-violet-400/50 hover:shadow-violet-950/50 focus:outline-none focus:ring-2 focus:ring-violet-500 sm:h-60"
                             >
                                 <img
                                     src="{{ $photo['src'] }}"
                                     alt="{{ $photo['title'] }}"
                                     loading="lazy"
-                                    referrerpolicy="no-referrer"
-                                    onerror="this.onerror=null;this.src='{{ $photo['fallback'] }}';"
-                                    class="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                    class="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                                 >
-                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"></div>
-                                <div class="absolute inset-x-0 bottom-0 p-4">
-                                    <p class="text-sm font-extrabold text-white">{{ $photo['title'] }}</p>
-                                    <p class="mt-0.5 text-xs text-slate-300">{{ $photo['subtitle'] }}</p>
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent"></div>
+                                <div class="absolute inset-x-0 bottom-0 z-10 p-4">
+                                    <p class="text-sm font-extrabold leading-snug text-white">{{ $photo['title'] }}</p>
+                                    <p class="mt-0.5 text-xs leading-relaxed text-slate-300">{{ $photo['subtitle'] }}</p>
                                 </div>
-                            </button>
+                            </div>
                         @endforeach
                     </div>
 

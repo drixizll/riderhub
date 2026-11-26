@@ -84,5 +84,52 @@
 
         <x-confirm-modal />
         <x-ai-assistant />
+        @auth
+            <script>
+                (() => {
+                    const csrf = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                    const heartbeatUrl = @js(route('presence.heartbeat'));
+                    const offlineUrl = @js(route('presence.offline'));
+
+                    const pingOnline = () => {
+                        if (document.hidden) return;
+                        fetch(heartbeatUrl, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+                            keepalive: true,
+                        }).catch(() => {});
+                    };
+
+                    const signalOffline = () => {
+                        try {
+                            const fd = new FormData();
+                            fd.append('_token', csrf);
+                            if (navigator.sendBeacon) {
+                                navigator.sendBeacon(offlineUrl, fd);
+                                return;
+                            }
+                        } catch {}
+                        fetch(offlineUrl, {
+                            method: 'POST',
+                            headers: { 'X-CSRF-TOKEN': csrf },
+                            keepalive: true,
+                        }).catch(() => {});
+                    };
+
+                    pingOnline();
+                    setInterval(pingOnline, 20000);
+
+                    document.addEventListener('visibilitychange', () => {
+                        if (document.visibilityState === 'hidden') {
+                            signalOffline();
+                        } else {
+                            pingOnline();
+                        }
+                    });
+                    window.addEventListener('pagehide', signalOffline);
+                    window.addEventListener('beforeunload', signalOffline);
+                })();
+            </script>
+        @endauth
     </body>
 </html>

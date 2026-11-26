@@ -22,16 +22,19 @@ class BookingMessageController extends Controller
             abort(403, 'You are not authorized to view messages for this booking.');
         }
 
-        // Update current user's live presence timestamp
-        User::whereKey($user->id)->update(['last_seen_at' => now()]);
+        $isVisible = $request->query('visible', '1') === '1';
 
-        // Mark incoming unread messages from the other party as seen
-        if (in_array($user->id, [$booking->customer_id, $booking->rider_id], true)) {
-            BookingMessage::query()
-                ->where('booking_id', $booking->id)
-                ->where('sender_id', '!=', $user->id)
-                ->whereNull('read_at')
-                ->update(['read_at' => now()]);
+        // Only refresh live presence & mark messages seen when user's tab is actually visible
+        if ($isVisible) {
+            User::whereKey($user->id)->update(['last_seen_at' => now()]);
+
+            if (in_array($user->id, [$booking->customer_id, $booking->rider_id], true)) {
+                BookingMessage::query()
+                    ->where('booking_id', $booking->id)
+                    ->where('sender_id', '!=', $user->id)
+                    ->whereNull('read_at')
+                    ->update(['read_at' => now()]);
+            }
         }
 
         $afterId = (int) $request->query('after_id', 0);
@@ -169,12 +172,8 @@ class BookingMessageController extends Controller
             ];
         }
 
-        $lastSeen = $partner->last_seen_at;
-        $isOnline = $lastSeen !== null && $lastSeen->greaterThanOrEqualTo(now()->subMinutes(2));
-
-        $statusText = $isOnline
-            ? 'Active now'
-            : ($lastSeen ? 'Offline '.$lastSeen->diffForHumans() : 'Offline');
+        $isOnline = $partner->isCurrentlyOnline();
+        $statusText = $partner->presenceLabel();
 
         $genderLabel = in_array($partner->gender, ['male', 'female'], true)
             ? ucfirst($partner->gender)

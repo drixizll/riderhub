@@ -67,6 +67,23 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isCurrentlyOnline(): bool
+    {
+        return $this->last_seen_at !== null
+            && $this->last_seen_at->greaterThanOrEqualTo(now()->subSeconds(35));
+    }
+
+    public function presenceLabel(): string
+    {
+        if ($this->isCurrentlyOnline()) {
+            return 'Active now';
+        }
+
+        return $this->last_seen_at
+            ? 'Offline '.$this->last_seen_at->diffForHumans()
+            : 'Offline';
+    }
+
     public function hasActiveBooking(): bool
     {
         return $this->riderBookings()->whereIn('status', ['accepted', 'picked_up'])->exists();

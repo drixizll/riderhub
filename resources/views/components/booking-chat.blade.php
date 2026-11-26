@@ -278,8 +278,9 @@
             };
 
             const poll = async () => {
+                if (document.hidden) return;
                 try {
-                    const res = await fetch(`${fetchUrl}?after_id=${lastId}`, {
+                    const res = await fetch(`${fetchUrl}?after_id=${lastId}&visible=1`, {
                         headers: { 'Accept': 'application/json' },
                     });
                     if (!res.ok) return;
@@ -393,6 +394,11 @@
 
             poll();
             setInterval(poll, 4000);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    poll();
+                }
+            });
         };
 
         document.addEventListener('DOMContentLoaded', () => {

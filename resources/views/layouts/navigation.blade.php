@@ -2,7 +2,7 @@
     if (Auth::check() && ! \Illuminate\Support\Facades\Cache::has('user_seen_'.Auth::id())) {
         try {
             \App\Models\User::whereKey(Auth::id())->update(['last_seen_at' => now()]);
-            \Illuminate\Support\Facades\Cache::put('user_seen_'.Auth::id(), true, now()->addSeconds(45));
+            \Illuminate\Support\Facades\Cache::put('user_seen_'.Auth::id(), true, now()->addSeconds(15));
         } catch (\Throwable) {}
     }
     $dashboardRoute = match (Auth::user()->role) {

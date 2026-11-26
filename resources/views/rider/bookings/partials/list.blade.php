@@ -23,7 +23,8 @@
                     @php
                         $c = $booking->customer;
                         $cInitials = \Illuminate\Support\Str::of($c->name)->explode(' ')->filter()->take(2)->map(fn ($p) => mb_substr($p, 0, 1))->implode('') ?: 'C';
-                        $cOnline = $c->last_seen_at && $c->last_seen_at->greaterThanOrEqualTo(now()->subMinutes(2));
+                        $cOnline = $c->isCurrentlyOnline();
+                        $cPresence = $c->presenceLabel();
                     @endphp
                     <div class="mt-3 flex flex-wrap items-center gap-2.5 text-sm text-slate-500">
                         <div class="relative h-7 w-7 shrink-0">
@@ -36,7 +37,7 @@
                         </div>
                         <span>Customer: <span class="font-semibold text-slate-700">{{ $c->name }}</span></span>
                         <span class="text-xs font-medium {{ $cOnline ? 'text-emerald-600' : 'text-slate-400' }}">
-                            {{ $cOnline ? '· Active now' : ($c->last_seen_at ? '· Offline '.$c->last_seen_at->diffForHumans() : '') }}
+                            · {{ $cPresence }}
                         </span>
                         @if ($booking->type === 'delivery' && $booking->item_description)
                             <span class="text-slate-300">·</span><span>Package: {{ $booking->item_description }}</span>

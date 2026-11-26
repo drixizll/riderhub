@@ -29,6 +29,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = $request->user();
+        if ($user) {
+            $user->forceFill(['last_seen_at' => now()])->save();
+        }
 
         if ($user->role === 'customer') {
             return redirect()->intended(route('customer.dashboard', absolute: false));
@@ -50,6 +53,11 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        if ($user = $request->user()) {
+            \App\Models\User::whereKey($user->id)->update(['last_seen_at' => now()->subSeconds(60)]);
+            \Illuminate\Support\Facades\Cache::forget('user_seen_'.$user->id);
+        }
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

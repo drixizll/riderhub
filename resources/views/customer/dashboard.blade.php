@@ -1,11 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <p class="text-sm font-semibold text-indigo-600">Customer workspace</p>
-                <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Good to see you, {{ Str::before(Auth::user()->name, ' ') }}</h1>
-                <p class="mt-1 text-sm text-slate-500">Plan a ride or send a package anywhere you need to go.</p>
-            </div>
+            <x-realtime-greeting :name="Auth::user()->name" role="customer" />
             <a href="{{ route('customer.bookings.create') }}" class="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v14m-7-7h14" /></svg>
                 New booking

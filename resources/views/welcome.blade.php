@@ -62,10 +62,7 @@
                 <div class="hero-map-grid pointer-events-none absolute inset-0 opacity-60" aria-hidden="true"></div>
                 <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 py-16 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
                     <div class="home-hero-copy max-w-2xl reveal-on-scroll" data-revealed="true">
-                        <span class="inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-white px-3 py-1.5 text-sm font-semibold text-indigo-700 shadow-sm">
-                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                            Your city, connected
-                        </span>
+                        <x-realtime-greeting variant="hero" />
                         <h1 class="mt-6 text-4xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-5xl lg:text-6xl">
                             Every trip.<br>
                             Every delivery.<br>

@@ -8,6 +8,7 @@ use App\Http\Controllers\CustomerBookingController;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PayMongoWebhookController;
+use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RiderBookingController;
@@ -103,6 +104,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/bookings/{booking}/messages', [BookingMessageController::class, 'store'])->middleware('throttle:60,1')->name('bookings.messages.store');
     Route::get('/bookings/{booking}/messages/{message}/image', [BookingMessageController::class, 'showImage'])->name('bookings.messages.image');
     Route::get('/bookings/{booking}/proof', [RiderBookingController::class, 'showProof'])->name('bookings.proof.show');
+    Route::post('/presence/heartbeat', [PresenceController::class, 'heartbeat'])->name('presence.heartbeat');
+    Route::post('/presence/offline', [PresenceController::class, 'offline'])->name('presence.offline');
 });
 
 require __DIR__.'/auth.php';

@@ -5,21 +5,16 @@
             $riderStatus = Auth::user()->rider_status ?? 'verified';
         @endphp
         <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <p class="text-sm font-semibold text-indigo-600">Rider workspace</p>
-                    <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $riderStatus === 'verified' ? 'bg-emerald-100 text-emerald-800' : ($riderStatus === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800') }}">
-                        {{ $riderStatus === 'verified' ? '✓ Verified Rider' : ($riderStatus === 'pending' ? '⏳ Pending KYC' : '⚠ Suspended') }}
+            <x-realtime-greeting :name="Auth::user()->name" role="rider">
+                <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $riderStatus === 'verified' ? 'bg-emerald-100 text-emerald-800' : ($riderStatus === 'pending' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800') }}">
+                    {{ $riderStatus === 'verified' ? '✓ Verified Rider' : ($riderStatus === 'pending' ? '⏳ Pending KYC' : '⚠ Suspended') }}
+                </span>
+                @if (Auth::user()->vehicle_model || Auth::user()->plate_number)
+                    <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
+                        🏍 {{ Auth::user()->vehicle_model ?: 'Motorcycle' }}{{ Auth::user()->plate_number ? ' · '.Auth::user()->plate_number : '' }}
                     </span>
-                    @if (Auth::user()->vehicle_model || Auth::user()->plate_number)
-                        <span class="rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold text-slate-700">
-                            🏍 {{ Auth::user()->vehicle_model ?: 'Motorcycle' }}{{ Auth::user()->plate_number ? ' · '.Auth::user()->plate_number : '' }}
-                        </span>
-                    @endif
-                </div>
-                <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">Ready for your next trip, {{ Str::before(Auth::user()->name, ' ') }}?</h1>
-                <p class="mt-1 text-sm text-slate-500">Manage your active booking and pick up a new request.</p>
-            </div>
+                @endif
+            </x-realtime-greeting>
             <div class="flex flex-wrap items-center gap-2">
                 <form method="POST" action="{{ route('rider.availability.toggle') }}">
                     @csrf
@@ -83,7 +78,8 @@
                         @php
                             $cust = $activeBooking->customer;
                             $custInitials = \Illuminate\Support\Str::of($cust->name)->explode(' ')->filter()->take(2)->map(fn ($p) => mb_substr($p, 0, 1))->implode('') ?: 'C';
-                            $custOnline = $cust->last_seen_at && $cust->last_seen_at->greaterThanOrEqualTo(now()->subMinutes(2));
+                            $custOnline = $cust->isCurrentlyOnline();
+                            $custPresence = $cust->presenceLabel();
                         @endphp
                         <div class="relative h-12 w-12 shrink-0">
                             @if ($cust->profile_photo_path)
@@ -91,7 +87,7 @@
                             @else
                                 <span class="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-extrabold text-white shadow-sm">{{ $custInitials }}</span>
                             @endif
-                            <span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white {{ $custOnline ? 'bg-emerald-500' : 'bg-slate-400' }}" title="{{ $custOnline ? 'Active now' : ($cust->last_seen_at ? 'Offline '.$cust->last_seen_at->diffForHumans() : 'Offline') }}"></span>
+                            <span class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white {{ $custOnline ? 'bg-emerald-500' : 'bg-slate-400' }}" title="{{ $custPresence }}"></span>
                         </div>
                         <div>
                             <div class="flex flex-wrap items-center gap-2">
@@ -103,7 +99,7 @@
                             </div>
                             <h2 class="mt-1 text-xl font-extrabold text-slate-950">{{ ucfirst($activeBooking->type) }} · {{ $cust->name }}</h2>
                             <p class="text-xs font-medium {{ $custOnline ? 'text-emerald-600' : 'text-slate-400' }}">
-                                {{ $custOnline ? '● Active now' : ($cust->last_seen_at ? 'Offline '.$cust->last_seen_at->diffForHumans() : 'Offline') }}
+                                {{ $custOnline ? '● '.$custPresence : $custPresence }}
                             </p>
                         </div>
                     </div>

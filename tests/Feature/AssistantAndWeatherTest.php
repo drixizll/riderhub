@@ -82,39 +82,37 @@ class AssistantAndWeatherTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('About RiderHub')
-            ->assertSee('Tagoloan_Municipal_Hall.jpg')
+            ->assertSee('tagoloan-hall.jpg')
             ->assertSee('RiderHub AI');
     }
 
-    public function test_assistant_evaluates_math_and_general_knowledge_queries(): void
+    public function test_assistant_enforces_strict_riderhub_domain_guardrails(): void
     {
-        $this->postJson('/api/assistant/chat', ['message' => 'What is 250 * 4?'])
-            ->assertOk()
-            ->assertJsonPath('reply', '250 * 4 = 1,000');
-
-        Http::fake([
-            'https://en.wikipedia.org/w/api.php*' => Http::response([
-                'query' => ['search' => [['title' => 'Tagoloan, Misamis Oriental']]],
-            ]),
-            'https://en.wikipedia.org/api/rest_v1/page/summary/*' => Http::response([
-                'extract' => 'Tagoloan is a first class municipality in the province of Misamis Oriental, Philippines.',
-            ]),
-        ]);
-
-        $response = $this->postJson('/api/assistant/chat', ['message' => 'Tell me about Tagoloan, Misamis Oriental'])
+        // Off-topic / unrelated questions must politely decline and list RiderHub-only topics
+        $offTopic = $this->postJson('/api/assistant/chat', ['message' => 'Who is the president of France?'])
             ->assertOk();
+        $this->assertStringContainsString('RiderHub Misamis Oriental', $offTopic->json('reply'));
+        $this->assertStringContainsString('inquiries only', $offTopic->json('reply'));
 
-        $this->assertStringContainsString('Misamis Oriental', $response->json('reply'));
+        // Random short non-related messages like "ok" also receive the RiderHub scope notice
+        $short = $this->postJson('/api/assistant/chat', ['message' => 'ok'])
+            ->assertOk();
+        $this->assertStringContainsString('inquiries only', $short->json('reply'));
 
-        // Taglish navigation query should give RiderHub login guidance, never a random Wikipedia article
+        // Taglish navigation query should give RiderHub login guidance
         $loginHelp = $this->postJson('/api/assistant/chat', ['message' => 'san mag log in?'])
             ->assertOk();
         $this->assertStringContainsString('Login page', $loginHelp->json('reply'));
 
-        // Casual greetings like "halo" should reply warmly with time-aware greeting, not Wikipedia "Halo" video game
+        // Casual greetings like "halo" should reply warmly with RiderHub greeting
         $greeting = $this->postJson('/api/assistant/chat', ['message' => 'halo'])
             ->assertOk();
-        $this->assertStringContainsString("What's up? How can I assist you", $greeting->json('reply'));
+        $this->assertStringContainsString('RiderHub AI', $greeting->json('reply'));
+
+        // Promo code query works
+        $promo = $this->postJson('/api/assistant/chat', ['message' => 'Promo codes'])
+            ->assertOk();
+        $this->assertStringContainsString('TAGOLOAN20', $promo->json('reply'));
     }
 
     public function test_route_endpoint_returns_real_road_steps_and_eta(): void

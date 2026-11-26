@@ -151,158 +151,100 @@ class RiderHubAssistantService
             ];
         }
 
-        // 5. Direct math evaluation (e.g. "what is 245 * 18", "100 + 55 / 5")
-        if ($mathReply = $this->tryMath($message)) {
+        // 4c. Promo codes, Mobile App Install, Rider KYC, Trip PIN / Chat / SOS
+        if ($this->matchesAny($text, ['promo', 'voucher', 'discount', 'coupon', 'tagoloan20', 'misor15', 'firsttrip'])) {
             return [
-                'reply' => $mathReply,
-                'actions' => [],
-                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather', 'Tell me about Tagoloan'],
+                'reply' => "You can apply active **RiderHub Promo Codes** directly on the booking page:\n• **TAGOLOAN20** — ₱20 off your ride\n• **FIRSTTRIP** — ₱25 off welcome promo\n• **MISOR15** — 15% off (up to ₱40)\n\nJust tap a promo chip or enter the code before confirming your booking!",
+                'actions' => $user?->role === 'customer'
+                    ? [['label' => 'Book with a Promo', 'url' => route('customer.bookings.create')]]
+                    : $this->primaryActions($user),
+                'suggestions' => ['Estimate fare for 5 km', 'Payment options', 'How to book a ride?'],
             ];
         }
 
-        // 6. Try real LLM (Repohive AI, Gemini, Groq, or OpenAI) if configured
-        if ($llmReply = $this->askConfiguredLlm($message, $user, $history)) {
+        if ($this->matchesAny($text, ['install', 'apk', 'download app', 'mobile app', 'ios', 'iphone', 'android'])) {
             return [
-                'reply' => $llmReply,
-                'actions' => [],
-                'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km', 'Ask another question'],
-                'source' => 'ai',
+                'reply' => "You can install **RiderHub** on both Android and iPhone:\n• **Android:** Download the verified fullscreen **RiderHub.apk** directly from our Install App page.\n• **iPhone (iOS):** Open **riderhub.online** in Safari → tap **Share** → **Add to Home Screen**.",
+                'actions' => [['label' => 'Open Install App Page', 'url' => route('install-app')]],
+                'suggestions' => ['How to book a ride?', 'About RiderHub', 'Safety & Trip PIN'],
             ];
         }
 
-        // 7. Current date & Philippine time
-        if ($this->matchesAny($text, ['what time', 'anong oras', 'unsa oras', 'what date', 'anong petsa', 'date today', 'today\'s date'])) {
-            $now = now()->timezone('Asia/Manila');
-
+        if ($this->matchesAny($text, ['kyc', 'license', 'plate', 'verify rider', 'verification', 'online toggle', 'offline'])) {
             return [
-                'reply' => 'It is currently '.$now->format('g:i A').' (Philippine Standard Time) on '.$now->format('l, F j, Y').'.',
-                'actions' => [],
-                'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km'],
+                'reply' => "For passenger safety, **RiderHub Riders** can upload their Driver's License, motorcycle model, and plate number in Account Settings for Admin KYC verification. Verified riders can toggle **Online / Offline** anytime from the Rider Dashboard.",
+                'actions' => $user
+                    ? [['label' => 'Open Account Settings', 'url' => route('profile.edit')]]
+                    : [['label' => 'Sign up as Rider', 'url' => route('register')]],
+                'suggestions' => ['Safety & Trip PIN', 'How to book a ride?', 'Install App'],
             ];
         }
 
-        // 8. Natural time-aware greetings & small talk (Philippine Standard Time)
-        if (preg_match('/^(h+i+|h+e+l+o+|h+a+l+o+|h+e+y+|y+o+|s+u+p+|what\'?s\s+up|kumusta|kamusta|musta|uy+|oi+|good\s+(morning|afternoon|evening|night)|maayong\s+(buntag|hapon|gabii))[\s!?.]*$/i', trim($message))) {
+        if ($this->matchesAny($text, ['pin', 'qr', 'sos', 'emergency', 'safety', 'trip chat', 'message rider', 'proof of delivery', 'recycle bin'])) {
+            return [
+                'reply' => "Every active **RiderHub** trip includes built-in safety & communication tools:\n• **4-Digit Trip PIN & QR Code** to verify your rider/passenger\n• **Live Trip Chat** with photos, emojis, and Seen receipts\n• **One-Tap SOS & 911 Bar** + live GPS tracking\n• **Proof of Delivery Photo** on completed trips",
+                'actions' => $this->primaryActions($user),
+                'suggestions' => ['Check my booking status', 'How to book a ride?', 'Payment options'],
+            ];
+        }
+
+        // 5. Natural greetings, thanks & identity (scoped to RiderHub)
+        if (preg_match('/^(h+i+|h+e+l+o+|h+a+l+o+|h+e+y+|y+o+|kumusta|kamusta|musta|good\s+(morning|afternoon|evening|night)|maayong\s+(buntag|hapon|gabii))[\s!?.]*$/i', trim($message))) {
             $hour = (int) now()->timezone('Asia/Manila')->format('G');
             $greetingName = $user ? ' '.Str::before($user->name, ' ') : '';
             $timeGreeting = match (true) {
-                $hour >= 5 && $hour < 12 => "Hey{$greetingName}, good morning! What's up? How can I assist you today?",
-                $hour >= 12 && $hour < 18 => "Hey{$greetingName}, good afternoon! What's up? How can I assist you today?",
-                default => "Hey{$greetingName}, good evening! What's up? How can I assist you tonight?",
+                $hour >= 5 && $hour < 12 => "Good morning{$greetingName}! Welcome to **RiderHub AI**. How can I assist you with your rides, deliveries, or fares today?",
+                $hour >= 12 && $hour < 18 => "Good afternoon{$greetingName}! Welcome to **RiderHub AI**. How can I assist you with your rides, deliveries, or fares today?",
+                default => "Good evening{$greetingName}! Welcome to **RiderHub AI**. How can I assist you with your rides, deliveries, or fares tonight?",
             };
 
             return [
                 'reply' => $timeGreeting,
                 'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'Where to log in?'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['how are you', 'kumusta ka', 'kamusta ka', 'okay ka lang', 'ok ka lang'])) {
-            $hour = (int) now()->timezone('Asia/Manila')->format('G');
-            $period = $hour >= 18 || $hour < 5 ? 'tonight' : 'today';
-
-            return [
-                'reply' => "I'm doing great and ready to help! How's your trip going {$period}? Need a fare estimate, live weather check, or help with a booking?",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['Estimate fare for 5 km', 'Check Misamis Oriental weather', 'How to book a ride?'],
+                'suggestions' => ['Estimate fare for 5 km', 'Promo codes', 'Check Tagoloan weather', 'Install App'],
             ];
         }
 
         if (preg_match('/^(thanks|thank you|ty|salamat|maraming salamat|daghang salamat|tnx)[\s!?.]*$/i', trim($message))) {
             return [
-                'reply' => "You're very welcome! Let me know anytime if you need help with rides, deliveries, weather, or anything else. Ride safe!",
+                'reply' => "You're very welcome! Let me know anytime if you need help with **RiderHub** bookings, fares, weather, or tracking. Ride safe!",
                 'actions' => [],
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km'],
+                'suggestions' => ['Check Tagoloan weather', 'Estimate fare for 5 km', 'Promo codes'],
             ];
         }
 
-        if (preg_match('/^(bye|goodbye|see ya|see you|paalam|babye)[\s!?.]*$/i', trim($message))) {
+        if ($this->matchesAny($text, ['who are you', 'what is your name', 'sino ka', 'kinsa ka'])) {
             return [
-                'reply' => 'Take care and ride safe across Misamis Oriental! Just tap me anytime you need assistance.',
-                'actions' => [],
-                'suggestions' => ['Check Misamis Oriental weather', 'About RiderHub'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['who are you', 'what is your name', 'sino ka', 'kinsa ka', 'what should i call you'])) {
-            return [
-                'reply' => "I'm RiderHub AI — your smart mobility assistant for Misamis Oriental. I can check live weather, compute trip fares, track your bookings, guide you around the app, and answer general questions!",
+                'reply' => "I'm **RiderHub AI** — your dedicated mobility concierge for **RiderHub Misamis Oriental**. I can help with ride & delivery bookings, fare estimates, promo codes, live weather, tracking, payments, and app installation.",
                 'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
+                'suggestions' => ['How to book a ride?', 'Estimate fare for 5 km', 'Promo codes', 'Install App'],
             ];
         }
 
-        if (preg_match('/^(ok|okay|nice|cool|wow|sige|ge|goods|ayos|great|awesome)[\s!?.]*$/i', trim($message))) {
+        // 6. Strict Domain Guardrail: only invoke external LLM if the question is actually about RiderHub / Misamis Oriental mobility
+        $isRiderHubTopic = $this->matchesAny($text, [
+            'riderhub', 'ride', 'rider', 'driver', 'book', 'booking', 'trip', 'deliver', 'delivery', 'parcel', 'package',
+            'tagoloan', 'misamis', 'cdo', 'cagayan', 'villanueva', 'jasaan', 'baluarte', 'poblacion', 'casinglot',
+            'pickup', 'drop', 'dropoff', 'map', 'gps', 'track', 'eta', 'route', 'fare', 'price', 'rate', 'tip',
+            'pay', 'payment', 'cash', 'gcash', 'maya', 'card', 'receipt', 'pdf', 'history', 'rating', 'review',
+            'account', 'password', 'otp', 'email', 'admin', 'dispatch', 'chat', 'app', 'apk',
+        ]);
+
+        if ($isRiderHubTopic && ($llmReply = $this->askConfiguredLlm($message, $user, $history))) {
             return [
-                'reply' => 'Awesome! Let me know what you want to do next — I’m right here whenever you need me.',
+                'reply' => $llmReply,
                 'actions' => $this->primaryActions($user),
-                'suggestions' => ['Estimate fare for 5 km', 'Check Misamis Oriental weather', 'How to book a ride?'],
+                'suggestions' => ['Estimate fare for 5 km', 'Check Tagoloan weather', 'Promo codes', 'Payment options'],
+                'source' => 'ai',
             ];
         }
 
-        // 9. Explicit general knowledge lookup (Wikipedia REST & Search API — only for real factual questions, never random chat)
-        $isKnowledgeQuery = (bool) preg_match('/^(what\s+is|what\s+are|who\s+is|who\s+was|where\s+is|tell\s+me\s+about|explain|define|ano\s+ang|sino\s+si|saan\s+ang|unsa\s+ang|kinsa\s+si|asa\s+ang)\s+.+/i', trim($message));
-        if ($isKnowledgeQuery && ($wikiReply = $this->lookupWikipedia($message))) {
-            return [
-                'reply' => $wikiReply,
-                'actions' => [],
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'About RiderHub'],
-                'source' => 'knowledge',
-            ];
-        }
-
-        // 10. Natural conversational replies for casual/random messages (when no external LLM key is configured)
-        $hour = (int) now()->timezone('Asia/Manila')->format('G');
-        $period = $hour >= 18 || $hour < 5 ? 'tonight' : 'today';
-        $firstName = $user ? Str::before($user->name, ' ') : null;
-        $nameSuffix = $firstName ? ", {$firstName}" : '';
-
-        if ($this->matchesAny($text, ['haha', 'hehe', 'lol', 'lmao', 'hihi', 'wkwk'])) {
-            return [
-                'reply' => "Haha love the energy{$nameSuffix}! 😄 Anything I can help you with {$period} — maybe a ride, fare estimate, or live weather check?",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['bored', 'boring', 'walang magawa', 'laay'])) {
-            return [
-                'reply' => "Feeling bored{$nameSuffix}? Maybe it's time for a quick trip or food run around Misamis Oriental! Want me to check the weather or estimate a fare for you?",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', 'How to book a ride?'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['gutom', 'hungry', 'kain', 'food', 'eat', 'kaon'])) {
-            return [
-                'reply' => "Sounds like it's time to eat{$nameSuffix}! 🍜 You can book a quick RiderHub ride to your favorite spot or use Send a Package for a fast delivery.",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['How to book a ride?', 'Estimate fare for 3 km', 'Check Misamis Oriental weather'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['pagod', 'tired', 'antok', 'sleepy', 'kapoy'])) {
-            return [
-                'reply' => "Take it easy and get some rest{$nameSuffix}! If you need a safe, hassle-free ride home {$period}, RiderHub riders are ready whenever you are.",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['How to book a ride?', 'Check Misamis Oriental weather'],
-            ];
-        }
-
-        if ($this->matchesAny($text, ['help', 'tulong', 'tabang', 'assist', 'ano kaya mo', 'what can you do'])) {
-            return [
-                'reply' => "I've got you{$nameSuffix}! I can check live Misamis Oriental weather, estimate ride/delivery fares, check your booking status, guide you through booking or PayMongo payments, solve math, and answer general questions. Just ask me anything!",
-                'actions' => $this->primaryActions($user),
-                'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'How to book a ride?'],
-            ];
-        }
-
-        // 11. Warm, natural fallback (never dumps random Wikipedia articles or errors)
+        // 7. Strict Off-Topic / Non-Related Guardrail Response
         return [
-            'reply' => "Gotcha{$nameSuffix}! I'm here to help {$period} — if you're looking for something specific, try asking me about Misamis Oriental weather, trip fares (like \"Estimate fare for 5 km\"), your booking status, or ask a question like \"Tell me about Tagoloan\". What would you like to do?",
+            'reply' => "I apologize, but I am specifically designed to assist with **RiderHub Misamis Oriental** inquiries only.\n\nI can only answer questions related to:\n• **Booking Rides & Express Parcel Delivery**\n• **Fare Estimates, Promo Codes & Payments** (Cash, GCash, Maya, Card)\n• **Live GPS Tracking, Trip PIN/QR, SOS & In-App Chat**\n• **Rider KYC Verification, Online Status & Earnings**\n• **Tagoloan & Misamis Oriental Coverage, Live Weather & Mobile App Install**",
             'actions' => $this->primaryActions($user),
-            'suggestions' => ['Check Misamis Oriental weather', 'Estimate fare for 5 km', $user ? 'Check my booking status' : 'How to book a ride?'],
+            'suggestions' => ['How to book a ride?', 'Estimate fare for 5 km', 'Promo codes', 'Payment options', 'Install App'],
+            'source' => 'guardrail',
         ];
     }
 
@@ -628,10 +570,11 @@ class RiderHubAssistantService
         $now = now()->timezone('Asia/Manila')->format('l, F j, Y g:i A');
         $userContext = $user ? "Signed-in user: {$user->name} (role: {$user->role})." : 'User is a guest visitor.';
 
-        return "You are RiderHub AI, a warm, natural, intelligent assistant built into RiderHub — a ride-booking and express delivery platform in Misamis Oriental (including Tagoloan, Cagayan de Oro, Villanueva, Jasaan, Opol, El Salvador, and nearby towns), Philippines. "
+        return "You are RiderHub AI, a dedicated, polite assistant strictly scoped to RiderHub — a ride-booking and express delivery platform in Tagoloan and Misamis Oriental, Philippines. "
             ."Current Philippine time: {$now}. "
-            ."Fare formula: ₱{$fare['base']} base + ₱{$fare['per_km']}/km. Supports Cash and PayMongo (GCash, Maya, Card). {$userContext} "
-            ."Respond naturally like a real helpful human assistant in whatever language the user uses (English, Tagalog, Taglish, or Bisaya/Cebuano), even for casual or random messages. Keep replies clear, accurate, friendly, and concise (1-4 sentences).";
+            ."Fare formula: ₱{$fare['base']} base + ₱{$fare['per_km']}/km. Supports Cash and PayMongo (GCash, Maya, Card). Promo codes: TAGOLOAN20, FIRSTTRIP, MISOR15. {$userContext} "
+            ."STRICT RULE: You may ONLY answer questions about RiderHub (bookings, rides, parcel delivery, fares, promos, payments, live GPS tracking, Trip PIN/QR, SOS, in-app chat, rider KYC/earnings, Misamis Oriental coverage, local weather, and installing the RiderHub app). "
+            ."If the user asks anything unrelated to RiderHub, politely refuse and list the RiderHub topics you can help with. Keep replies concise (1-4 sentences) and use **bold** for key terms.";
     }
 
     private function tryMath(string $message): ?string

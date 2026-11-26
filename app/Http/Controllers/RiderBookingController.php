@@ -180,6 +180,53 @@ class RiderBookingController extends Controller
         return redirect()->route('rider.dashboard')->with('success', 'Booking accepted. Contact the customer and head to pickup.');
     }
 
+    public function release(Request $request, Booking $booking, \App\Services\BookingNotificationService $notifications): RedirectResponse
+    {
+        $validated = $request->validate([
+            'reason' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $reason = trim((string) ($validated['reason'] ?? '')) ?: 'Rider unavailable';
+        $errorMessage = null;
+
+        DB::transaction(function () use ($booking, &$errorMessage): void {
+            $lockedBooking = Booking::query()->lockForUpdate()->findOrFail($booking->id);
+
+            if ($lockedBooking->rider_id !== Auth::id()) {
+                abort(403, 'You are not assigned to this booking.');
+            }
+
+            if ($lockedBooking->status !== 'accepted') {
+                $errorMessage = 'You can only release a booking before picking up the passenger or parcel.';
+
+                return;
+            }
+
+            $lockedBooking->update([
+                'rider_id' => null,
+                'status' => 'pending',
+            ]);
+        });
+
+        if ($errorMessage !== null) {
+            return redirect()->route('rider.dashboard')->with('error', $errorMessage);
+        }
+
+        $booking->refresh()->loadMissing('customer');
+        if ($booking->customer) {
+            $booking->customer->notify(new RiderHubNotification(
+                'Finding a new rider',
+                "Your previous rider released Booking #{$booking->id} ({$reason}). Your booking is back in the queue for another nearby verified rider.",
+                route('customer.bookings.show', $booking, absolute: false),
+                'booking',
+            ));
+        }
+
+        $notifications->notifyAvailableRiders($booking);
+
+        return redirect()->route('rider.dashboard')->with('success', "Booking #{$booking->id} released back to available requests.");
+    }
+
     public function updateStatus(Request $request, Booking $booking): RedirectResponse
     {
         $validated = $request->validate([

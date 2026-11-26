@@ -171,6 +171,28 @@
                                 <input type="hidden" name="status" value="picked_up">
                                 <button type="submit" class="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">Mark as picked up</button>
                             </form>
+
+                            <!-- Release / Unassign Booking (Before Pickup Only) -->
+                            <div x-data="{ openRelease: false }" class="rounded-xl border border-rose-200/80 bg-rose-50/60 p-2.5">
+                                <button type="button" @click="openRelease = !openRelease" class="flex w-full items-center justify-between text-xs font-bold text-rose-700 hover:text-rose-900">
+                                    <span>Can't make it? Release booking</span>
+                                    <span x-text="openRelease ? '▲' : '▼'" class="text-[10px]"></span>
+                                </button>
+                                <form x-show="openRelease" x-cloak method="POST" action="{{ route('rider.bookings.release', $activeBooking) }}" class="mt-2.5 space-y-2">
+                                    @csrf
+                                    <select name="reason" required class="block w-full rounded-lg border border-rose-200 bg-white px-2.5 py-2 text-xs font-semibold text-slate-800 focus:border-rose-500 focus:outline-none">
+                                        <option value="Accidental tap">Accidental tap</option>
+                                        <option value="Flat tire / mechanical issue">Flat tire / mechanical issue</option>
+                                        <option value="Heavy traffic / road closed">Heavy traffic / road closed</option>
+                                        <option value="Customer unreachable">Customer unreachable</option>
+                                        <option value="Personal emergency">Personal emergency</option>
+                                    </select>
+                                    <button type="submit" class="w-full rounded-lg bg-rose-600 px-3 py-2 text-xs font-extrabold text-white transition hover:bg-rose-700">
+                                        Release to Other Riders
+                                    </button>
+                                    <p class="text-[10px] leading-4 text-rose-700/80">Customer's booking stays active and returns to nearby riders immediately.</p>
+                                </form>
+                            </div>
                         @else
                             <form method="POST" action="{{ route('rider.bookings.status', $activeBooking) }}" enctype="multipart/form-data" class="space-y-2.5">
                                 @csrf

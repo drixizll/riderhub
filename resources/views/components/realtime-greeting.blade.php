@@ -39,7 +39,7 @@
             <span class="relative inline-flex h-2.5 w-2.5 rounded-full" :class="dotClass"></span>
         </span>
         <span class="text-sm leading-none" x-text="icon">{{ $initialIcon }}</span>
-        <span x-text="greeting + ', Misamis Oriental'">{{ $initialGreeting }}, Misamis Oriental</span>
+        <span x-text="greeting + ' · Ready to ride'">{{ $initialGreeting }} · Ready to ride</span>
         <span class="opacity-40">•</span>
         <span class="font-mono text-[11px] font-extrabold tracking-tight opacity-90 sm:text-xs" x-text="timeStr + ' PHT'">{{ $initialTime }} PHT</span>
     </div>

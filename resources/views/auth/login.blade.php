@@ -22,9 +22,11 @@
 
             <div>
                 <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-                       placeholder="you@example.com"
-                       class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                <div class="rgb-input-wrap mt-2">
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autofocus autocomplete="username"
+                           placeholder="you@example.com"
+                           class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                </div>
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
             </div>
 

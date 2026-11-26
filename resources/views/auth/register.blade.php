@@ -44,25 +44,31 @@
 
             <div>
                 <label for="name" class="block text-sm font-semibold text-slate-700">{{ __('Full name') }}</label>
-                <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name"
-                       placeholder="Your name"
-                       class="mt-2 block w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                <div class="rgb-input-wrap mt-2">
+                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autofocus autocomplete="name"
+                           placeholder="Your name"
+                           class="block w-full rounded-xl border-0 bg-white px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                </div>
                 <x-input-error :messages="$errors->get('name')" class="mt-2" />
             </div>
 
             <div class="grid gap-3.5 sm:grid-cols-2">
                 <div>
                     <label for="email" class="block text-sm font-semibold text-slate-700">{{ __('Email address') }}</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username"
-                           placeholder="you@example.com"
-                           class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <div class="rgb-input-wrap mt-1.5">
+                        <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="username"
+                               placeholder="you@example.com"
+                               class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                    </div>
                     <x-input-error :messages="$errors->get('email')" class="mt-1.5" />
                 </div>
                 <div>
                     <label for="phone" class="block text-sm font-semibold text-slate-700">{{ __('Phone number') }} <span class="font-normal text-slate-400">(optional)</span></label>
-                    <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel"
-                           placeholder="+63 9XX XXX XXXX"
-                           class="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <div class="rgb-input-wrap mt-1.5">
+                        <input id="phone" name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel"
+                               placeholder="+63 9XX XXX XXXX"
+                               class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0">
+                    </div>
                     <x-input-error :messages="$errors->get('phone')" class="mt-1.5" />
                 </div>
             </div>

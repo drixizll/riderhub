@@ -8,14 +8,14 @@
 
 <div x-data="{ visible: false }">
     <label for="{{ $id }}" class="block text-sm font-semibold text-slate-700">{{ $label }}</label>
-    <div class="relative mt-2">
+    <div class="rgb-input-wrap relative mt-2">
         <input
             id="{{ $id }}"
             name="{{ $name }}"
             :type="visible ? 'text' : 'password'"
             autocomplete="{{ $autocomplete }}"
             @required($required)
-            {{ $attributes->merge(['class' => 'block w-full rounded-xl border border-slate-300 bg-white py-3 pl-4 pr-12 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20']) }}
+            {{ $attributes->merge(['class' => 'block w-full rounded-xl border-0 bg-white py-3 pl-4 pr-12 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-0']) }}
         >
         <button
             type="button"
